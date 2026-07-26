@@ -1,4 +1,4 @@
-\# CLAUDE.md — PV Forecasting Benchmark
+\# CLAUDE.md - PV Forecasting Benchmark
 
 
 
@@ -36,7 +36,7 @@ number and a more defensible protocol, the protocol wins.
 
 These are RECENT major versions. Do not rely on remembered APIs.
 
-pandas 3.x has copy-on-write by default and a different default string dtype;
+pandas 3.x has copy-on-write by default and a different default string dtype.
 
 numpy 2.x and xgboost 3.x both had breaking changes. If unsure about an API,
 
@@ -114,27 +114,29 @@ src/eval/       metrics, skill score, sky classification, Diebold-Mariano
 
 configs/        YAML experiment configs
 
-results/        run JSONs — VERSION CONTROLLED, this is the audit trail
+results/        run JSONs, VERSION CONTROLLED, this is the audit trail
 
 scripts/        entry points, aggregation into tables and figures
 
 paper/          LaTeX
 
-data/           raw and processed data — GITIGNORED, never commit
+data/           raw and processed data, GITIGNORED, never commit
 
 
 
 \## Windows / PowerShell notes
 
-\- NEVER write text files with `>` redirect. PowerShell writes UTF-16 and Python
+\- NEVER write text files with the > redirect. PowerShell writes UTF-16 and
 
-&#x20; and git cannot read it. Use \[System.IO.File]::WriteAllLines or write from
+&#x20; Python and git cannot read it. Use System.IO.File WriteAllLines or write
 
-&#x20; Python.
+&#x20; from Python.
 
 \- Use forward slashes or pathlib.Path in Python. No hardcoded backslash paths.
 
 \- Smart App Control is OFF on this machine (it blocked unsigned .pyd files).
+
+\- Keep this file ASCII only. No em-dashes, no smart quotes.
 
 
 
