@@ -45,3 +45,7 @@ desktop.ini
 # The run JSONs are the paper's evidence and must be version controlled.
 # Claude Code local settings
 .claude/settings.local.json
+
+# results/ is the audit trail - never ignore anything in it
+!results/*.csv
+!results/*.json
