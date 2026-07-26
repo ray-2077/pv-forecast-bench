@@ -130,3 +130,12 @@ data/           raw and processed data, GITIGNORED, never commit
 
 - Set random seeds explicitly everywhere. Log them.
 
+
+## Data window (decided 2026-07-27 from results/data_audit.csv)
+Arrays: 07 (CdTe, 7.0kW), 11 (poly-Si, 5.0kW), 12 (mono-Si, 5.1kW). All fixed-mount, DKASC Alice Springs.
+These are three co-located ARRAYS, not three sites. They share one weather station.
+Their errors are correlated. Do not treat them as independent samples.
+Years: train 2012+2013, validate 2014, test 2015. Whole calendar years only, so
+no split is seasonally biased.
+Wind_Speed is 19.5 pct NaN in 2016 and 100 pct NaN from 2017. This is why the
+window ends at 2015.
