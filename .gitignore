@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# Environments
+.env
+venv/
+.venv/
+
+# Data - large and re-downloadable from DKASC
+data/raw/
+data/interim/
+data/processed/
+*.csv
+*.parquet
+
+# Model checkpoints - large binaries
+checkpoints/
+*.pt
+*.pth
+*.pkl
+*.joblib
+logs/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# OS and editors
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# NOTE: results/ is deliberately NOT ignored.
+# The run JSONs are the paper's evidence and must be version controlled.
