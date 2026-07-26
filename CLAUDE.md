@@ -36,25 +36,25 @@ check the installed version before writing code, not after it fails.
 
 ## Non-negotiable methodology rules
 
-1\. Chronological splits only. Never shuffle a time series. No random splits.
+1. Chronological splits only. Never shuffle a time series. No random splits.
 
-2\. Daylight filtering. Night hours excluded from evaluation, or reported
+2. Daylight filtering. Night hours excluded from evaluation, or reported
 
 &#x20;  separately. Predicting zero at night is free accuracy.
 
-3\. Scalers and feature statistics fit on TRAINING data only. Never on
+3. Scalers and feature statistics fit on TRAINING data only. Never on
 
 &#x20;  validation or test.
 
-4\. Skill score vs smart persistence is the headline metric, not raw RMSE.
+4. Skill score vs smart persistence is the headline metric, not raw RMSE.
 
-5\. Lagged and oracle feature regimes must never be mixed. Any result using
+5. Lagged and oracle feature regimes must never be mixed. Any result using
 
 &#x20;  future weather is labelled explicitly as a perfect-forecast upper bound.
 
-6\. XGBoost residual stage is fit on VALIDATION-split residuals, not training.
+6. XGBoost residual stage is fit on VALIDATION-split residuals, not training.
 
-7\. Every experiment writes results/<run_id>.json containing config, git commit
+7. Every experiment writes results/<run_id>.json containing config, git commit
 
 &#x20;  hash, random seed, all metrics, and timing.
 
