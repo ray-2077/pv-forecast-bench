@@ -1,14 +1,10 @@
-\# CLAUDE.md - PV Forecasting Benchmark
+# CLAUDE.md - PV Forecasting Benchmark
 
-
-
-\## Project
+## Project
 
 Short-term PV power forecasting benchmark on DKASC (Alice Springs) data.
 
 Models: smart persistence, XGBoost, LSTM, CNN-LSTM, CNN-LSTM+XGBoost residual hybrid.
-
-
 
 The contribution is NOT the architecture. It is a leakage-controlled evaluation
 
@@ -18,21 +14,17 @@ choices rather than model capacity. When a tradeoff arises between a better
 
 number and a more defensible protocol, the protocol wins.
 
+## Environment (verified 2026-07-27)
 
+- Windows 11, RTX 3070 Ti Laptop (8 GB VRAM)
 
-\## Environment (verified 2026-07-27)
+- Conda env `pvfc`, Python 3.12.13. Activate with: conda activate pvfc
 
-\- Windows 11, RTX 3070 Ti Laptop (8 GB VRAM)
+- Project root: C:\\Users\\Sudhanshu\\projects\\pv-forecast-bench
 
-\- Conda env `pvfc`, Python 3.12.13. Activate with: conda activate pvfc
-
-\- Project root: C:\\Users\\Sudhanshu\\projects\\pv-forecast-bench
-
-\- torch 2.11.0+cu128 (CUDA available), numpy 2.5.1, pandas 3.0.5,
+- torch 2.11.0+cu128 (CUDA available), numpy 2.5.1, pandas 3.0.5,
 
 &#x20; scikit-learn 1.9.0, xgboost 3.3.0, pvlib 0.15.2, statsmodels 0.14.6
-
-
 
 These are RECENT major versions. Do not rely on remembered APIs.
 
@@ -42,9 +34,7 @@ numpy 2.x and xgboost 3.x both had breaking changes. If unsure about an API,
 
 check the installed version before writing code, not after it fails.
 
-
-
-\## Non-negotiable methodology rules
+## Non-negotiable methodology rules
 
 1\. Chronological splits only. Never shuffle a time series. No random splits.
 
@@ -64,45 +54,37 @@ check the installed version before writing code, not after it fails.
 
 6\. XGBoost residual stage is fit on VALIDATION-split residuals, not training.
 
-7\. Every experiment writes results/<run\_id>.json containing config, git commit
+7\. Every experiment writes results/<run_id>.json containing config, git commit
 
 &#x20;  hash, random seed, all metrics, and timing.
 
-
-
 If asked to write code that violates any of these, refuse and say which rule.
 
+## Research integrity
 
-
-\## Research integrity
-
-\- NEVER invent, estimate, or placeholder a numeric result. Every number in the
+- NEVER invent, estimate, or placeholder a numeric result. Every number in the
 
 &#x20; paper comes from a real run that produced a real log file.
 
-\- If asked to fill in a plausible-looking metric, refuse and say to run the
+- If asked to fill in a plausible-looking metric, refuse and say to run the
 
 &#x20; experiment instead.
 
-\- Do not tune on the test set. Test set is touched once, at the end.
+- Do not tune on the test set. Test set is touched once, at the end.
 
-\- A negative result is publishable. Plain XGBoost beating the deep hybrid is an
+- A negative result is publishable. Plain XGBoost beating the deep hybrid is an
 
 &#x20; acceptable outcome. Do not massage numbers toward a nicer story.
 
-
-
-\## Scope control
+## Scope control
 
 Hard deadline: 4-6 weeks, 10-15 h/week, single laptop GPU.
 
 If I propose new scope, say honestly whether it fits. If it does not, tell me to
 
-write it in FUTURE\_WORK.md and move on. Do not silently expand scope.
+write it in FUTURE_WORK.md and move on. Do not silently expand scope.
 
-
-
-\## Repo layout
+## Repo layout
 
 src/data/       loading, resampling, cleaning, clear-sky, splits
 
@@ -122,33 +104,29 @@ paper/          LaTeX
 
 data/           raw and processed data, GITIGNORED, never commit
 
+## Windows / PowerShell notes
 
-
-\## Windows / PowerShell notes
-
-\- NEVER write text files with the > redirect. PowerShell writes UTF-16 and
+- NEVER write text files with the > redirect. PowerShell writes UTF-16 and
 
 &#x20; Python and git cannot read it. Use System.IO.File WriteAllLines or write
 
 &#x20; from Python.
 
-\- Use forward slashes or pathlib.Path in Python. No hardcoded backslash paths.
+- Use forward slashes or pathlib.Path in Python. No hardcoded backslash paths.
 
-\- Smart App Control is OFF on this machine (it blocked unsigned .pyd files).
+- Smart App Control is OFF on this machine (it blocked unsigned .pyd files).
 
-\- Keep this file ASCII only. No em-dashes, no smart quotes.
+- Keep this file ASCII only. No em-dashes, no smart quotes.
 
+## Working style
 
+- I am new to ML research, PyTorch, and Claude Code. Explain before doing.
 
-\## Working style
+- One change at a time. Do not refactor unrelated code while fixing something.
 
-\- I am new to ML research, PyTorch, and Claude Code. Explain before doing.
+- Commit after each working piece, with a message describing what changed.
 
-\- One change at a time. Do not refactor unrelated code while fixing something.
+- Prefer boring, readable code over clever code.
 
-\- Commit after each working piece, with a message describing what changed.
-
-\- Prefer boring, readable code over clever code.
-
-\- Set random seeds explicitly everywhere. Log them.
+- Set random seeds explicitly everywhere. Log them.
 
