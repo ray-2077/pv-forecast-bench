@@ -32,10 +32,17 @@ DUMMY_CONFIG = {
     "horizon": 0,
     "regime": "dummy",
     "seed": 0,
+    "eval_split": "val",
 }
 TEST_RUN_ID = make_run_id(DUMMY_CONFIG)
 TEST_RUN_PATH = RESULTS_DIR / f"{TEST_RUN_ID}.json"
-DUMMY_METRICS = {"mae": 0.1, "rmse": 0.2, "skill": 0.5}
+DUMMY_METRICS = {
+    "mae": 0.1,
+    "rmse": 0.2,
+    "skill_vs_persistence": 0.5,
+    "skill_vs_convex": 0.3,
+    "convex_weight": 0.7,
+}
 DUMMY_TIMINGS = {
     "fit_seconds": 1.0,
     "predict_seconds": 0.1,

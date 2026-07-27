@@ -15,7 +15,9 @@ from pathlib import Path
 
 import numpy as np
 
-REQUIRED_CONFIG_KEYS = ("model", "array", "horizon", "regime", "seed")
+REQUIRED_CONFIG_KEYS = ("model", "array", "horizon", "regime", "seed", "eval_split")
+EVAL_SPLITS = ("val", "test")
+REQUIRED_METRICS_KEYS = ("skill_vs_persistence", "skill_vs_convex", "convex_weight")
 REQUIRED_TIMING_KEYS = (
     "fit_seconds",
     "predict_seconds",
@@ -30,11 +32,25 @@ def make_run_id(config: dict) -> str:
 
     Format: <model>_<array>_h<horizon>_<regime>_seed<seed>, e.g.
     xgboost_array11_h3_lagged_seed0. Requires config to contain
-    'model', 'array', 'horizon', 'regime', 'seed'.
+    'model', 'array', 'horizon', 'regime', 'seed', 'eval_split'.
+
+    eval_split must be 'val' (development/tuning runs) or 'test' (the one
+    final run per config, touched once at the end - CLAUDE.md research
+    integrity rule). It is not part of the run id string itself, but is
+    required in every config so aggregation scripts can filter on it and
+    never accidentally mix a validation-split number with a test-split
+    one. Raises ValueError if it is present but not one of those two
+    values.
     """
     missing = [k for k in REQUIRED_CONFIG_KEYS if k not in config]
     if missing:
         raise KeyError(f"config is missing required keys: {missing}")
+
+    if config["eval_split"] not in EVAL_SPLITS:
+        raise ValueError(
+            f"config['eval_split'] must be one of {EVAL_SPLITS}, got "
+            f"{config['eval_split']!r}"
+        )
 
     return (
         f"{config['model']}_{config['array']}_h{config['horizon']}_"
@@ -131,6 +147,27 @@ def _to_jsonable(obj):
     return obj
 
 
+def _validate_metrics(metrics: dict) -> None:
+    """Every run must record skill against BOTH reference forecasts, per
+    scripts/compare_references.py: a run with only skill_vs_persistence
+    cannot be used to reproduce that comparison later without re-running
+    the whole grid (see that script's motivation, and CLAUDE.md rule 7).
+
+    metrics is usually shaped as subset_name -> {metric_name: value}
+    (e.g. "daylight"/"all_hours" in scripts/run_xgb_dev.py), so each
+    dict-valued entry is checked individually. If metrics has no
+    dict-valued entries at all, it is itself the one metrics dict to
+    check (this is what lets scripts/validate_runner.py's flat dummy
+    metrics dict exercise this same check).
+    """
+    subsets = [v for v in metrics.values() if isinstance(v, dict)]
+    targets = subsets if subsets else [metrics]
+    for target in targets:
+        missing = [k for k in REQUIRED_METRICS_KEYS if k not in target]
+        if missing:
+            raise KeyError(f"metrics is missing required keys: {missing}")
+
+
 def write_run(
     config: dict,
     metrics: dict,
@@ -145,7 +182,9 @@ def write_run(
     timings, extra.
 
     timings must include fit_seconds, predict_seconds, n_train, n_val,
-    n_test.
+    n_test. metrics (or each of its dict-valued entries, e.g.
+    "daylight"/"all_hours") must include skill_vs_persistence,
+    skill_vs_convex, convex_weight - see _validate_metrics.
 
     Raises FileExistsError if results/<run_id>.json already exists and
     overwrite is False - a silently overwritten result is a lost
@@ -154,6 +193,8 @@ def write_run(
     missing = [k for k in REQUIRED_TIMING_KEYS if k not in timings]
     if missing:
         raise KeyError(f"timings is missing required keys: {missing}")
+
+    _validate_metrics(metrics)
 
     run_id = make_run_id(config)
 

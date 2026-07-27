@@ -46,7 +46,14 @@ check the installed version before writing code, not after it fails.
 
 &#x20;  validation or test.
 
-4. Skill score vs smart persistence is the headline metric, not raw RMSE.
+4. Skill score vs the CONVEX COMBINATION of climatology and smart persistence
+   is the headline metric, not raw RMSE and not skill vs persistence alone.
+   Weight w fitted on VALIDATION only, per Yang et al. 2020 Solar Energy
+   210:20-37. Skill vs plain persistence is reported alongside, because the
+   gap between them is a result: on array11 2014, XGBoost h=6 scores +0.659
+   vs persistence but +0.215 vs the convex reference. Persistence collapses
+   at long horizons (MBE to -2.15 kW at midday, h=6) because the issue time
+   falls near dawn and its k_p is stale.
 
 5. Lagged and oracle feature regimes must never be mixed. Any result using
 
