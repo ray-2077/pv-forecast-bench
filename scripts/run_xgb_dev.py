@@ -42,20 +42,7 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from src.data.clearsky import (
-    add_clearsky,
-    add_clearsky_index_ghi,
-    add_daylight_mask,
-    add_solar_position,
-)
-from src.data.clearsky_power import (
-    GAMMA_PDC_HIT,
-    GAMMA_PDC_SILICON,
-    add_clearsky_power,
-    fit_gain,
-    fit_temperature_climatology,
-    model_clearsky_power,
-)
+from src.data.pipeline import ARRAYS, add_clearsky_power_per_split, load_and_prepare
 from src.data.splits import split_chronological
 from src.eval.exclusions import exclusion_mask
 from src.eval.metrics import mae, mbe, nrmse, rmse, skill_score
@@ -68,14 +55,6 @@ from src.models.xgb import XGBForecaster
 PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 RESULTS_DIR = REPO_ROOT / "results"
 
-# array key -> (parquet filename, nameplate kW, gamma_pdc). array07
-# excluded - see CLAUDE.md "Data window" and results/dead_period_audit.csv.
-ARRAYS = {
-    "array11": ("array11_polySi_hourly.parquet", 5.0, GAMMA_PDC_SILICON),
-    "array12": ("array12_monoSi_hourly.parquet", 5.1, GAMMA_PDC_SILICON),
-    "array17": ("array17_HIT_hourly.parquet", 6.3, GAMMA_PDC_HIT),
-}
-
 N_TOP_FEATURES = 15
 
 
@@ -86,42 +65,6 @@ def parse_args():
     parser.add_argument("--regime", choices=("lagged", "oracle"), default="lagged")
     parser.add_argument("--seed", type=int, default=0)
     return parser.parse_args()
-
-
-def load_and_prepare(array_key):
-    """Load one array's processed parquet and add every column build_features
-    and SmartPersistence require EXCEPT clear-sky power (p_cs, k_p), which
-    depends on train-only fitted parameters and is added per-split below.
-
-    Not restricted to the split years here: the processed parquet covers
-    2009-2015 while TRAIN_YEARS starts at 2011, and split_chronological
-    now tolerates (and logs) rows outside the split window on its own -
-    see src/data/splits.py.
-    """
-    filename, nameplate_kw, gamma_pdc = ARRAYS[array_key]
-    df = pd.read_parquet(PROCESSED_DIR / filename)
-    df = add_solar_position(df)
-    df = add_clearsky(df)
-    df = add_daylight_mask(df)
-    df = add_clearsky_index_ghi(df)
-    return df, nameplate_kw, gamma_pdc
-
-
-def add_clearsky_power_per_split(train, val, test, nameplate_kw, gamma_pdc):
-    """Fit the temperature climatology and gain on TRAIN ONLY, then apply
-    them to produce p_cs/k_p on train and val. test is left untouched -
-    the test split is not read at all in this script.
-    """
-    temp_clim = fit_temperature_climatology(train)
-
-    p_cs_raw_train = model_clearsky_power(train.index, nameplate_kw, gamma_pdc, temp_clim)
-    gain, n_gain_hours, gain_iqr = fit_gain(train, p_cs_raw_train)
-    train = add_clearsky_power(train, p_cs_raw_train, gain, nameplate_kw)
-
-    p_cs_raw_val = model_clearsky_power(val.index, nameplate_kw, gamma_pdc, temp_clim)
-    val = add_clearsky_power(val, p_cs_raw_val, gain, nameplate_kw)
-
-    return train, val, {"gain": gain, "gain_n_hours": n_gain_hours, "gain_iqr": gain_iqr}
 
 
 def print_metrics_row(label, m):
@@ -137,47 +80,61 @@ def print_metrics_row(label, m):
     )
 
 
-def main():
-    args = parse_args()
-    print(f"array={args.array}  horizon={args.horizon}  regime={args.regime}  seed={args.seed}")
+def run_experiment(array, horizon, regime, seed, results_dir=RESULTS_DIR, verbose=True):
+    """Run one XGBoost dev experiment and write results/<run_id>.json.
 
-    set_all_seeds(args.seed)
+    Pulled out of main() so scripts/run_seed_sweep.py can call this
+    directly for many (array, horizon, seed) combinations without
+    duplicating the pipeline. verbose=False suppresses the per-run prints
+    below so a sweep of many runs doesn't flood the console; the caller
+    is expected to print its own one-line progress instead.
 
-    df, nameplate_kw, gamma_pdc = load_and_prepare(args.array)
+    Returns (out_path, metrics).
+    """
+
+    def vprint(*a, **kw):
+        if verbose:
+            print(*a, **kw)
+
+    vprint(f"array={array}  horizon={horizon}  regime={regime}  seed={seed}")
+
+    set_all_seeds(seed)
+
+    df, nameplate_kw, gamma_pdc = load_and_prepare(array, PROCESSED_DIR)
     train, val, test = split_chronological(df)
     train, val, gain_info = add_clearsky_power_per_split(train, val, test, nameplate_kw, gamma_pdc)
 
-    print(
+    vprint(
         f"gain (fit on train years only): {gain_info['gain']:.4f}  "
         f"(hours used: {gain_info['gain_n_hours']}, IQR: {gain_info['gain_iqr']:.4f})"
     )
-    print(f"n_train={len(train)}  n_val={len(val)}  n_test={len(test)} (test not touched)")
+    vprint(f"n_train={len(train)}  n_val={len(val)}  n_test={len(test)} (test not touched)")
 
     # --- fit XGBoost, val used only for early stopping ---
-    model = XGBForecaster(seed=args.seed, regime=args.regime)
+    model = XGBForecaster(seed=seed, regime=regime)
 
     fit_start = time.perf_counter()
-    model.fit(train, args.horizon, df_val=val)
+    model.fit(train, horizon, df_val=val)
     fit_seconds = time.perf_counter() - fit_start
-    print(f"fit done in {fit_seconds:.2f}s, best_iteration={model.best_iteration}")
+    vprint(f"fit done in {fit_seconds:.2f}s, best_iteration={model.best_iteration}")
 
     predict_start = time.perf_counter()
-    preds_xgb = model.predict(val, args.horizon)
+    preds_xgb = model.predict(val, horizon)
     predict_seconds = time.perf_counter() - predict_start
-    check_no_lookahead(val, preds_xgb, args.horizon)
+    check_no_lookahead(val, preds_xgb, horizon)
 
     # --- reference forecasters, same val split, same horizon ---
     # SmartPersistence: unmodified, see persistence.py.
     sp_model = SmartPersistence()
-    sp_model.fit(train, args.horizon)  # no-op, see persistence.py
-    preds_sp = sp_model.predict(val, args.horizon)
-    check_no_lookahead(val, preds_sp, args.horizon)
+    sp_model.fit(train, horizon)  # no-op, see persistence.py
+    preds_sp = sp_model.predict(val, horizon)
+    check_no_lookahead(val, preds_sp, horizon)
 
     # Climatology: trained-mean k_p per (month, hour), see
     # src/models/climatology.py.
     clim_model = Climatology()
-    clim_model.fit(train, args.horizon)
-    preds_clim = clim_model.predict(val, args.horizon)
+    clim_model.fit(train, horizon)
+    preds_clim = clim_model.predict(val, horizon)
 
     # ConvexCombination: w*persistence + (1-w)*climatology, w chosen by
     # grid search to minimise RMSE on df_val - CRITICAL, w is fit on
@@ -187,9 +144,9 @@ def main():
     # scripts/compare_references.py showed can differ hugely from plain
     # persistence at longer horizons.
     convex_model = ConvexCombination()
-    convex_model.fit(train, args.horizon, val)
-    preds_convex = convex_model.predict(val, args.horizon)
-    check_no_lookahead(val, preds_convex, args.horizon)
+    convex_model.fit(train, horizon, val)
+    preds_convex = convex_model.predict(val, horizon)
+    check_no_lookahead(val, preds_convex, horizon)
 
     # Restrict every model to the intersection of timestamps where ALL
     # FOUR produced a prediction, so every metric below - the model's own
@@ -200,7 +157,7 @@ def main():
         .intersection(preds_clim.index)
         .intersection(preds_convex.index)
     )
-    print(
+    vprint(
         f"predictions: xgboost={len(preds_xgb)}  smart_persistence={len(preds_sp)}  "
         f"climatology={len(preds_clim)}  convex_reference={len(preds_convex)}  "
         f"intersection={len(common_idx)}"
@@ -210,11 +167,11 @@ def main():
     # model's metrics are computed, so every model is evaluated on the
     # identical set of rows and none benefits/suffers from hours known to
     # be equipment-dead rather than a forecasting failure.
-    outage_mask = exclusion_mask(args.array, common_idx)
+    outage_mask = exclusion_mask(array, common_idx)
     n_excluded_outage = int(outage_mask.sum())
     eval_idx = common_idx[~outage_mask]
     if n_excluded_outage:
-        print(f"excluded {n_excluded_outage} documented-outage hours from evaluation")
+        vprint(f"excluded {n_excluded_outage} documented-outage hours from evaluation")
 
     y_true = val.loc[eval_idx, "Active_Power"]
     y_xgb = preds_xgb.loc[eval_idx]
@@ -243,24 +200,26 @@ def main():
             "rmse_climatology": rmse(yt, yc),
         }
 
-    print(f"\n--- horizon = {args.horizon}h, regime = {args.regime} (validation split, 2014) ---")
-    print_metrics_row("daylight", metrics["daylight"])
-    print_metrics_row("all_hours", metrics["all_hours"])
+    vprint(f"\n--- horizon = {horizon}h, regime = {regime} (validation split, 2014) ---")
+    if verbose:
+        print_metrics_row("daylight", metrics["daylight"])
+        print_metrics_row("all_hours", metrics["all_hours"])
 
     # --- feature importance ---
     importances = model.feature_importance()
     top_features = list(importances.items())[:N_TOP_FEATURES]
-    print(f"\ntop {N_TOP_FEATURES} features by gain:")
-    for rank, (feat, gain) in enumerate(top_features, start=1):
-        print(f"  {rank:2d}. {feat:30s} {gain:12.4f}")
+    if verbose:
+        print(f"\ntop {N_TOP_FEATURES} features by gain:")
+        for rank, (feat, gain) in enumerate(top_features, start=1):
+            print(f"  {rank:2d}. {feat:30s} {gain:12.4f}")
 
     # --- run record ---
     config = {
         "model": XGBForecaster.name,
-        "array": args.array,
-        "horizon": args.horizon,
-        "regime": args.regime,
-        "seed": args.seed,
+        "array": array,
+        "horizon": horizon,
+        "regime": regime,
+        "seed": seed,
         # This script never touches 2015 (see module docstring) - every
         # run it writes is a validation-split, development run.
         "eval_split": "val",
@@ -293,8 +252,15 @@ def main():
         "top_features_gain": dict(top_features),
     }
 
-    out_path = write_run(config, metrics, timings, extra=extra, results_dir=str(RESULTS_DIR))
-    print(f"\nwrote {out_path}")
+    out_path = write_run(config, metrics, timings, extra=extra, results_dir=str(results_dir))
+    vprint(f"\nwrote {out_path}")
+
+    return out_path, metrics
+
+
+def main():
+    args = parse_args()
+    run_experiment(args.array, args.horizon, args.regime, args.seed)
 
 
 if __name__ == "__main__":
