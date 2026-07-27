@@ -26,7 +26,7 @@ re-running the whole grid. src.eval.runner.write_run now enforces this:
 it raises if a metrics subset is missing any of those first three keys.
 
 Usage:
-    python scripts/run_xgb_dev.py [--array {array07,array11,array12}]
+    python scripts/run_xgb_dev.py [--array {array11,array12,array17}]
         [--horizon H] [--regime {lagged,oracle}] [--seed SEED]
 
 Defaults: --array array11 --horizon 3 --regime lagged --seed 0
@@ -49,7 +49,7 @@ from src.data.clearsky import (
     add_solar_position,
 )
 from src.data.clearsky_power import (
-    GAMMA_PDC_CDTE,
+    GAMMA_PDC_HIT,
     GAMMA_PDC_SILICON,
     add_clearsky_power,
     fit_gain,
@@ -57,6 +57,7 @@ from src.data.clearsky_power import (
     model_clearsky_power,
 )
 from src.data.splits import split_chronological
+from src.eval.exclusions import exclusion_mask
 from src.eval.metrics import mae, mbe, nrmse, rmse, skill_score
 from src.eval.runner import make_run_id, set_all_seeds, write_run
 from src.models.base import check_no_lookahead
@@ -67,12 +68,12 @@ from src.models.xgb import XGBForecaster
 PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 RESULTS_DIR = REPO_ROOT / "results"
 
-# array key -> (parquet filename, nameplate kW, gamma_pdc). Same three
-# arrays and same values as scripts/validate_persistence.py.
+# array key -> (parquet filename, nameplate kW, gamma_pdc). array07
+# excluded - see CLAUDE.md "Data window" and results/dead_period_audit.csv.
 ARRAYS = {
-    "array07": ("array07_CdTe_hourly.parquet", 7.0, GAMMA_PDC_CDTE),
     "array11": ("array11_polySi_hourly.parquet", 5.0, GAMMA_PDC_SILICON),
     "array12": ("array12_monoSi_hourly.parquet", 5.1, GAMMA_PDC_SILICON),
+    "array17": ("array17_HIT_hourly.parquet", 6.3, GAMMA_PDC_HIT),
 }
 
 N_TOP_FEATURES = 15
@@ -91,6 +92,11 @@ def load_and_prepare(array_key):
     """Load one array's processed parquet and add every column build_features
     and SmartPersistence require EXCEPT clear-sky power (p_cs, k_p), which
     depends on train-only fitted parameters and is added per-split below.
+
+    Not restricted to the split years here: the processed parquet covers
+    2009-2015 while TRAIN_YEARS starts at 2011, and split_chronological
+    now tolerates (and logs) rows outside the split window on its own -
+    see src/data/splits.py.
     """
     filename, nameplate_kw, gamma_pdc = ARRAYS[array_key]
     df = pd.read_parquet(PROCESSED_DIR / filename)
@@ -200,17 +206,27 @@ def main():
         f"intersection={len(common_idx)}"
     )
 
-    y_true = val.loc[common_idx, "Active_Power"]
-    y_xgb = preds_xgb.loc[common_idx]
-    y_pers = preds_sp.loc[common_idx]
-    y_clim = preds_clim.loc[common_idx]
-    y_convex = preds_convex.loc[common_idx]
-    is_daylight = val.loc[common_idx, "is_daylight"]
+    # Drop documented-outage timestamps (src.eval.exclusions) before any
+    # model's metrics are computed, so every model is evaluated on the
+    # identical set of rows and none benefits/suffers from hours known to
+    # be equipment-dead rather than a forecasting failure.
+    outage_mask = exclusion_mask(args.array, common_idx)
+    n_excluded_outage = int(outage_mask.sum())
+    eval_idx = common_idx[~outage_mask]
+    if n_excluded_outage:
+        print(f"excluded {n_excluded_outage} documented-outage hours from evaluation")
+
+    y_true = val.loc[eval_idx, "Active_Power"]
+    y_xgb = preds_xgb.loc[eval_idx]
+    y_pers = preds_sp.loc[eval_idx]
+    y_clim = preds_clim.loc[eval_idx]
+    y_convex = preds_convex.loc[eval_idx]
+    is_daylight = val.loc[eval_idx, "is_daylight"]
 
     metrics = {}
     for label, mask in [
         ("daylight", is_daylight),
-        ("all_hours", pd.Series(True, index=common_idx)),
+        ("all_hours", pd.Series(True, index=eval_idx)),
     ]:
         yt, yx, yp, yc, yv = y_true[mask], y_xgb[mask], y_pers[mask], y_clim[mask], y_convex[mask]
         metrics[label] = {
@@ -266,6 +282,7 @@ def main():
         "n_train": len(train),
         "n_val": len(val),
         "n_test": len(test),
+        "n_excluded_outage": n_excluded_outage,
     }
     extra = {
         "n_preds_xgboost": len(preds_xgb),

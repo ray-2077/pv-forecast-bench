@@ -24,6 +24,12 @@ REQUIRED_TIMING_KEYS = (
     "n_train",
     "n_val",
     "n_test",
+    # Count of timestamps dropped by src.eval.exclusions.exclusion_mask
+    # (documented equipment outages, e.g. array17's 5-9 June 2015 - external
+    # metadata, not a model-performance judgment). Required on every run so
+    # a reader can see exactly how many hours were withheld and why,
+    # without cross-referencing a separate log.
+    "n_excluded_outage",
 )
 
 
@@ -182,7 +188,9 @@ def write_run(
     timings, extra.
 
     timings must include fit_seconds, predict_seconds, n_train, n_val,
-    n_test. metrics (or each of its dict-valued entries, e.g.
+    n_test, n_excluded_outage (see src.eval.exclusions.exclusion_mask -
+    applied identically to every model before metrics are computed).
+    metrics (or each of its dict-valued entries, e.g.
     "daylight"/"all_hours") must include skill_vs_persistence,
     skill_vs_convex, convex_weight - see _validate_metrics.
 

@@ -1,7 +1,8 @@
 """Compare the three reference forecasters - SmartPersistence, Climatology,
 ConvexCombination (src/models/climatology.py) - on the VALIDATION split
-(2014) ONLY, for arrays 07, 11, 12. 2015 is never loaded past
+(2014) ONLY, for arrays 11, 12, 17. 2015 is never loaded past
 split_chronological's mechanical partitioning, and its rows are never read.
+(array07 excluded - see CLAUDE.md "Data window" and results/dead_period_audit.csv.)
 
 Motivation: scripts/diagnose_baseline_error.py showed SmartPersistence has
 a large, systematic MBE at midday for longer horizons (issue time near
@@ -47,7 +48,7 @@ from src.data.clearsky import (
     add_solar_position,
 )
 from src.data.clearsky_power import (
-    GAMMA_PDC_CDTE,
+    GAMMA_PDC_HIT,
     GAMMA_PDC_SILICON,
     add_clearsky_power,
     fit_gain,
@@ -65,9 +66,9 @@ PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 RESULTS_DIR = REPO_ROOT / "results"
 
 ARRAYS = {
-    "array07": {"file": "array07_CdTe_hourly.parquet", "nameplate_kw": 7.0, "gamma_pdc": GAMMA_PDC_CDTE},
     "array11": {"file": "array11_polySi_hourly.parquet", "nameplate_kw": 5.0, "gamma_pdc": GAMMA_PDC_SILICON},
     "array12": {"file": "array12_monoSi_hourly.parquet", "nameplate_kw": 5.1, "gamma_pdc": GAMMA_PDC_SILICON},
+    "array17": {"file": "array17_HIT_hourly.parquet", "nameplate_kw": 6.3, "gamma_pdc": GAMMA_PDC_HIT},
 }
 
 HORIZONS = [1, 3, 6]

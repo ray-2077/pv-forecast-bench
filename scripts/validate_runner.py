@@ -49,6 +49,7 @@ DUMMY_TIMINGS = {
     "n_train": 10,
     "n_val": 5,
     "n_test": 5,
+    "n_excluded_outage": 0,
 }
 
 

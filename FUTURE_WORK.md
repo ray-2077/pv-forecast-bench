@@ -29,3 +29,14 @@ and add daylight-issued-only as a protocol configuration for RQ2 Table 4.
 nRMSE_all / nRMSE_daylight = sqrt(N_daylight / N_all) when night errors are
 near zero. Predicted 0.659 for 2014, observed 0.66 across all arrays and
 horizons. Report this closed form in the paper.
+
+## Completeness audits are blind to dead arrays (found 2026-07-28)
+results/data_audit.csv passed array07 2014 with 99.99 pct coverage and 0.00 pct
+NaN. The array in fact produced ZERO power from March to September 2014 - the
+logger kept recording and recorded zeros. Zero is not NaN, so a
+completeness-based audit cannot see it. Confirmed in the raw CSV: 48-97 pct of
+daytime records (GHI>200) are exactly zero across those months.
+DKASC is a widely used open dataset. Any study taking array 7 through 2014 on
+the strength of a completeness check inherited seven months of zeros.
+DECISION: array07 dropped. Report in the data section, and cite as motivation
+in the Introduction. See scripts/audit_dead_periods.py.

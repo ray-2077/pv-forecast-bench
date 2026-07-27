@@ -138,11 +138,22 @@ data/           raw and processed data, GITIGNORED, never commit
 - Set random seeds explicitly everywhere. Log them.
 
 
-## Data window (decided 2026-07-27 from results/data_audit.csv)
-Arrays: 07 (CdTe, 7.0kW), 11 (poly-Si, 5.0kW), 12 (mono-Si, 5.1kW). All fixed-mount, DKASC Alice Springs.
-These are three co-located ARRAYS, not three sites. They share one weather station.
-Their errors are correlated. Do not treat them as independent samples.
-Years: train 2012+2013, validate 2014, test 2015. Whole calendar years only, so
-no split is seasonally biased.
+## Data window (decided 2026-07-27 from results/data_audit.csv; revised 2026-07-27
+after scripts/audit_dead_periods.py and scripts/diagnose_array17_events.py)
+Arrays: 11 (poly-Si, 5.0kW), 12 (mono-Si, 5.1kW), 17 (HIT, 6.3kW). All fixed-mount,
+DKASC Alice Springs. These are three co-located ARRAYS, not three sites. They
+share one weather station. Their errors are correlated. Do not treat them as
+independent samples.
+array07 (CdTe, 7.0kW) EXCLUDED: results/dead_period_audit.csv shows 48.4 pct of
+its 2014 daylight hours dead (exactly zero output) and a 48-day near-zero run
+from 2015-11-14 to 2015-12-31 - both inside the evaluation years (2014
+validation, 2015 test). This is a paper result, not a data gap: keep
+data/raw/array07_CdTe.csv and its rows in results/dead_period_audit.csv and
+results/data_audit.csv as the evidence, do not delete them. See
+scripts/audit_dead_periods.py and FUTURE_WORK.md.
+Years: train 2011-2013, validate 2014, test 2015. Whole calendar years only, so
+no split is seasonally biased. Train starts at 2011, not 2009: array17 was not
+installed until 11 March 2010, and all arrays share one training window so the
+cross-array comparison is not confounded by differing training length.
 Wind_Speed is 19.5 pct NaN in 2016 and 100 pct NaN from 2017. This is why the
 window ends at 2015.

@@ -17,11 +17,15 @@ from src.data.loader import clean_5min, load_array, resample_hourly
 RAW_DIR = REPO_ROOT / "data" / "raw"
 PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 
-# Nameplate capacities in kW.
+# Nameplate capacities in kW. array07 excluded - see CLAUDE.md "Data window"
+# and results/dead_period_audit.csv: 48.4 pct of 2014 daylight hours dead
+# and a 48-day near-zero run in Nov-Dec 2015, both inside the evaluation
+# years. data/raw/array07_CdTe.csv is kept (not deleted) as evidence for
+# that exclusion; it is simply no longer processed.
 ARRAYS = {
-    "array07_CdTe": (RAW_DIR / "array07_CdTe.csv", 7.0),
     "array11_polySi": (RAW_DIR / "array11_polySi.csv", 5.0),
     "array12_monoSi": (RAW_DIR / "array12_monoSi.csv", 5.1),
+    "array17_HIT": (RAW_DIR / "array17_HIT.csv", 6.3),
 }
 
 

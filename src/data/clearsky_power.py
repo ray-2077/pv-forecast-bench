@@ -35,6 +35,9 @@ TEMP_MODEL_PARAMS = temperature.TEMPERATURE_MODEL_PARAMETERS["sapm"][
 # these specific arrays.
 GAMMA_PDC_SILICON = -0.0040
 GAMMA_PDC_CDTE = -0.0025
+GAMMA_PDC_HIT = -0.0030  # Sanyo HIT hybrid silicon (array17) - HIT's
+# datasheet-typical coefficient is better (less negative) than standard
+# silicon's, not measured for this specific array either.
 
 
 def fit_temperature_climatology(df_train):
