@@ -1,0 +1,154 @@
+{
+  "config": {
+    "array": "array12",
+    "base_best_epoch": 3,
+    "base_epochs_run": 14,
+    "base_full_determinism_achieved": false,
+    "base_model": "lstm",
+    "device": "cuda",
+    "eval_split": "val",
+    "gain": 0.9074265915522486,
+    "gain_iqr": 0.052240815879677105,
+    "gain_n_hours": 763,
+    "horizon": 6,
+    "hyperparams": {
+      "base_batch_size": 256,
+      "base_dropout": 0.0,
+      "base_hidden_size": 64,
+      "base_learning_rate": 0.001,
+      "base_max_epochs": 100,
+      "base_num_layers": 1,
+      "base_patience": 10,
+      "base_seq_len": 24,
+      "residual_colsample_bytree": 0.8,
+      "residual_learning_rate": 0.05,
+      "residual_max_depth": 4,
+      "residual_n_estimators": 300,
+      "residual_subsample": 0.8
+    },
+    "leaked_by_design": false,
+    "model": "lstm_residual",
+    "n_oof_residuals": 16551,
+    "nameplate_kw": 5.1,
+    "oof_years": [
+      2012,
+      2013
+    ],
+    "regime": "lagged",
+    "residual_fit_split": "oof",
+    "seed": 1
+  },
+  "environment": {
+    "git_branch": "main",
+    "git_commit": "2d4d38f8b5d223b45419eb747a099e6178a50e85",
+    "git_dirty": true,
+    "gpu_name": "NVIDIA GeForce RTX 3070 Ti Laptop GPU",
+    "package_versions": {
+      "numpy": "2.5.1",
+      "pandas": "3.0.5",
+      "pvlib": "0.15.2",
+      "scikit-learn": "1.9.0",
+      "statsmodels": "0.14.6",
+      "torch": "2.11.0+cu128",
+      "xgboost": "3.3.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python_version": "3.12.13"
+  },
+  "extra": {
+    "base_history": {
+      "train_loss": [
+        0.22899828188949162,
+        0.0759068937087902,
+        0.06908278944290648,
+        0.06669339977882126,
+        0.0659284745954504,
+        0.06382537890940604,
+        0.06294689873101736,
+        0.061824292828789866,
+        0.059851258315823296,
+        0.05949668206199251,
+        0.05805027829200932,
+        0.057028590635669354,
+        0.05669071628815598,
+        0.05474279563159051
+      ],
+      "val_rmse": [
+        0.367659963158581,
+        0.35020738212115665,
+        0.3449245630157,
+        0.33688913878348925,
+        0.34900853948942306,
+        0.34475331909006723,
+        0.3371946789101635,
+        0.3417803455287113,
+        0.34985335169616527,
+        0.33850766496066026,
+        0.3444810403957644,
+        0.3466599776221058,
+        0.34207745131083045,
+        0.352040326822685
+      ]
+    },
+    "n_preds_climatology": 4289,
+    "n_preds_convex_reference": 4283,
+    "n_preds_intersection": 4150,
+    "n_preds_lstm_residual": 8466,
+    "n_preds_smart_persistence": 8748,
+    "top_residual_features_gain": {
+      "Active_Power_daily": 3.1650607585906982,
+      "Active_Power_issue_m2": 4.483330726623535,
+      "Active_Power_roll24_mean": 3.0497443675994873,
+      "Weather_Relative_Humidity_issue": 3.003493070602417,
+      "Weather_Temperature_Celsius_issue": 3.473492383956909,
+      "doy_cos": 6.31294059753418,
+      "hour_cos": 3.3740060329437256,
+      "k_ghi_issue": 3.0152485370635986,
+      "k_ghi_issue_m1": 3.653698444366455,
+      "k_ghi_issue_m2": 4.828430652618408,
+      "k_p_daily": 5.131877899169922,
+      "k_p_issue": 3.1012649536132812,
+      "k_p_issue_m2": 3.035489797592163,
+      "k_p_last3obs_mean": 3.0123281478881836,
+      "solar_zenith": 3.049708843231201
+    }
+  },
+  "metrics": {
+    "all_hours": {
+      "convex_weight": 0.05,
+      "mae": 0.30038011692956995,
+      "mbe": 0.04685883325406715,
+      "n_samples": 4150,
+      "nrmse": 9.631668097746704,
+      "rmse": 0.49121507298508194,
+      "rmse_climatology": 0.6090484491126449,
+      "rmse_convex": 0.6071801519873375,
+      "rmse_persistence": 1.3681623536125307,
+      "skill_vs_convex": 0.1909895747130318,
+      "skill_vs_persistence": 0.640967264091089
+    },
+    "daylight": {
+      "convex_weight": 0.05,
+      "mae": 0.3311005915863125,
+      "mbe": 0.04931164574856964,
+      "n_samples": 3679,
+      "nrmse": 10.213273223899641,
+      "rmse": 0.5208769344188817,
+      "rmse_climatology": 0.6466697485257739,
+      "rmse_convex": 0.6446708885855027,
+      "rmse_persistence": 1.451125931370109,
+      "skill_vs_convex": 0.19202659272895362,
+      "skill_vs_persistence": 0.6410532517139395
+    }
+  },
+  "run_id": "lstm_residual_array12_h6_lagged_seed1",
+  "timestamp_utc": "2026-07-27T17:24:01.920228+00:00",
+  "timings": {
+    "fit_seconds": 14.934857699990971,
+    "n_excluded_outage": 0,
+    "n_test": 8760,
+    "n_train": 26304,
+    "n_val": 8760,
+    "predict_seconds": 0.12595089999376796
+  }
+}
