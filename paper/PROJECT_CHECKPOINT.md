@@ -237,7 +237,23 @@ reader of the feature-importance figure.
    reported alongside, because the GAP BETWEEN THEM IS A RESULT.
 5. Lagged and oracle regimes never mixed. Oracle results explicitly
    labelled as an upper bound.
-6. XGBoost residual stage fits on VALIDATION-split residuals.
+6. **[REVISED 2026-07-29]** The XGBoost residual stage is fit on
+   OUT-OF-FOLD residuals generated within the TRAINING period, using an
+   expanding window over TRAIN_YEARS (fit on 2011 -> predict 2012; fit on
+   2011-2012 -> predict 2013). The validation split is used ONLY for
+   early stopping of the base model, never for fitting the residual
+   stage.
+
+    CHANGE LOG. The rule previously read: "XGBoost residual stage is fit
+    on validation-split residuals, not training-split residuals." That was
+    WRONG and produced the largest leak in the project. Fitting on
+    validation residuals and then evaluating on validation is in-sample
+    performance for the correction stage ([L1.1], Kapoor & Narayanan).
+    Evidence: array11 h6 seed0 gave skill_vs_convex +0.5447 under the old
+    rule, +0.1768 under the corrected scheme, against a plain LSTM
+    baseline of +0.2110. The old behaviour is retained as an explicit,
+    warned opt-in (residual_fit_split='val', leaked_by_design=True) so it
+    can be quantified in the protocol-inflation table.
 7. Every experiment writes results/<run_id>.json with config, git commit,
    git_dirty flag, seed, metrics, timings.
 
@@ -545,6 +561,157 @@ heuristic stand in for either.
 Scripts: scripts/run_seed_sweep.py, scripts/aggregate_seed_sweep.py
 Data: results/seed_sweep_summary.csv, 90 run JSONs
 
+### Finding 9: convolution costs accuracy, stability and compute
+
+TRIGGER: the planned hybrid was CNN-LSTM + XGBoost residual. Before
+building the residual stage on top of it, the CNN-LSTM was run through
+the same 5-seed sweep as XGBoost and LSTM (135 runs total, 15.7 min,
+0 failures).
+
+FIRST EXPECTATION: convolution would either add a small amount at h=6
+(where the LSTM had shown a real advantage) or be neutral. The hybrid
+literature treats a Conv1d front-end as a straightforward improvement.
+
+EVIDENCE — skill_vs_convex, mean +/- std over 5 seeds, validation 2014,
+daylight:
+
+| array   | h | XGBoost           | LSTM              | CNN-LSTM          | CNN-LSTM - LSTM |
+|---------|---|-------------------|-------------------|-------------------|-----------------|
+| array11 | 1 | +0.1967 +/-0.0023 | +0.1938 +/-0.0021 | +0.1945 +/-0.0058 | +0.0007         |
+| array11 | 3 | +0.2761 +/-0.0029 | +0.2722 +/-0.0042 | +0.2646 +/-0.0032 | -0.0075         |
+| array11 | 6 | +0.1947 +/-0.0019 | +0.2104 +/-0.0055 | +0.2017 +/-0.0047 | -0.0087         |
+| array12 | 1 | +0.1890 +/-0.0023 | +0.1903 +/-0.0015 | +0.1893 +/-0.0035 | -0.0010         |
+| array12 | 3 | +0.2750 +/-0.0007 | +0.2751 +/-0.0046 | +0.2671 +/-0.0061 | -0.0080         |
+| array12 | 6 | +0.2002 +/-0.0027 | +0.2150 +/-0.0037 | +0.2014 +/-0.0063 | -0.0137         |
+| array17 | 1 | +0.1190 +/-0.0022 | +0.1190 +/-0.0022 | +0.1168 +/-0.0049 | -0.0022         |
+| array17 | 3 | +0.1828 +/-0.0012 | +0.1806 +/-0.0046 | +0.1763 +/-0.0052 | -0.0043         |
+| array17 | 6 | +0.1302 +/-0.0027 | +0.1542 +/-0.0061 | +0.1491 +/-0.0087 | -0.0050         |
+
+READING: CNN-LSTM is worse than or equal to the plain LSTM in 8 of 9
+cells. The single positive cell (+0.0007) is trivially small. At h=6,
+where the LSTM has a genuine advantage over XGBoost, the convolution
+gives back roughly half of it on all three arrays.
+
+STATISTICS, STATED CAREFULLY: most individual cells do not clear the
+aggregator's (over-conservative) 2x-std threshold. The evidence is the
+CONSISTENCY OF SIGN, not any single cell. Under a two-sided sign test,
+8 of 9 negative gives p ~ 0.039. This is the correct way to present it -
+do not cherry-pick the two cells that clear the threshold.
+
+THREE AXES, ALL NEGATIVE OR NEUTRAL:
+1. Accuracy: worse in 8 of 9 cells.
+2. Stability: CNN-LSTM has higher seed variance than XGBoost in all 9
+   cells, and higher than the LSTM in 7 of 9 (the exceptions are
+   array11 h3 and array11 h6). Largest gap: array17 h6, +/-0.0087 vs
+   +/-0.0061 LSTM vs +/-0.0027 XGBoost.
+3. Compute: fit times ~20-31 s vs ~14-27 s for the LSTM, roughly 20-30
+   percent more.
+
+INTERPRETATION: the h=6 advantage of recurrent models over XGBoost comes
+from RECURRENCE, not from convolution. A component that is standard in
+this literature fails to justify itself on accuracy, on reproducibility
+and on compute simultaneously.
+
+CONSEQUENCE FOR THE STUDY DESIGN: this result forced the residual stage
+to be built as a 2x2 - {LSTM, CNN-LSTM} x {no residual, residual} -
+rather than only on CNN-LSTM as originally planned. Testing the residual
+stage only on the weaker base would have confounded two questions.
+
+PAPER: RQ1 component attribution, Table 5. Also RQ4, since the compute
+cost is measured. Note explicitly that this is an ABLATION, which most of
+the surveyed hybrid papers do not run - they report the full architecture
+against its own components or against nothing.
+
+Data: results/seed_sweep_summary.csv, 135 run JSONs,
+results/_sweep_log_cnn.txt
+
+### Finding 10: residual-stage leakage (the largest effect measured)
+
+TRIGGER: the first residual-corrected run (array11, h=6, lagged, seed 0,
+base LSTM) returned skill_vs_convex = +0.5447 against the plain LSTM's
++0.2110. RMSE halved, 0.516 -> 0.298.
+
+WHAT MADE IT OBVIOUS: a jump of +0.334. Every genuine architectural
+effect measured across 135 runs in this project is 0.01-0.02. This was
+roughly TWENTY TIMES larger than anything real. The magnitude itself was
+the diagnostic - the number was impossible before it was explained.
+
+FIRST DESCRIPTION, AND WHY IT WAS INADEQUATE: the run was initially
+flagged as "optimistic" because both stages had partly seen the
+validation split. That is too weak. The residual XGBoost was FIT on
+validation residuals and then EVALUATED on validation - the same rows.
+That is in-sample performance for the correction stage: [L1.1] in Kapoor
+& Narayanan's taxonomy, "no test set - training and testing on the same
+data". Not optimism. Leakage.
+
+ROOT CAUSE — A PROTOCOL RULE THAT WAS ITSELF WRONG: CLAUDE.md rule 6
+originally said the residual stage fits on VALIDATION-split residuals.
+The reasoning behind it was sound as far as it went: training-split
+residuals are artificially small because the base model has already
+fitted them. But the rule avoided that contamination by creating a worse
+one. THIS IS THE MOST IMPORTANT METHODOLOGICAL LESSON OF THE PROJECT:
+a written, deliberate, well-intentioned protocol rule was the source of
+the largest leak found.
+
+FIX — out-of-fold residuals within the TRAINING period only, the standard
+stacking construction adapted to time series:
+- expanding window over TRAIN_YEARS: fit base on 2011 -> predict 2012;
+  fit on 2011-2012 -> predict 2013
+- pool those out-of-sample predictions and their residuals
+- fit the residual XGBoost on the pooled out-of-fold set
+- then fit the final base model on all training years, using validation
+  ONLY for early stopping
+n_oof_residuals = 16551, contributed by years 2012 and 2013 (2011
+contributes no fold, by construction).
+Each fold's base model sees less training data than the final model, so
+out-of-fold residuals are slightly PESSIMISTIC. That is the correct
+direction to err.
+
+RESULT AFTER THE FIX (array11, h=6, lagged, seed 0):
+
+| variant                          | daylight skill_vs_convex |
+|----------------------------------|--------------------------|
+| plain LSTM                       | +0.2110                  |
+| LSTM + residual, corrected (oof) | +0.1768                  |
+| LSTM + residual, leaked (val)    | +0.5447                  |
+
+TWO SEPARATE RESULTS:
+
+(a) The residual stage HURTS by about -0.034 once leakage is removed -
+    roughly six LSTM seed standard deviations. Needs the 5-seed sweep to
+    confirm, and the residual model's own variance is not yet known.
+
+(b) A single plausible-looking protocol choice turns a component that
+    hurts by 0.034 into one that appears to help by 0.334. That is not
+    just inflation - it is a SIGN FLIP plus an order of magnitude.
+    "Fit the second stage on the validation split" reads as reasonable
+    in a methods section.
+
+FEATURE IMPORTANCES ALSO REORDERED, which matters as much as the metric.
+Leaked run's top features: k_p_hours_stale (2.461),
+Active_Power_roll24_std (2.388), k_p_issue_m1 (2.267), k_p_issue_m2
+(2.192), k_ghi_issue_m2 (1.883). Corrected run's top features: hour_cos,
+k_ghi_issue_m2, Active_Power_roll24_std. Any RQ1 component-attribution
+claim drawn from the leaked run would have been wrong about WHICH
+features carried residual signal, not merely by how much.
+
+EVIDENCE PRESERVED, NOT DELETED: the leaked run is kept as
+results/leaked_lstm_residual_array11_h6_lagged_seed0.json with a
+top-level "INVALID_LEAKED": true key and an explanatory note. The leaked
+behaviour is also available as an EXPLICIT opt-in flag
+residual_fit_split='val' on ResidualCorrected, which warns on
+construction and sets leaked_by_design=True in the config. This makes it
+a reproducible protocol configuration for Table 4 rather than an
+accident.
+
+PAPER: Table 4, alongside night inclusion and reference choice. This is
+the single largest protocol effect in the paper, and arguably the most
+persuasive, because the mistake is so easy to make and the consequence is
+a sign flip rather than a magnitude change. It is also direct evidence
+for the Introduction's claim.
+
+Scripts: src/models/residual.py, scripts/run_residual_dev.py
+
 ---
 
 ## 6. WHAT IS BUILT vs WHAT REMAINS
@@ -552,37 +719,41 @@ Data: results/seed_sweep_summary.csv, 90 run JSONs
 BUILT AND VALIDATED:
 - data layer (load, clean, resample, clear-sky irradiance, clear-sky
   power, splits, exclusions)
-- feature layer (tabular both regimes, sequences, scaler) with real
-  leakage assertions that are proven to catch injected leaks
-- models: SmartPersistence, Climatology, ConvexCombination, XGBoost, LSTM
+- feature layer (tabular both regimes, sequences, scaler) with leakage
+  assertions proven to catch injected leaks
+- models: SmartPersistence, Climatology, ConvexCombination, XGBoost,
+  LSTM, CNN-LSTM, ResidualCorrected (wraps either recurrent base)
+- src/models/recurrent_base.py: shared training loop, scalers, early
+  stopping, prediction. Refactor verified behaviour-preserving by
+  re-running LSTM array11/h6/seed0 and diffing bit-for-bit against the
+  previously committed result.
 - metrics, run-record writer with environment capture
-- 90 committed runs
+- 137 committed runs (135-run sweep + 2 residual dev runs)
 
-REMAINING:
-- CNN-LSTM (prompt already drafted; next step)
-- CNN-LSTM + XGBoost residual stage (rule 6: fit on VALIDATION residuals)
-- sky-condition classification for RQ3 — MUST use k_ghi and its
-  variability, NOT k_p. Two reasons: sky condition is a property of the
-  atmosphere and is shared across arrays, whereas k_p would give three
-  different classifications of the same sky; and k_p is computed from
-  measured power, i.e. the target, so stratifying errors by it means
-  conditioning on the thing being predicted.
-- Diebold-Mariano tests (HAC + HLN correction)
-- oracle-regime runs across the grid
-- full grid runner + config system
-- aggregation into LaTeX tables, figures F1-F7
+REMAINING — REQUIRED:
+- 5-seed sweep for lstm_residual and cnn_lstm_residual (225-run grid;
+  each residual run fits the base 3 times, so budget ~90-105 min)
+- Diebold-Mariano tests with HAC variance and the Harvey-Leybourne-Newbold
+  small-sample correction. MUST replace the 2x-std heuristic before
+  publication.
+- fix the all_hours metrics block (see Finding 2 caveat) - needs a
+  separate all_hours_vs_persistence subset intersecting only the model
+  and persistence, so it spans a true 24-hour cycle again
+- sky-condition classification for RQ3, from k_ghi and its variability,
+  NOT k_p (k_p is derived from the target; also sky condition is shared
+  across arrays while k_p is not)
+- oracle-regime runs
+- aggregation into LaTeX tables; figures F1-F7
 - ONE final test-set (2015) run, at the very end
-- the paper
 
-OUTSTANDING FIXES (known, not yet done):
-1. all_hours metrics block no longer spans 24 hours (see Finding 2
-   caveat). Needs a separate all_hours_vs_persistence subset.
-2. Aggregator significance test is not a proper two-sample test.
-3. Pipeline setup costs ~10 s per run and is recomputed identically 90
-   times. For a 450-run grid that is over an hour of pure waste. Cache
-   the prepared dataframe per array before the full grid.
-4. Several older scripts still hardcode their own TRAIN_YEARS and are
-   retained for provenance only; each has a NOTE in its docstring.
+REMAINING — OPTIONAL, and probably worth SKIPPING to protect writing time:
+- the exhaustive 225-run grid across every cell. Architecture is
+  indistinguishable at h=1 and h=3 across three arrays and three model
+  families; running every seed x regime x horizon buys precision on a
+  settled question. A reduced grid with an explicit justification is a
+  defensible methodological choice.
+- caching the prepared dataframe per array (only matters if the full grid
+  is run; ~10 s of redundant setup per run)
 
 ---
 
@@ -598,6 +769,16 @@ OUTSTANDING FIXES (known, not yet done):
 | 6 dead array / audit blind spots | Data; Intro motivation | dead_period_audit.csv |
 | 7 training length | ablation | seed sweep |
 | 8 architecture x horizon | Table 3, Table 5 | seed_sweep_summary.csv |
+| 9 convolution ablation | RQ1, Table 5; RQ4 compute | seed_sweep_summary.csv |
+| 10 residual leakage | Table 4 (largest effect); Intro | leaked_*.json + residual.py |
+
+Table 4 (protocol inflation) now has at least four rows, in ascending
+order of severity:
+1. night-hour inclusion: nRMSE deflated ~34%, skill unchanged (+0.002)
+2. reference choice: h=6 skill +0.65 -> +0.19, and the horizon trend
+   changes from monotonic to non-monotonic
+3. residual fit split: -0.034 -> +0.334, a SIGN FLIP
+4. (planned) oracle vs lagged weather
 
 Structure (~8 pages, IEEE two-column): Introduction, Related Work, Data
 and Preprocessing, Methodology (4.1 protocol FIRST, then 4.2
@@ -652,6 +833,23 @@ trusting a plausible explanation is what caught the real bugs.
    patterns. It prints the matching negation line.
 7. Let the 2x-std significance heuristic stand initially instead of
    specifying a proper two-sample test and DM from the start.
+
+8. Wrote protocol rule 6 (residual stage fits on validation residuals)
+   into CLAUDE.md at the start of the project and left it unexamined
+   through every subsequent review, until the +0.5447 result forced the
+   issue. The rule was carried over from the original project spec
+   without working through what it implied for evaluation. It then
+   produced the largest leak in the project. The lesson generalises: a
+   protocol rule being WRITTEN DOWN and DELIBERATE is not evidence that
+   it is correct, and a documented rule is harder to question than an
+   undocumented habit.
+
+9. Described the leaked residual result as "optimistic" on first reading
+   rather than as leakage. The correct classification ([L1.1], in-sample
+   evaluation) only became clear from the magnitude.
+
+10. Predicted CNN-LSTM would be neutral-to-slightly-positive at h=6.
+    It was negative in 8 of 9 cells.
 
 ---
 
