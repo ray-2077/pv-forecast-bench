@@ -31,7 +31,7 @@ def main() -> None:
     for name, (path, nameplate_kw) in ARRAYS.items():
         print(f"\n{name} ({path.name}, nameplate {nameplate_kw} kW)")
 
-        raw = load_array(path)
+        raw = load_array(path, start="2009-01-01", end="2015-12-31")
         cleaned, removed = clean_5min(raw, nameplate_kw)
         hourly = resample_hourly(cleaned)
 

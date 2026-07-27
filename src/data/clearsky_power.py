@@ -18,6 +18,7 @@ import pandas as pd
 from pvlib import irradiance, pvsystem, temperature
 
 from src.data.clearsky import get_location
+from src.data.splits import TRAIN_YEARS
 
 SURFACE_TILT = 20.0
 # pvlib convention: 0 = north. Fixed arrays face solar north (DKASC is in
@@ -34,8 +35,6 @@ TEMP_MODEL_PARAMS = temperature.TEMPERATURE_MODEL_PARAMETERS["sapm"][
 # these specific arrays.
 GAMMA_PDC_SILICON = -0.0040
 GAMMA_PDC_CDTE = -0.0025
-
-TRAIN_YEARS = (2012, 2013)
 
 
 def fit_temperature_climatology(df_train):

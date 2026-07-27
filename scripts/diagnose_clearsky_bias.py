@@ -1,4 +1,9 @@
-"""Diagnose whether array11's k_ghi bias (median ~1.02, see
+"""NOTE: run against the ORIGINAL 2012-2013 training window, before the
+window was extended to 2009-2013. Retained unchanged for provenance - the
+conclusion (hour-mean vs instantaneous sampling mismatch) does not depend on
+which years were used. Do not re-run and compare against current results.
+
+Diagnose whether array11's k_ghi bias (median ~1.02, see
 validate_clearsky.py output) is a uniform clear-sky model bias or a
 solar-position timing error. The two need different fixes: a uniform bias
 is a Linke-turbidity/model calibration issue, a timing error means the
