@@ -4,17 +4,25 @@ skill_vs_persistence, and daylight RMSE, per model x array x horizon,
 across the 5 sweep seeds.
 
 Reads results/<model>_<array>_h<horizon>_lagged_seed<seed>.json for every
-(model, array, horizon, seed) in the same grid run_seed_sweep.py sweeps.
-A cell with fewer than 5 seeds present (sweep not finished, or a run
-failed) is still reported, with n_seeds showing how many contributed.
+(model, array, horizon, seed) in the same grid run_seed_sweep.py sweeps -
+now five models: xgboost, lstm, cnn_lstm, lstm_residual, cnn_lstm_residual
+(src/models/residual.py). A cell with fewer than 5 seeds present (sweep
+not finished, or a run failed) is still reported, with n_seeds showing how
+many contributed.
+
+Per src/models/residual.py's docstring, lstm_residual and
+cnn_lstm_residual's own validation-split metrics are optimistic (their
+residual stage is fit on validation residuals, per CLAUDE.md rule 6) -
+this script reports their seed variance the same way as the other three
+models for comparability, but that caveat applies to every row and
+pairwise comparison involving either residual model below.
 
 Writes results/seed_sweep_summary.csv (one row per model x array x
 horizon) and, for each array x horizon, prints the difference in mean
-skill_vs_convex for every pairwise model comparison (not just LSTM vs
-XGBoost - now that CNN-LSTM is a third model, all three pairs are
-reported), flagging whether it exceeds 2 standard deviations of either
-model's own seed-to-seed spread - the bar for treating the gap as a real
-difference rather than seed noise.
+skill_vs_convex for every pairwise model comparison (with five models,
+that is all 10 pairs, not just one or three), flagging whether it exceeds
+2 standard deviations of either model's own seed-to-seed spread - the bar
+for treating the gap as a real difference rather than seed noise.
 
 Usage:
     python scripts/aggregate_seed_sweep.py
@@ -30,7 +38,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = REPO_ROOT / "results"
 
-MODELS = ["xgboost", "lstm", "cnn_lstm"]
+MODELS = ["xgboost", "lstm", "cnn_lstm", "lstm_residual", "cnn_lstm_residual"]
 ARRAYS = ["array11", "array12", "array17"]
 HORIZONS = [1, 3, 6]
 SEEDS = [0, 1, 2, 3, 4]
@@ -129,8 +137,9 @@ def write_csv(summary, out_path):
 
 def print_pairwise_comparisons(summary):
     """Every pairwise model comparison (not just one model vs another) -
-    with three models there are three pairs per array x horizon:
-    xgboost-vs-lstm, xgboost-vs-cnn_lstm, lstm-vs-cnn_lstm.
+    with five models (MODELS above) there are C(5,2) = 10 pairs per
+    array x horizon, e.g. xgboost-vs-lstm, lstm-vs-lstm_residual,
+    cnn_lstm-vs-cnn_lstm_residual, and so on for every combination.
     """
     print("\npairwise skill_vs_convex comparisons, per array x horizon:")
     for array in ARRAYS:

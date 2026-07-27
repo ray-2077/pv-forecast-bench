@@ -1,4 +1,5 @@
-"""Seed variance sweep for XGBoost, LSTM, and CNN-LSTM.
+"""Seed variance sweep for XGBoost, LSTM, CNN-LSTM, and the two residual
+hybrids (LSTM+residual, CNN-LSTM+residual).
 
 Motivation: a single-seed comparison (e.g. LSTM +0.279 vs XGBoost +0.276
 skill_vs_convex, array11 h3 lagged) cannot distinguish a real difference
@@ -6,33 +7,41 @@ from noise. This script re-runs the same grid across 5 seeds so
 scripts/aggregate_seed_sweep.py can report a mean and standard deviation
 per model x array x horizon.
 
-Grid: models [xgboost, lstm, cnn_lstm] x arrays [array11, array12,
-array17] x horizons [1, 3, 6] x regime [lagged] x seeds [0, 1, 2, 3, 4] =
-135 runs. Evaluated on the VALIDATION split (2014) only - this script
-never reads 2015, exactly like run_xgb_dev.py, run_lstm_dev.py, and
-run_cnn_lstm_dev.py, which it calls directly.
+Grid: models [xgboost, lstm, cnn_lstm, lstm_residual, cnn_lstm_residual] x
+arrays [array11, array12, array17] x horizons [1, 3, 6] x regime [lagged]
+x seeds [0, 1, 2, 3, 4] = 225 runs. Evaluated on the VALIDATION split
+(2014) only - this script never reads 2015, exactly like run_xgb_dev.py,
+run_lstm_dev.py, run_cnn_lstm_dev.py, and run_residual_dev.py, which it
+calls directly. Per src/models/residual.py's docstring, the two residual
+models' own validation-split metrics are optimistic (the residual stage
+is fit on validation residuals, per CLAUDE.md rule 6) - this sweep still
+reports their seed-to-seed variance on validation for comparability with
+the other three models, but that caveat applies to every lstm_residual /
+cnn_lstm_residual cell here.
 
 Rather than duplicate the data-loading/model-fit/metrics pipeline here,
 this script imports run_experiment() from scripts/run_xgb_dev.py,
-scripts/run_lstm_dev.py, and scripts/run_cnn_lstm_dev.py. Those three
-functions were pulled out of each script's main() specifically so they
-could be called in a loop like this without copy-pasting the pipeline a
-third time. The setup that was IDENTICAL between run_xgb_dev.py and
-run_lstm_dev.py (ARRAYS, load_and_prepare, add_clearsky_power_per_split)
-was moved out further, into src/data/pipeline.py, which all three dev
-scripts now import from too - see that module's docstring.
+scripts/run_lstm_dev.py, scripts/run_cnn_lstm_dev.py, and
+scripts/run_residual_dev.py. Those functions were pulled out of each
+script's main() specifically so they could be called in a loop like this
+without copy-pasting the pipeline a third (and fourth, fifth) time. The
+setup that was IDENTICAL between run_xgb_dev.py and run_lstm_dev.py
+(ARRAYS, load_and_prepare, add_clearsky_power_per_split) was moved out
+further, into src/data/pipeline.py, which all dev scripts now import from
+too - see that module's docstring.
 
-Each run writes its own results/<run_id>.json exactly as run_xgb_dev.py,
-run_lstm_dev.py, and run_cnn_lstm_dev.py do on their own (same schema,
-same write_run call). Runs whose JSON already exists are skipped without
-re-computing anything - see write_run's own FileExistsError-on-overwrite
-guard in src/eval/runner.py, which this script relies on by checking
-existence first rather than catching that error.
+Each run writes its own results/<run_id>.json exactly as the dev scripts
+do on their own (same schema, same write_run call). Runs whose JSON
+already exists are skipped without re-computing anything - see write_run's
+own FileExistsError-on-overwrite guard in src/eval/runner.py, which this
+script relies on by checking existence first rather than catching that
+error.
 
 Usage:
     python scripts/run_seed_sweep.py
 """
 
+import functools
 import sys
 import time
 from pathlib import Path
@@ -46,6 +55,7 @@ from src.eval.runner import make_run_id  # noqa: E402
 
 import run_cnn_lstm_dev  # noqa: E402
 import run_lstm_dev  # noqa: E402
+import run_residual_dev  # noqa: E402
 import run_xgb_dev  # noqa: E402
 
 RESULTS_DIR = REPO_ROOT / "results"
@@ -56,16 +66,22 @@ SEEDS = [0, 1, 2, 3, 4]
 REGIME = "lagged"
 
 # model name (matches XGBForecaster.name / LSTMForecaster.name /
-# CNNLSTMForecaster.name, and the run_id string) -> the
-# run_experiment(array, horizon, regime, seed, verbose=...) function that
-# produces it. run_cnn_lstm_dev.run_experiment takes extra n_filters/
-# kernel_size arguments, but both have defaults, so calling it with the
-# same (array, horizon, regime, seed, verbose=...) signature as the other
-# two still works.
+# CNNLSTMForecaster.name / ResidualCorrected.name, and the run_id string)
+# -> the run_experiment(array, horizon, regime, seed, verbose=...)
+# function that produces it. run_cnn_lstm_dev.run_experiment takes extra
+# n_filters/kernel_size arguments, but both have defaults, so calling it
+# with the same (array, horizon, regime, seed, verbose=...) signature as
+# the other two still works. run_residual_dev.run_experiment additionally
+# takes `base` ("lstm" or "cnn_lstm"), which has no single sensible
+# default here - bound per entry with functools.partial instead, so each
+# still matches the common (array, horizon, regime, seed, verbose=...)
+# call signature below.
 MODEL_RUNNERS = {
     "xgboost": run_xgb_dev.run_experiment,
     "lstm": run_lstm_dev.run_experiment,
     "cnn_lstm": run_cnn_lstm_dev.run_experiment,
+    "lstm_residual": functools.partial(run_residual_dev.run_experiment, base="lstm"),
+    "cnn_lstm_residual": functools.partial(run_residual_dev.run_experiment, base="cnn_lstm"),
 }
 
 

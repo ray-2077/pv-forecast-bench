@@ -59,7 +59,36 @@ check the installed version before writing code, not after it fails.
 
 &#x20;  future weather is labelled explicitly as a perfect-forecast upper bound.
 
-6. XGBoost residual stage is fit on VALIDATION-split residuals, not training.
+6. XGBoost residual stage is fit on OUT-OF-FOLD TRAINING residuals: an
+   expanding window over TRAIN_YEARS (fit on years[:k], predict year k,
+   pool the out-of-fold residuals across folds - no fold for the first
+   training year, since there is no prior year to expand from). The base
+   model is then refit once on ALL of TRAIN_YEARS, with VALIDATION used
+   ONLY for early stopping, never to fit the residual stage. See
+   src/models/residual.py, ResidualCorrected.fit and _oof_residuals, for
+   the exact scheme. Each fold's base model sees less data than the final
+   one, so out-of-fold residuals run slightly pessimistic - the correct
+   direction to err.
+
+   CHANGE LOG (2026-07-27): this rule originally read "XGBoost residual
+   stage is fit on VALIDATION-split residuals, not training" - the
+   reasoning at the time was that TRAINING residuals are contaminated
+   because the base model has already fitted them. That reasoning was
+   correct, but the fix was wrong: fitting the residual stage on
+   validation and then EVALUATING it on validation is in-sample
+   performance for the residual stage, not merely optimistic - [L1.1] in
+   Kapoor & Narayanan's leakage taxonomy. Evidence of the magnitude:
+   array11 h6 seed0 went from skill_vs_convex +0.2104 (plain LSTM) to
+   +0.5447 (val-fit residual stage), when every genuine architectural
+   effect measured elsewhere in this project is 0.01-0.02. That run is
+   preserved, not deleted, as
+   results/leaked_lstm_residual_array11_h6_lagged_seed0.json (top-level
+   key "INVALID_LEAKED": true) as evidence for a protocol-inflation
+   table, not as a result. The leaked scheme is still reachable on
+   purpose, for that table, via
+   ResidualCorrected(residual_fit_split='val') - it raises a warning and
+   records leaked_by_design=True in config when used; the default is
+   residual_fit_split='oof', the corrected scheme above.
 
 7. Every experiment writes results/<run_id>.json containing config, git commit
 
