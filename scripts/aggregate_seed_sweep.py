@@ -10,15 +10,18 @@ failed) is still reported, with n_seeds showing how many contributed.
 
 Writes results/seed_sweep_summary.csv (one row per model x array x
 horizon) and, for each array x horizon, prints the difference in mean
-skill_vs_convex between LSTM and XGBoost, flagging whether it exceeds 2
-standard deviations of either model's own seed-to-seed spread - the bar
-for treating the gap as a real difference rather than seed noise.
+skill_vs_convex for every pairwise model comparison (not just LSTM vs
+XGBoost - now that CNN-LSTM is a third model, all three pairs are
+reported), flagging whether it exceeds 2 standard deviations of either
+model's own seed-to-seed spread - the bar for treating the gap as a real
+difference rather than seed noise.
 
 Usage:
     python scripts/aggregate_seed_sweep.py
 """
 
 import csv
+import itertools
 import json
 import statistics
 import sys
@@ -27,7 +30,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = REPO_ROOT / "results"
 
-MODELS = ["xgboost", "lstm"]
+MODELS = ["xgboost", "lstm", "cnn_lstm"]
 ARRAYS = ["array11", "array12", "array17"]
 HORIZONS = [1, 3, 6]
 SEEDS = [0, 1, 2, 3, 4]
@@ -124,33 +127,39 @@ def write_csv(summary, out_path):
         writer.writerows(rows)
 
 
-def print_lstm_vs_xgboost(summary):
-    print("\nLSTM vs XGBoost skill_vs_convex, per array x horizon:")
+def print_pairwise_comparisons(summary):
+    """Every pairwise model comparison (not just one model vs another) -
+    with three models there are three pairs per array x horizon:
+    xgboost-vs-lstm, xgboost-vs-cnn_lstm, lstm-vs-cnn_lstm.
+    """
+    print("\npairwise skill_vs_convex comparisons, per array x horizon:")
     for array in ARRAYS:
         for horizon in HORIZONS:
-            xgb = summary.get(("xgboost", array, horizon))
-            lstm = summary.get(("lstm", array, horizon))
-            if xgb is None or lstm is None:
-                print(f"  {array:8s} h{horizon}  missing data, cannot compare")
-                continue
+            print(f"  {array:8s} h{horizon}")
+            for model_a, model_b in itertools.combinations(MODELS, 2):
+                a = summary.get((model_a, array, horizon))
+                b = summary.get((model_b, array, horizon))
+                if a is None or b is None:
+                    print(f"    {model_a} vs {model_b}: missing data, cannot compare")
+                    continue
 
-            diff = lstm["mean_skill_vs_convex"] - xgb["mean_skill_vs_convex"]
-            xgb_2std = 2 * xgb["std_skill_vs_convex"]
-            lstm_2std = 2 * lstm["std_skill_vs_convex"]
-            exceeds_xgb = abs(diff) > xgb_2std
-            exceeds_lstm = abs(diff) > lstm_2std
+                diff = b["mean_skill_vs_convex"] - a["mean_skill_vs_convex"]
+                a_2std = 2 * a["std_skill_vs_convex"]
+                b_2std = 2 * b["std_skill_vs_convex"]
+                exceeds_a = abs(diff) > a_2std
+                exceeds_b = abs(diff) > b_2std
 
-            if exceeds_xgb and exceeds_lstm:
-                verdict = "exceeds 2*std of BOTH -> likely a real difference"
-            elif exceeds_xgb or exceeds_lstm:
-                verdict = "exceeds 2*std of ONE model only -> borderline"
-            else:
-                verdict = "within 2*std of both -> not distinguishable from seed noise"
+                if exceeds_a and exceeds_b:
+                    verdict = "exceeds 2*std of BOTH -> likely a real difference"
+                elif exceeds_a or exceeds_b:
+                    verdict = "exceeds 2*std of ONE model only -> borderline"
+                else:
+                    verdict = "within 2*std of both -> not distinguishable from seed noise"
 
-            print(
-                f"  {array:8s} h{horizon}  LSTM - XGBoost = {diff:+.4f}  "
-                f"(xgb 2*std={xgb_2std:.4f}, lstm 2*std={lstm_2std:.4f})  {verdict}"
-            )
+                print(
+                    f"    {model_b} - {model_a} = {diff:+.4f}  "
+                    f"({model_a} 2*std={a_2std:.4f}, {model_b} 2*std={b_2std:.4f})  {verdict}"
+                )
 
 
 def main():
@@ -166,7 +175,7 @@ def main():
     write_csv(summary, out_path)
     print(f"\nwrote {out_path}")
 
-    print_lstm_vs_xgboost(summary)
+    print_pairwise_comparisons(summary)
 
 
 if __name__ == "__main__":
