@@ -4,6 +4,38 @@ regenerated from these files. See CLAUDE.md rule 7.
 
 No model code, no plotting - this module only assembles and writes the
 run record.
+
+CAVEAT (2026-07-28) - the "all_hours" metrics block is mislabelled in
+every run JSON written before this date by scripts/run_xgb_dev.py,
+run_lstm_dev.py, run_cnn_lstm_dev.py, and run_residual_dev.py. It is
+computed on the intersection of timestamps where the model AND
+SmartPersistence AND Climatology AND ConvexCombination all produced a
+prediction (see any of those scripts' "common_idx" construction).
+Climatology has no prediction at (month, hour) cells that are never
+daylight in training data - k_p is NaN by construction at night, see
+src.models.climatology.Climatology.fit/predict - so that intersection
+covers roughly 4247 of a year's 8694 hours, not a full 24-hour cycle.
+The name says otherwise.
+
+Do NOT rewrite the existing run JSONs to fix this: they are the audit
+trail and are internally consistent (the block has always meant this
+same quantity, whatever it is labelled). Runs written from 2026-07-28
+onward use the key "common_hours" for this same quantity instead of
+"all_hours" - if you are reading an older run JSON, "all_hours" IS
+"common_hours" under the new name.
+
+Neither "daylight" nor "common_hours"/"all_hours" answers the actual
+night-inclusion question (how metrics behave when literal night hours
+are included), because both are restricted to the four-way prediction
+intersection above, which already excludes most true night rows via
+Climatology's coverage gap. For that question, see
+scripts/build_table4_protocol.py, which computes each evaluation
+configuration from scratch using only the intersection it actually
+needs (e.g. model + persistence only, with no daylight filter, to get
+a metric that truly spans a 24-hour cycle) rather than reading it out
+of run JSONs that were never designed to answer it. See also
+paper/PROJECT_CHECKPOINT.md, Finding 2, for the closed-form prediction
+RMSE_all = RMSE_day * sqrt(N_day / N_all) that motivated this script.
 """
 
 import json
@@ -160,11 +192,13 @@ def _validate_metrics(metrics: dict) -> None:
     the whole grid (see that script's motivation, and CLAUDE.md rule 7).
 
     metrics is usually shaped as subset_name -> {metric_name: value}
-    (e.g. "daylight"/"all_hours" in scripts/run_xgb_dev.py), so each
-    dict-valued entry is checked individually. If metrics has no
-    dict-valued entries at all, it is itself the one metrics dict to
-    check (this is what lets scripts/validate_runner.py's flat dummy
-    metrics dict exercise this same check).
+    (e.g. "daylight"/"common_hours" in scripts/run_xgb_dev.py - older run
+    JSONs use "all_hours" for the same "common_hours" quantity, see the
+    module docstring CAVEAT), so each dict-valued entry is checked
+    individually. If metrics has no dict-valued entries at all, it is
+    itself the one metrics dict to check (this is what lets
+    scripts/validate_runner.py's flat dummy metrics dict exercise this
+    same check).
     """
     subsets = [v for v in metrics.values() if isinstance(v, dict)]
     targets = subsets if subsets else [metrics]
@@ -191,8 +225,10 @@ def write_run(
     n_test, n_excluded_outage (see src.eval.exclusions.exclusion_mask -
     applied identically to every model before metrics are computed).
     metrics (or each of its dict-valued entries, e.g.
-    "daylight"/"all_hours") must include skill_vs_persistence,
-    skill_vs_convex, convex_weight - see _validate_metrics.
+    "daylight"/"common_hours" - see module docstring CAVEAT for what
+    this block does and does not cover, and for older runs' "all_hours"
+    key) must include skill_vs_persistence, skill_vs_convex,
+    convex_weight - see _validate_metrics.
 
     Raises FileExistsError if results/<run_id>.json already exists and
     overwrite is False - a silently overwritten result is a lost

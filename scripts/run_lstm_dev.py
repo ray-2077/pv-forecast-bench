@@ -17,7 +17,10 @@ fit on TRAIN only, then clear-sky POWER added to train and val
 -> predict on val -> metrics against SmartPersistence AND the
 ConvexCombination reference (src.models.climatology - weight fitted on
 VALIDATION, per that module's own CRITICAL comment) on the same rows,
-daylight-only and all-hours -> results/<run_id>.json.
+daylight-only and common_hours (the intersection where the model,
+persistence, climatology, AND convex all predicted - NOT a full 24-hour
+cycle, see src/eval/runner.py module docstring CAVEAT) ->
+results/<run_id>.json.
 
 Every run also records skill_vs_persistence, skill_vs_convex,
 convex_weight, rmse_persistence, rmse_convex, rmse_climatology in each
@@ -196,7 +199,12 @@ def run_experiment(array, horizon, regime, seed, train_years=None, results_dir=R
     metrics = {}
     for label, mask in [
         ("daylight", is_daylight),
-        ("all_hours", pd.Series(True, index=eval_idx)),
+        # NOT a full 24h cycle: restricted to rows where climatology (and
+        # therefore convex_reference) also produced a prediction, which
+        # excludes most true night hours. See src/eval/runner.py module
+        # docstring CAVEAT and scripts/build_table4_protocol.py. Runs
+        # before 2026-07-28 call this same quantity "all_hours".
+        ("common_hours", pd.Series(True, index=eval_idx)),
     ]:
         yt, yl, yp, yc, yv = y_true[mask], y_lstm[mask], y_pers[mask], y_clim[mask], y_convex[mask]
         metrics[label] = {
@@ -216,7 +224,7 @@ def run_experiment(array, horizon, regime, seed, train_years=None, results_dir=R
     vprint(f"\n--- horizon = {horizon}h, regime = {regime} (validation split, 2014) ---")
     if verbose:
         print_metrics_row("daylight", metrics["daylight"])
-        print_metrics_row("all_hours", metrics["all_hours"])
+        print_metrics_row("common_hours", metrics["common_hours"])
 
         print("\nper-epoch validation RMSE:")
         for epoch, val_rmse in enumerate(model.history["val_rmse"]):
