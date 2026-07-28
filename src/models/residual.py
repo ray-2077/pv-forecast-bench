@@ -63,7 +63,6 @@ import warnings
 import xgboost as xgb
 import pandas as pd
 
-from src.data.splits import TRAIN_YEARS
 from src.features.build import build_features
 from src.models.base import BaseForecaster
 
@@ -237,13 +236,22 @@ class ResidualCorrected(BaseForecaster):
         return self
 
     def _oof_residuals(self, df_train, horizon, df_val):
-        """Expanding-window out-of-fold residuals within TRAIN_YEARS
-        (src/data/splits.py) only - the corrected CLAUDE.md rule 6 scheme.
+        """Expanding-window out-of-fold residuals within the years actually
+        present in df_train - the corrected CLAUDE.md rule 6 scheme.
+
+        fold_years is read directly off df_train's own index, NOT
+        re-filtered against src.data.splits.TRAIN_YEARS: df_train is
+        already exactly the training window the caller chose (ordinarily
+        TRAIN_YEARS, but deliberately variable for a training-length
+        ablation - see src/data/splits.py's TRAIN_YEARS comment). Filtering
+        against the default constant here would silently discard any extra
+        years such an ablation adds, making the fold count invariant to
+        the very thing being ablated.
 
         Fold k (k = 1 .. len(fold_years)-1): fit a FRESH base model
         (_clone_base_model - never self.base_model, which is fit
-        separately on the full training set) on TRAIN_YEARS[:k], then
-        predict on TRAIN_YEARS[:k+1] (the fit years PLUS the held-out
+        separately on the full training set) on fold_years[:k], then
+        predict on fold_years[:k+1] (the fit years PLUS the held-out
         year k) so the held-out year's sequence windows can see genuine
         PAST history from the prior fold years - exactly what a deployed
         model would have available at issue time - but only the held-out
@@ -251,11 +259,12 @@ class ResidualCorrected(BaseForecaster):
         fit years' own predictions on themselves would be in-sample, not
         out-of-fold, and are discarded.
 
-        There is no fold for fold_years[0] (2011 for the current
+        There is no fold for fold_years[0] (2011 for the default
         TRAIN_YEARS): expanding from an empty prior window is undefined,
         so the first training year never contributes an out-of-fold
         residual. With TRAIN_YEARS = (2011, 2012, 2013) this yields
-        exactly 2 folds (out-of-fold predictions for 2012, then 2013).
+        exactly 2 folds (out-of-fold predictions for 2012, then 2013); a
+        5-year window (2009-2013) yields 4 folds.
 
         VALIDATION (df_val) is passed to each fold's fit() for early
         stopping ONLY, identically to how the final base model uses it -
@@ -273,7 +282,7 @@ class ResidualCorrected(BaseForecaster):
         held-out years that actually contributed, in order).
         """
         idx_years = df_train.index.year
-        fold_years = sorted({int(y) for y in idx_years if int(y) in TRAIN_YEARS})
+        fold_years = sorted({int(y) for y in idx_years})
 
         X_parts = []
         residual_parts = []

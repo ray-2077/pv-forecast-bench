@@ -41,7 +41,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from src.data.pipeline import ARRAYS, add_clearsky_power_per_split, load_and_prepare
-from src.data.splits import split_chronological
+from src.data.splits import TRAIN_YEARS, split_chronological
 from src.eval.exclusions import exclusion_mask
 from src.eval.metrics import mae, mbe, nrmse, rmse, skill_score
 from src.eval.runner import make_run_id, set_all_seeds, write_run
@@ -76,7 +76,7 @@ def print_metrics_row(label, m):
     )
 
 
-def run_experiment(array, horizon, regime, seed, results_dir=RESULTS_DIR, verbose=True):
+def run_experiment(array, horizon, regime, seed, train_years=None, results_dir=RESULTS_DIR, verbose=True):
     """Run one LSTM dev experiment and write results/<run_id>.json.
 
     Pulled out of main() so scripts/run_seed_sweep.py can call this
@@ -85,6 +85,14 @@ def run_experiment(array, horizon, regime, seed, results_dir=RESULTS_DIR, verbos
     below so a sweep of many runs doesn't flood the console; the caller
     is expected to print its own one-line progress instead.
 
+    train_years=None (default) uses src.data.splits.TRAIN_YEARS, i.e.
+    identical behaviour to before this parameter existed. Passing an
+    explicit tuple overrides the training window only - VAL_YEARS/TEST_YEARS
+    are never touched (src/data/splits.py) - for a training-length ablation
+    (see scripts/rerun_residual_5yr.py). The effective window actually used
+    is recorded in config["train_years"] either way, since make_run_id does
+    not encode it in the run id.
+
     Returns (out_path, metrics).
     """
 
@@ -92,12 +100,17 @@ def run_experiment(array, horizon, regime, seed, results_dir=RESULTS_DIR, verbos
         if verbose:
             print(*a, **kw)
 
-    vprint(f"array={array}  horizon={horizon}  regime={regime}  seed={seed}")
+    effective_train_years = tuple(train_years) if train_years is not None else TRAIN_YEARS
+
+    vprint(
+        f"array={array}  horizon={horizon}  regime={regime}  seed={seed}  "
+        f"train_years={effective_train_years}"
+    )
 
     set_all_seeds(seed)
 
     df, nameplate_kw, gamma_pdc = load_and_prepare(array, PROCESSED_DIR)
-    train, val, test = split_chronological(df)
+    train, val, test = split_chronological(df, train_years=effective_train_years)
     train, val, gain_info = add_clearsky_power_per_split(train, val, test, nameplate_kw, gamma_pdc)
 
     vprint(
@@ -221,6 +234,7 @@ def run_experiment(array, horizon, regime, seed, results_dir=RESULTS_DIR, verbos
         # This script never touches 2015 (see module docstring) - every
         # run it writes is a validation-split, development run.
         "eval_split": "val",
+        "train_years": list(effective_train_years),
         "hyperparams": {
             "hidden_size": model.hidden_size,
             "num_layers": model.num_layers,

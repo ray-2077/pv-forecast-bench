@@ -62,7 +62,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from src.data.pipeline import ARRAYS, add_clearsky_power_per_split, load_and_prepare
-from src.data.splits import split_chronological
+from src.data.splits import TRAIN_YEARS, split_chronological
 from src.eval.exclusions import exclusion_mask
 from src.eval.metrics import mae, mbe, nrmse, rmse, skill_score
 from src.eval.runner import make_run_id, set_all_seeds, write_run
@@ -115,6 +115,7 @@ def run_experiment(
     seed,
     base="lstm",
     residual_fit_split="oof",
+    train_years=None,
     results_dir=RESULTS_DIR,
     verbose=True,
 ):
@@ -128,6 +129,16 @@ def run_experiment(
     it registers - both use the residual_fit_split='oof' default, per
     CLAUDE.md rule 6.
 
+    train_years=None (default) uses src.data.splits.TRAIN_YEARS, i.e.
+    identical behaviour to before this parameter existed. Passing an
+    explicit tuple overrides the training window (VAL_YEARS/TEST_YEARS are
+    never touched) - this also changes the fold count inside
+    ResidualCorrected._oof_residuals, which now derives fold years from the
+    actual training data rather than the hardcoded TRAIN_YEARS constant
+    (see src/models/residual.py). Used by scripts/rerun_residual_5yr.py for
+    the 4-fold ablation. The effective window is recorded in
+    config["train_years"].
+
     Returns (out_path, metrics).
     """
 
@@ -135,15 +146,18 @@ def run_experiment(
         if verbose:
             print(*a, **kw)
 
+    effective_train_years = tuple(train_years) if train_years is not None else TRAIN_YEARS
+
     vprint(
         f"base={base}  residual_fit_split={residual_fit_split}  array={array}  "
-        f"horizon={horizon}  regime={regime}  seed={seed}"
+        f"horizon={horizon}  regime={regime}  seed={seed}  "
+        f"train_years={effective_train_years}"
     )
 
     set_all_seeds(seed)
 
     df, nameplate_kw, gamma_pdc = load_and_prepare(array, PROCESSED_DIR)
-    train, val, test = split_chronological(df)
+    train, val, test = split_chronological(df, train_years=effective_train_years)
     train, val, gain_info = add_clearsky_power_per_split(train, val, test, nameplate_kw, gamma_pdc)
 
     vprint(
@@ -313,6 +327,7 @@ def run_experiment(
         # This script never touches 2015 (see module docstring) - every
         # run it writes is a validation-split, development run.
         "eval_split": "val",
+        "train_years": list(effective_train_years),
         "hyperparams": hyperparams,
         "nameplate_kw": nameplate_kw,
         "base_best_epoch": base_model.best_epoch,

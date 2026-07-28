@@ -18,7 +18,7 @@ import pandas as pd
 from pvlib import irradiance, pvsystem, temperature
 
 from src.data.clearsky import get_location
-from src.data.splits import TRAIN_YEARS
+from src.data.splits import TEST_YEARS, VAL_YEARS
 
 SURFACE_TILT = 20.0
 # pvlib convention: 0 = north. Fixed arrays face solar north (DKASC is in
@@ -44,14 +44,19 @@ def fit_temperature_climatology(df_train):
     """From TRAINING data only, return a month-by-hour table (index=month
     1-12, columns=hour 0-23) of mean Weather_Temperature_Celsius.
 
-    Raises ValueError if df_train contains any year outside TRAIN_YEARS -
-    this table must never see 2014 or 2015.
+    Raises ValueError if df_train contains any VAL_YEARS or TEST_YEARS year -
+    this table must never see 2014 or 2015. Deliberately does NOT require
+    df_train's years to equal the default TRAIN_YEARS exactly: TRAIN_YEARS
+    is a variable training-window parameter (src/data/splits.py), e.g. for
+    a training-length ablation on array11/array12, and any window that
+    stays clear of validation/test years is valid here.
     """
     years = set(df_train.index.year.unique())
-    if not years.issubset(TRAIN_YEARS):
+    forbidden = years & (set(VAL_YEARS) | set(TEST_YEARS))
+    if forbidden:
         raise ValueError(
-            f"fit_temperature_climatology got years {sorted(years)}, "
-            f"expected only {TRAIN_YEARS}"
+            f"fit_temperature_climatology got forbidden validation/test "
+            f"year(s) {sorted(forbidden)} in df_train"
         )
 
     temp = df_train["Weather_Temperature_Celsius"]
