@@ -22,10 +22,14 @@ intersection above):
       is_daylight.
   C2  daylight only, skill vs smart persistence: model + persistence
       only, restricted to is_daylight.
-  C3  ALL 24 HOURS, skill vs convex reference: model + convex_reference
-      only, no daylight filter. Convex still inherits Climatology's
-      coverage gap, so this does NOT span a true 24h cycle either - the
-      point of including it is to show that gap directly, via n_samples.
+  C3  convex-covered hours only, skill vs convex reference: model +
+      convex_reference only, no daylight filter, but restricted (via the
+      preds_xgb/preds_ref index intersection in build_config_row) to
+      whatever hours Climatology actually produced a prediction for.
+      That coverage gap means C3 is within 0.0002 of C1 at h=3 and h=6 -
+      it is NOT a distinct 24h protocol variant, and is kept in this
+      table only to document that limitation directly via n_samples,
+      not as something to read as "skill with night included".
   C4  ALL 24 HOURS, skill vs smart persistence: model + persistence
       only, no daylight filter. SmartPersistence forward-fills through
       the night (src.models.persistence.SmartPersistence,
@@ -104,8 +108,14 @@ CONFIGS = [
      "daylight", "convex_reference"),
     ("C2", "daylight only, skill vs smart persistence",
      "daylight", "smart_persistence"),
-    ("C3", "all 24 hours, skill vs convex reference (model + convex only)",
-     "all_24h", "convex_reference"),
+    # C3 is NOT a real 24h protocol variant: convex_reference (Climatology)
+    # has no prediction at always-night (month, hour) cells, so this config
+    # collapses to within 0.0002 of C1's skill at h=3 and h=6. It is kept
+    # only to document that coverage gap via n_samples, not to compare
+    # against as if it were night-inclusive.
+    ("C3", "convex-covered hours only, skill vs convex reference (NOT a 24h cycle - "
+     "the convex reference has no prediction at always-night cells)",
+     "convex_covered", "convex_reference"),
     ("C4", "all 24 hours, skill vs smart persistence (model + persistence only, true 24h cycle)",
      "all_24h", "smart_persistence"),
     ("C5", "daylight only, raw nRMSE, no skill score",
