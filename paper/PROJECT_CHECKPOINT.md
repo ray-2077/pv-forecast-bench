@@ -714,6 +714,91 @@ Scripts: src/models/residual.py, scripts/run_residual_dev.py
 
 ---
 
+### Finding 11: the residual penalty is fold-starvation at short horizons, genuine at long ones
+
+TRIGGER: the 225-run seed sweep (Finding 10 addendum) showed residual
+correction negative in all 18 array x horizon cells (-0.024 to -0.046
+skill_vs_convex).
+
+FIRST READING, TOO STRONG: "residual correction does not help on this
+problem". The 18-of-18 consistency was itself suspicious - real effects
+in this project have been noisier.
+
+CONFOUND IDENTIFIED: with TRAIN_YEARS = 2011-2013 the expanding window
+gives only TWO folds (base on 2011 -> predict 2012; base on 2011-2012 ->
+predict 2013), seeing 1/3 and 2/3 of the training data against the
+deployed model's 3/3. The corrector may learn to fix errors a stronger
+model does not make.
+
+CONTROL: rerun with TRAIN_YEARS = 2009-2013 (five years, four folds),
+arrays 11 and 12, 3 seeds, 36 runs. n_oof_residuals 16.5k -> 34k.
+
+RESULT - the penalty shrinks but does not vanish, and the pattern is
+horizon-structured:
+
+| array   | h | 3yr/2fold | 5yr/4fold | recovery |
+|---------|---|-----------|-----------|----------|
+| array11 | 1 | -0.0271   | -0.0069   | 75%      |
+| array11 | 3 | -0.0260   | -0.0105   | 60%      |
+| array11 | 6 | -0.0309   | -0.0175   | 43%      |
+| array12 | 1 | -0.0310   | -0.0013   | 96%      |
+| array12 | 3 | -0.0400   | -0.0071   | 82%      |
+| array12 | 6 | -0.0248   | -0.0200   | 19%      |
+
+INTERPRETATION: claim B (fold starvation) at short horizons, claim A
+(genuine penalty) at long ones. At h=1 with four folds the penalty is
+inside seed noise - with 3 seeds the standard error on these differences
+is roughly 0.003-0.005, so -0.0013 and -0.0069 are not distinguishable
+from zero. At h=6 a penalty of -0.0175 to -0.0200 survives at 3-4
+standard errors.
+
+MECHANISM (scripts/diagnose_residual_signal.py, array11, seed 0):
+correlation between predicted and actual residual is +0.76 to +0.79
+out-of-fold but only +0.04-0.13 on validation, under both the 3-year and
+5-year windows. The corrector is not learning nothing - it is
+OVERCONFIDENT: it sizes its correction to the out-of-fold relationship,
+not the weaker one that transfers to validation. Sizing this precisely
+with the closed form for how a correction p changes a base model's MSE
+(-2*rho*sigma_r*sigma_p + sigma_p^2, so p helps only when
+sigma_p < 2*rho_val*sigma_r) confirms it, and confirms the fold-count
+story quantitatively rather than just directionally:
+
+| config        | rho_oof | rho_val | sigma_p/sigma_r | break-even (2*rho_val) | overconfidence |
+|---------------|---------|---------|-----------------|-------------------------|----------------|
+| h3  3yr/2fold | +0.765  | +0.096  | 0.380           | 0.192                   | 2.0x           |
+| h3  5yr/4fold | +0.651  | +0.131  | 0.325           | 0.261                   | 1.2x           |
+| h6  3yr/2fold | +0.790  | +0.036  | 0.340           | 0.072                   | 4.7x           |
+| h6  5yr/4fold | +0.666  | +0.059  | 0.335           | 0.117                   | 2.9x           |
+
+The 5-year window moves h3 to within 1.2x of break-even (nearly
+calibrated) but leaves h6 at 2.9x - the same short-horizon-recovers,
+long-horizon-persists split as the skill-score table above, now visible
+in the mechanism that produces it: more folds raise rho_val and lower
+sigma_p together, and h3's validation correlation responds much more to
+added folds (+0.10 -> +0.13) than h6's does (+0.036 -> +0.059).
+
+WHY THIS IS A BETTER RESULT THAN THE FIRST READING: "component X hurts"
+is an architecture verdict on one dataset. "Component X's measured value
+changes by 75-96 percent depending on how the training residuals are
+constructed, with no leakage in either version" is a protocol-sensitivity
+finding, which is this paper's thesis. It belongs alongside the
+reference-choice result, not in competition with it.
+
+NEAR MISS WORTH RECORDING: two hardcoded 3-year assumptions
+(clearsky_power.py's train-year guard, residual.py's _oof_residuals fold
+derivation) would have silently kept using 2 folds even under the 5-year
+window. That would have produced a "no change" result reading as
+confirmation of claim A - a stronger claim than the data supports. A bug
+that produces a plausible NULL is more dangerous than one that crashes.
+
+PAPER: RQ1, and a row in Table 4. The 3-year sweep is the main table
+(2011-2013 is the window all three arrays share); the 5-year run is the
+sensitivity analysis that makes it credible. Report both.
+
+Scripts: scripts/rerun_residual_5yr.py, scripts/diagnose_residual_signal.py
+
+---
+
 ## 6. WHAT IS BUILT vs WHAT REMAINS
 
 BUILT AND VALIDATED:
@@ -728,11 +813,22 @@ BUILT AND VALIDATED:
   re-running LSTM array11/h6/seed0 and diffing bit-for-bit against the
   previously committed result.
 - metrics, run-record writer with environment capture
-- 137 committed runs (135-run sweep + 2 residual dev runs)
+- 225-run 5-seed sweep for lstm_residual and cnn_lstm_residual, complete,
+  0 failures: residual correction is net negative in all 18 array x
+  horizon cells under the default 3-year TRAIN_YEARS (Finding 10 addendum
+  / results/seed_sweep_summary.csv)
+- 5-year/4-fold training-length ablation for the residual stage
+  (scripts/rerun_residual_5yr.py, 36 runs, results/train5yr/): the
+  penalty shrinks (43-96% recovery depending on horizon) but does not
+  vanish at h=6 - see Finding 11
+- scripts/diagnose_residual_signal.py: out-of-fold vs validation
+  correlation and predicted/actual residual-std diagnostic behind
+  Finding 11's OVERCONFIDENCE mechanism, parameterised over horizon and
+  train_years
+- 262 committed runs (135-run architecture sweep + 225-run residual sweep
+  + 36-run 5yr ablation + residual dev runs, some overlapping the sweeps)
 
 REMAINING — REQUIRED:
-- 5-seed sweep for lstm_residual and cnn_lstm_residual (225-run grid;
-  each residual run fits the base 3 times, so budget ~90-105 min)
 - Diebold-Mariano tests with HAC variance and the Harvey-Leybourne-Newbold
   small-sample correction. MUST replace the 2x-std heuristic before
   publication.
@@ -747,12 +843,11 @@ REMAINING — REQUIRED:
 - ONE final test-set (2015) run, at the very end
 
 REMAINING — OPTIONAL, and probably worth SKIPPING to protect writing time:
-- the exhaustive 225-run grid across every cell. Architecture is
-  indistinguishable at h=1 and h=3 across three arrays and three model
-  families; running every seed x regime x horizon buys precision on a
-  settled question. A reduced grid with an explicit justification is a
-  defensible methodological choice.
-- caching the prepared dataframe per array (only matters if the full grid
+- extending the 5-year/4-fold ablation to array17 and to the 6-seed grid
+  the main sweep uses (currently 3 seeds, arrays 11/12 only, per Finding
+  11's CONTROL) - the horizon-structured pattern is already clear enough
+  to report as a sensitivity analysis, not a second main result
+- caching the prepared dataframe per array (only matters if a wider grid
   is run; ~10 s of redundant setup per run)
 
 ---
@@ -771,14 +866,18 @@ REMAINING — OPTIONAL, and probably worth SKIPPING to protect writing time:
 | 8 architecture x horizon | Table 3, Table 5 | seed_sweep_summary.csv |
 | 9 convolution ablation | RQ1, Table 5; RQ4 compute | seed_sweep_summary.csv |
 | 10 residual leakage | Table 4 (largest effect); Intro | leaked_*.json + residual.py |
+| 11 residual penalty fold-sensitivity | RQ1; Table 4 | rerun_residual_5yr.py, diagnose_residual_signal.py |
 
-Table 4 (protocol inflation) now has at least four rows, in ascending
+Table 4 (protocol inflation) now has at least five rows, in ascending
 order of severity:
 1. night-hour inclusion: nRMSE deflated ~34%, skill unchanged (+0.002)
 2. reference choice: h=6 skill +0.65 -> +0.19, and the horizon trend
    changes from monotonic to non-monotonic
 3. residual fit split: -0.034 -> +0.334, a SIGN FLIP
-4. (planned) oracle vs lagged weather
+4. residual training-window length: penalty magnitude changes 19-96%
+   depending on TRAIN_YEARS (2011-2013 vs 2009-2013), no sign flip but a
+   large swing in a supposedly fixed architectural verdict
+5. (planned) oracle vs lagged weather
 
 Structure (~8 pages, IEEE two-column): Introduction, Related Work, Data
 and Preprocessing, Methodology (4.1 protocol FIRST, then 4.2
@@ -850,6 +949,13 @@ trusting a plausible explanation is what caught the real bugs.
 
 10. Predicted CNN-LSTM would be neutral-to-slightly-positive at h=6.
     It was negative in 8 of 9 cells.
+
+11. Read the 225-run sweep's 18-of-18 negative cells for residual
+    correction as "the component does not help" (Finding 11). The
+    consistency itself should have been the tell - no other effect in
+    this project has been that uniform - before the 5-year/4-fold control
+    showed most of the penalty at short horizons was fold starvation, not
+    a genuine architectural verdict.
 
 ---
 
