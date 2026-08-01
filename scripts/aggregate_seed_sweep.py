@@ -20,9 +20,24 @@ pairwise comparison involving either residual model below.
 Writes results/seed_sweep_summary.csv (one row per model x array x
 horizon) and, for each array x horizon, prints the difference in mean
 skill_vs_convex for every pairwise model comparison (with five models,
-that is all 10 pairs, not just one or three), flagging whether it exceeds
-2 standard deviations of either model's own seed-to-seed spread - the bar
-for treating the gap as a real difference rather than seed noise.
+that is all 10 pairs, not just one or three).
+
+This script used to also print a verdict ("exceeds 2*std of BOTH ->
+likely a real difference", and similar) based on whether a pairwise
+difference in means exceeded 2 standard deviations of either model's
+5-seed spread. That heuristic is retired: it is not a valid two-sample
+test (no null distribution, no p-value), and it measures the wrong
+uncertainty besides - seed spread is TRAINING STOCHASTICITY (how much a
+model's own accuracy varies when only its random initialization/shuffling
+changes), not sampling uncertainty about whether one model truly forecasts
+better on this evaluation period. Evidence it matters: array11 h6, LSTM
+vs XGBoost - the 2*std heuristic called this "likely a real difference",
+but the actual significance test (Diebold-Mariano, which accounts for the
+autocorrelation of overlapping-horizon forecast errors) gives p_raw =
+0.010, p_holm = 0.073 - not significant after Holm correction across all
+pairs in that cell. See results/table6_dm.csv (scripts/build_table6_dm.py)
+for the real test. Seed mean/std stays in this script and in Table 3: it
+is a legitimate reproducibility statistic, just not a significance test.
 
 Usage:
     python scripts/aggregate_seed_sweep.py
@@ -140,8 +155,17 @@ def print_pairwise_comparisons(summary):
     with five models (MODELS above) there are C(5,2) = 10 pairs per
     array x horizon, e.g. xgboost-vs-lstm, lstm-vs-lstm_residual,
     cnn_lstm-vs-cnn_lstm_residual, and so on for every combination.
+
+    Prints only the difference in mean skill_vs_convex for each pair - no
+    significance verdict. See the module docstring for why.
     """
     print("\npairwise skill_vs_convex comparisons, per array x horizon:")
+    print(
+        "Significance is tested by Diebold-Mariano in "
+        "results/table6_dm.csv, not by seed spread. Seed spread measures "
+        "training stochasticity; DM measures whether one model forecasts "
+        "better on this data."
+    )
     for array in ARRAYS:
         for horizon in HORIZONS:
             print(f"  {array:8s} h{horizon}")
@@ -153,22 +177,7 @@ def print_pairwise_comparisons(summary):
                     continue
 
                 diff = b["mean_skill_vs_convex"] - a["mean_skill_vs_convex"]
-                a_2std = 2 * a["std_skill_vs_convex"]
-                b_2std = 2 * b["std_skill_vs_convex"]
-                exceeds_a = abs(diff) > a_2std
-                exceeds_b = abs(diff) > b_2std
-
-                if exceeds_a and exceeds_b:
-                    verdict = "exceeds 2*std of BOTH -> likely a real difference"
-                elif exceeds_a or exceeds_b:
-                    verdict = "exceeds 2*std of ONE model only -> borderline"
-                else:
-                    verdict = "within 2*std of both -> not distinguishable from seed noise"
-
-                print(
-                    f"    {model_b} - {model_a} = {diff:+.4f}  "
-                    f"({model_a} 2*std={a_2std:.4f}, {model_b} 2*std={b_2std:.4f})  {verdict}"
-                )
+                print(f"    {model_b} - {model_a} = {diff:+.4f}")
 
 
 def main():
