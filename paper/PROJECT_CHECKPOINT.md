@@ -505,7 +505,7 @@ entirely.
 A proper training-length ablation is cheap and already possible: only
 arrays 11 and 12 have clean data back to 2009, TRAIN_YEARS is a parameter.
 
-### Finding 8: architecture matters only at long horizons (RQ1)
+### Finding 8: a suggestive, not established, architecture edge at long horizons (RQ1)
 90-run seed sweep: 2 models x 3 arrays x 3 horizons x lagged x 5 seeds.
 21 minutes wall clock, 0 failures. All 90 run JSONs committed.
 
@@ -524,9 +524,15 @@ skill_vs_convex, mean +/- std across 5 seeds, validation 2014, daylight:
 | array17 | 6 | +0.1302 +/-0.0027 | +0.1542 +/-0.0061 | **+0.0239**|
 
 READING: at h=1 and h=3 the two are indistinguishable (differences
-0.000-0.004 against seed std 0.001-0.005). At h=6 the LSTM wins on ALL
-THREE arrays by 0.015-0.024, consistent in sign across three module
-technologies.
+0.000-0.004 against seed std 0.001-0.005; DM confirms this, all six
+cells p_holm=1.0). At h=6 the sign favours the LSTM on all three arrays
+by 0.015-0.024, but under Diebold-Mariano (HAC variance, HLN
+correction, Holm-Bonferroni within cell) only array17 is significant
+(hln_stat 3.26, p_holm 0.0114); array11 (hln_stat 2.56, p_holm 0.073)
+and array12 (hln_stat 2.64, p_holm 0.059) are not. Three co-located
+arrays sharing one weather station are not three independent
+confirmations, so "wins on all three" overstates what one significant
+result and two non-significant ones support.
 
 INTERPRETATION: the sequence model earns nothing where point lags
 suffice, and earns something only when the issue time is far enough from
@@ -543,11 +549,22 @@ for zero measurable gain at h=1 and h=3.
 
 STATISTICAL CAVEAT, IMPORTANT: the aggregator's current test compares the
 difference in means against 2x the std of INDIVIDUAL RUNS. That is not a
-correct two-sample test — the standard error of the difference is
-sqrt(s1^2/5 + s2^2/5), which for array11 h6 is ~0.0026 against a
-difference of 0.0157 (t ~ 6). Under a proper test the h=6 results are
-much stronger and h=1/h=3 remain non-significant. Same conclusion, better
-justified.
+correct two-sample test. This section originally replaced it with a
+seed-based two-sample calculation - standard error of the difference
+sqrt(s1^2/5 + s2^2/5), giving ~0.0026 for array11 h6 against a
+difference of 0.0157, "t ~ 6" - and called the h=6 result "much
+stronger" under it. That calculation is deleted: it is wrong for the
+same reason the 2x-std heuristic is wrong (seed spread is training
+stochasticity, not sampling uncertainty over the evaluation period), and
+it overstated the effect by roughly 2x. The real test is
+Diebold-Mariano on paired forecast error series across the ~3760
+daylight hours (HAC variance, HLN small-sample correction,
+Holm-Bonferroni within cell): the actual array11 h6 statistic is
+hln_stat 2.56, p_holm 0.073, not t~6, and it does not clear
+significance. See Finding 12 Part A and results/table6_dm.csv. This
+finding committed, within the same section that goes on to warn against
+it, the exact error of letting seed spread substitute for DM - see
+Record of Wrong Predictions #12.
 
 MORE IMPORTANT: seed spread is the WRONG uncertainty for the paper's
 claim. It measures training stochasticity, not sampling uncertainty in
@@ -561,7 +578,7 @@ heuristic stand in for either.
 Scripts: scripts/run_seed_sweep.py, scripts/aggregate_seed_sweep.py
 Data: results/seed_sweep_summary.csv, 90 run JSONs
 
-### Finding 9: convolution costs accuracy, stability and compute
+### Finding 9: convolution shows a consistent directional cost, not a significant one
 
 TRIGGER: the planned hybrid was CNN-LSTM + XGBoost residual. Before
 building the residual stage on top of it, the CNN-LSTM was run through
@@ -593,13 +610,24 @@ where the LSTM has a genuine advantage over XGBoost, the convolution
 gives back roughly half of it on all three arrays.
 
 STATISTICS, STATED CAREFULLY: most individual cells do not clear the
-aggregator's (over-conservative) 2x-std threshold. The evidence is the
-CONSISTENCY OF SIGN, not any single cell. Under a two-sided sign test,
-8 of 9 negative gives p ~ 0.039. This is the correct way to present it -
-do not cherry-pick the two cells that clear the threshold.
+aggregator's (over-conservative) 2x-std threshold. This was originally
+reported here via a two-sided sign test over the 9 array x horizon
+cells (8 of 9 negative, p ~ 0.039) - that test is WRONG as stated,
+because it treats the 9 cells as independent observations. They are
+not: array11, array12 and array17 are co-located and share one weather
+station, so their errors are correlated, and 3 of the 9 "observations"
+are really 3 correlated views of the same 3 horizons. The sign test is
+retracted; see Finding 12 Part A for the test that replaces it. Under
+Diebold-Mariano (HAC variance, HLN correction, Holm-Bonferroni within
+cell), lstm vs cnn_lstm is NOT significant in ANY of the 9 cells
+(largest |hln_stat| 2.30, array12 h=6, p_holm=0.13). The evidence for
+Finding 9 is therefore the CONSISTENCY OF SIGN and the two auxiliary
+axes below, not a demonstrated accuracy loss.
 
-THREE AXES, ALL NEGATIVE OR NEUTRAL:
-1. Accuracy: worse in 8 of 9 cells.
+THREE AXES:
+1. Accuracy: worse in 8 of 9 cells, direction consistent (worse at h=3
+   and h=6 in all three arrays, better at h=1 in all three), but not
+   Holm-significant in any cell under DM (Finding 12 Part A).
 2. Stability: CNN-LSTM has higher seed variance than XGBoost in all 9
    cells, and higher than the LSTM in 7 of 9 (the exceptions are
    array11 h3 and array11 h6). Largest gap: array17 h6, +/-0.0087 vs
@@ -607,10 +635,14 @@ THREE AXES, ALL NEGATIVE OR NEUTRAL:
 3. Compute: fit times ~20-31 s vs ~14-27 s for the LSTM, roughly 20-30
    percent more.
 
-INTERPRETATION: the h=6 advantage of recurrent models over XGBoost comes
-from RECURRENCE, not from convolution. A component that is standard in
-this literature fails to justify itself on accuracy, on reproducibility
-and on compute simultaneously.
+INTERPRETATION: at h=6, where recurrent models hold a genuine advantage
+over XGBoost, convolution gives back roughly half of it on all three
+arrays - but this directional effect does not reach significance under
+DM, so it should be reported as a consistent, non-significant cost, not
+a demonstrated one. Combined with higher seed variance in most cells and
+20-30 percent higher compute, a component that is standard in this
+literature fails to earn its place on any of the three axes, without
+the accuracy claim itself being statistically established.
 
 CONSEQUENCE FOR THE STUDY DESIGN: this result forced the residual stage
 to be built as a 2x2 - {LSTM, CNN-LSTM} x {no residual, residual} -
@@ -678,14 +710,23 @@ RESULT AFTER THE FIX (array11, h=6, lagged, seed 0):
 TWO SEPARATE RESULTS:
 
 (a) The residual stage HURTS by about -0.034 once leakage is removed -
-    roughly six LSTM seed standard deviations. Needs the 5-seed sweep to
-    confirm, and the residual model's own variance is not yet known.
+    roughly six LSTM seed standard deviations. This is no longer awaiting
+    confirmation: Diebold-Mariano (Finding 12 Part A,
+    results/table6_dm.csv) independently confirms lstm vs lstm_residual
+    at array11 h=6 is significant in the direction of plain LSTM
+    (hln_stat -3.45, p_holm 0.0056).
 
 (b) A single plausible-looking protocol choice turns a component that
     hurts by 0.034 into one that appears to help by 0.334. That is not
     just inflation - it is a SIGN FLIP plus an order of magnitude.
     "Fit the second stage on the validation split" reads as reasonable
-    in a methods section.
+    in a methods section. CAVEAT ON THIS COMPARISON: it rests on ONE
+    seed, ONE array (array11), ONE horizon (h=6). The leaked variant was
+    never run through the DM pipeline - table6_dm.csv has no leaked-model
+    column - so the sign-flip/magnitude claim itself has no significance
+    test behind it, only the single-run numbers above. That is adequate
+    for demonstrating that the leak is possible and large, but it is not
+    a general effect-size claim.
 
 FEATURE IMPORTANCES ALSO REORDERED, which matters as much as the metric.
 Leaked run's top features: k_p_hours_stale (2.461),
@@ -714,7 +755,7 @@ Scripts: src/models/residual.py, scripts/run_residual_dev.py
 
 ---
 
-### Finding 11: the residual penalty is fold-starvation at short horizons, genuine at long ones
+### Finding 11: the residual penalty shrinks with more folds, but the short-recovers/long-persists split is not confirmed by DM
 
 TRIGGER: the 225-run seed sweep (Finding 10 addendum) showed residual
 correction negative in all 18 array x horizon cells (-0.024 to -0.046
@@ -745,12 +786,43 @@ horizon-structured:
 | array12 | 3 | -0.0400   | -0.0071   | 82%      |
 | array12 | 6 | -0.0248   | -0.0200   | 19%      |
 
-INTERPRETATION: claim B (fold starvation) at short horizons, claim A
-(genuine penalty) at long ones. At h=1 with four folds the penalty is
-inside seed noise - with 3 seeds the standard error on these differences
-is roughly 0.003-0.005, so -0.0013 and -0.0069 are not distinguishable
-from zero. At h=6 a penalty of -0.0175 to -0.0200 survives at 3-4
-standard errors.
+INTERPRETATION, AS ORIGINALLY WRITTEN: claim B (fold starvation) at
+short horizons, claim A (genuine penalty) at long ones. At h=1 with four
+folds the penalty is inside seed noise - with 3 seeds the standard error
+on these differences is roughly 0.003-0.005, so -0.0013 and -0.0069 are
+not distinguishable from zero. At h=6 a penalty of -0.0175 to -0.0200
+survives at 3-4 standard errors.
+
+CORRECTION AFTER DM: the clean short-recovers/long-persists split above
+was never tested with Diebold-Mariano - the "3-4 standard errors" figure
+is a 3-seed two-sample SE (the same category of statistic Finding 8 had
+to retract, not an autocorrelation-aware test on the daylight-hour error
+series), and it was computed only for the 5-year/4-fold sensitivity run,
+which was never run through the DM pipeline at all: table6_dm.csv has no
+5-year-window entries, only the standard 3-year/2-fold config. The
+numbers in both tables above stand; the significance status does not.
+On the 3-year/2-fold config that IS in table6_dm.csv, DM on lstm vs
+lstm_residual gives: array11 h1 not significant (hln_stat -2.46, p_holm
+0.069); array11 h3 significant (-3.45, p_holm 0.0040); array11 h6
+significant (-3.45, p_holm 0.0056); array12 h1 significant (-2.89, p_holm
+0.027); array12 h3 significant (-6.24, p_holm 4.9e-9); array12 h6 NOT
+significant (-2.09, p_holm 0.185). This does not reproduce a clean h=1
+recovers / h=6 persists split: array12 h6 is a long horizon with a
+penalty similar in size to array11 h6's significant one (-0.0248 vs
+-0.0309) yet is not significant, while array12 h1 is short and IS
+significant. Report the fold-count mechanism as a real, quantified effect
+on the OOF/validation correlation gap (that part does not depend on
+seed-based significance), but do not claim DM confirms a clean
+horizon-based split - it does not.
+
+CNN-LSTM DOES NOT FIT THE MECHANISM EITHER: cnn_lstm vs
+cnn_lstm_residual is Holm-significant in all 9 array x horizon cells,
+including h=1 (p_holm 0.0002 to 0.035; see Finding 12 Part A). If fold
+starvation explained the short-horizon recovery seen in the LSTM base,
+CNN-LSTM's residual penalty should show the same pattern at h=1 and it
+does not - it is significant everywhere. The fold-count control
+(CONTROL, above) was only run for the LSTM base on arrays 11 and 12; the
+mechanism has not been shown to generalise to CNN-LSTM or to array17.
 
 MECHANISM (scripts/diagnose_residual_signal.py, array11, seed 0):
 correlation between predicted and actual residual is +0.76 to +0.79
@@ -796,6 +868,92 @@ PAPER: RQ1, and a row in Table 4. The 3-year sweep is the main table
 sensitivity analysis that makes it credible. Report both.
 
 Scripts: scripts/rerun_residual_5yr.py, scripts/diagnose_residual_signal.py
+
+---
+
+### Finding 12: DM retires the 2x-std heuristic; sky stratification finds partly-cloudy, not overcast, is the hard case
+
+TRIGGER: two REQUIRED items from Section 6 closed two commits apart: (1)
+replace the 2x-seed-std significance heuristic (Record of Wrong
+Predictions #7) with a real hypothesis test before publication, (2)
+build the sky-condition classification for RQ3 from k_ghi alone, never
+k_p (src/eval/sky.py's module docstring works through why k_p would
+leak array-specific, target-derived information into what is supposed
+to be an atmosphere-only stratification).
+
+PART A - DIEBOLD-MARIANO: src/eval/dm.py implements dm_test (HAC
+long-run variance, Bartlett kernel, truncated at lag h-1, since h-step
+forecast errors overlap and are correlated by construction even when
+the underlying series is not; HLN small-sample correction against
+t(n-1) rather than the normal DM originally used) and dm_matrix (all
+C(7,2)=21 pairwise comparisons per array x horizon cell across the 5
+forecasters plus smart_persistence and convex_reference, Holm-Bonferroni
+corrected within each cell). scripts/build_table6_dm.py writes
+results/table6_dm.csv: 189 pairs (21 x 3 arrays x 3 horizons), 138/189
+significant at Holm-corrected p<0.05 overall - but only 39/90 once the
+two baseline comparators are excluded and only the 5 core forecasters
+are compared against each other. Most of the raw significance count
+was never in question (every model beats smart_persistence and
+convex_reference at high significance); the informative number is the
+39/90 among architectures.
+
+Two examples of what DM changes about existing findings:
+
+- Finding 9 (convolution): lstm vs cnn_lstm is NOT Holm-significant in
+  ANY of the 9 array x horizon cells (largest |hln_stat| 2.30, array12
+  h=6, p_holm=0.13). Direction is consistent with the skill-score sweep
+  - cnn_lstm is worse at h=3 and h=6 in all three arrays, better at h=1
+  in all three - but "convolution costs accuracy" should be reported as
+  a consistent, non-significant directional effect, not as 9
+  independent losses.
+- Finding 11 (residual penalty): cnn_lstm vs cnn_lstm_residual is
+  Holm-significant in all 9 cells (p_holm 0.035 to 0.00007) - the
+  convolutional base model's residual penalty is the more robust of the
+  two under DM. lstm vs lstm_residual is significant in only 5 of 9
+  (array11 h3/h6, array12 h1/h3, array17 h1) and NOT significant at
+  array11 h1, array12 h6, array17 h3/h6. This is roughly consistent with
+  Finding 11's short-horizon-recovers story but not a clean h<=1-vs-h=6
+  split - array12 h6 fails to reach significance despite being a long
+  horizon, array17 h1 reaches it despite being short. Report the DM
+  result alongside Finding 11's mechanism rather than as a cleaner
+  restatement of it.
+
+PART B - SKY-CONDITION STRATIFICATION (RQ3): src/eval/sky.py's
+classify_sky bins each daylight row into clear / partly_cloudy /
+overcast from k_ghi_mean and k_ghi_std over the last 3 valid
+observations (thresholds 0.75 / 0.10 / 0.40, conventional literature
+values, NOT fitted on this site or any split). scripts/build_table_sky.py
+writes results/table_sky.csv (xgboost, lstm, lstm_residual x 3 arrays x
+3 horizons x 3 classes). Pooled daylight-hour counts: clear 60,048,
+partly_cloudy 33,021, overcast 6,426 - overcast is the rarest condition
+at this site, ~6.5% of daylight hours.
+
+RESULT - mean skill_vs_convex by class: clear 0.332, overcast 0.235,
+partly_cloudy 0.066. partly_cloudy is the WORST class, below overcast,
+in every one of the 9 array x horizon cells with zero exceptions (e.g.
+array11 h=3: clear 0.412, overcast 0.401, partly_cloudy 0.051; array17
+h=6: clear 0.249, overcast 0.184, partly_cloudy 0.025).
+
+INTERPRETATION: counterintuitive on first reading - overcast is dim and
+low-output, so it looks like the harder condition. It is not: overcast
+skies are temporally stable hour to hour, so the convex reference
+(climatology + persistence) already tracks them well and the models add
+little beyond that. Partly-cloudy is where fast-moving cloud edges
+produce irradiance ramps that lagged features cannot anticipate - the
+k_ghi_std component of the classifier is, by construction, selecting for
+exactly the regime where short-horizon forecasting is hardest. This
+matches the general solar-forecasting literature (ramp events under
+broken cloud are the standard hard case) and is a genuine empirical
+result, not another protocol-sensitivity finding like 1-11 - flag that
+distinction when writing it up.
+
+PAPER: RQ3 (sky stratification, new empirical result) and Table 6 (DM
+replaces the 2x-std heuristic as the paper's significance test; seed
+spread stays in Table 3 as a reproducibility statistic only, per
+src/eval/dm.py's module docstring).
+
+Scripts: src/eval/dm.py, scripts/build_table6_dm.py, src/eval/sky.py,
+scripts/build_table_sky.py
 
 ---
 
@@ -956,6 +1114,12 @@ trusting a plausible explanation is what caught the real bugs.
     this project has been that uniform - before the 5-year/4-fold control
     showed most of the penalty at short horizons was fold starvation, not
     a genuine architectural verdict.
+
+12. Wrote Finding 8's claim that the LSTM h=6 advantage was established
+    across all three arrays, and supported it with a seed-based
+    two-sample t of ~6, within the same finding that warns seed spread
+    must not substitute for DM. The actual DM statistic is 2.56 and only
+    one of three arrays is Holm-significant.
 
 ---
 
