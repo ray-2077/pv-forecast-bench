@@ -6,6 +6,8 @@ Saxena, N., Kumar, R., Rao, Y.K.S.S., Mondloe, D.S., Dhapekar, N.K.,
 Sharma, A., Yadav, A.S. (2024). "Hybrid KNN-SVM machine learning approach
 for solar power forecasting." *Environmental Challenges* 14:100838.
 
+DOI: https://doi.org/10.1016/j.envc.2024.100838
+
 ## Coded fields
 
 **year**: 2024 | "Environmental Challenges 14 (2024) 100838"

@@ -6,6 +6,8 @@ Li, Z., Xu, R., Luo, X., Cao, X., Du, S., Sun, H. (2022). "Short-term
 photovoltaic power prediction based on modal reconstruction and hybrid deep
 learning model." *Energy Reports* 8:9919-9932.
 
+DOI: https://doi.org/10.1016/j.egyr.2022.07.176
+
 ## Coded fields
 
 **year**: 2022 | "Energy Reports 8 (2022) 9919-9932"

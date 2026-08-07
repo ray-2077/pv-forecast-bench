@@ -6,6 +6,8 @@ Al-Ali, E.M., Hajji, Y., Said, Y., Hleili, M., Alanzi, A.M., Laatar, A.H.,
 Atri, M. (2023). "Solar Energy Production Forecasting Based on a Hybrid
 CNN-LSTM-Transformer Model." *Mathematics* (MDPI) 11:676.
 
+DOI: https://doi.org/10.3390/math11030676
+
 ## Coded fields
 
 **year**: 2023 | "Mathematics 2023, 11, 676"

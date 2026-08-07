@@ -5,6 +5,8 @@ Source: `data/papers/energies-15-08233.pdf` (17 pages, 70,950 chars)
 Lim, S.-C., Huh, J.-H., Hong, S.-H., Park, C.-Y., Kim, J.-C. (2022). "Solar
 Power Forecasting Using CNN-LSTM Hybrid Model." *Energies* (MDPI) 15:8233.
 
+DOI: https://doi.org/10.3390/en15218233
+
 ## Coded fields
 
 **year**: 2022 | "Energies 2022, 15, 8233"

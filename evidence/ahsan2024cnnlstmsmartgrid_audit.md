@@ -12,6 +12,8 @@ one daily power total and one daily radiance total per day), not
 hourly/sub-hourly like most other papers in this batch - this changes how
 several fields should be read (see night_hours_excluded below).
 
+DOI: https://doi.org/10.48112/jestt.v1i2c.5
+
 ## Coded fields
 
 **year**: 2024 | "Vol. 1, Issue 2, August 2024"

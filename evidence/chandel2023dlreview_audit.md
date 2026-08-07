@@ -27,6 +27,8 @@ recommended this paper be tagged/handled separately from the empirical
 papers in the survey's summary statistics rather than counted as another
 instance of under-reporting.
 
+DOI: https://doi.org/10.1016/j.solcom.2023.100061
+
 ## Coded fields
 
 **year**: 2023 | "Solar Compass 8 (2023) 100061"

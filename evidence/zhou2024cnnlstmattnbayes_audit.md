@@ -15,6 +15,8 @@ same open dataset this project uses (different years: this paper uses
 2020-2021, this project uses 2011-2015; unclear if the same array/site
 within DKASC - not stated in the extracted text which specific site number).
 
+DOI: https://doi.org/10.1016/j.gloei.2024.10.005
+
 ## Coded fields
 
 **year**: 2024

@@ -11,6 +11,8 @@ This is the most methodologically rigorous paper coded in this batch so
 far - flagged upfront because most of what follows is confirmation rather
 than the usual gap-finding.
 
+DOI: https://doi.org/10.1016/j.egyr.2026.109119
+
 ## Coded fields
 
 **year**: 2026 | "Energy Reports 15 (2026) 109119"

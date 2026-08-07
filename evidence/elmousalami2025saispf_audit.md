@@ -6,6 +6,8 @@ Elmousalami, H., Hui, F.K.P., Alnaser, A.A. (2025). "Enhancing Smart and
 Zero-Carbon Cities Through a Hybrid CNN-LSTM Algorithm for Sustainable
 AI-Driven Solar Power Forecasting (SAI-SPF)." *Buildings* 15:2785 (MDPI).
 
+DOI: https://doi.org/10.3390/buildings15152785
+
 ## Coded fields
 
 **year**: 2025 | "Buildings 2025, 15, 2785", "Published: 6 August 2025"

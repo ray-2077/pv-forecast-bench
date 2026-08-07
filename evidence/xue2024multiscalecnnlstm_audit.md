@@ -25,6 +25,8 @@ any "how many papers in the literature do X" count in the survey - the
 same research group's practices (night-hour handling, split ratio, no
 naive baseline) would otherwise be counted twice.
 
+DOI: https://doi.org/10.3390/en17163877
+
 ## Coded fields
 
 **year**: 2024 | "Energies 2024, 17, 3877"

@@ -16,6 +16,8 @@ batch built on DKA Solar Centre data (after zhou2024cnnlstmattnbayes,
 which used the main DKASC Alice Springs pool) - different site, same
 network/data provider.
 
+DOI: https://doi.org/10.1016/j.egyr.2024.04.065
+
 ## Coded fields
 
 **year**: 2024 | "Energy Reports 11 (2024) 5125-5138"

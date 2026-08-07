@@ -6,6 +6,8 @@ Mayer, M.J. (2022). "Benefits of physical and machine learning hybridization
 for photovoltaic power forecasting." *Renewable and Sustainable Energy
 Reviews* 168:112772. https://doi.org/10.1016/j.rser.2022.112772
 
+DOI: https://doi.org/10.1016/j.rser.2022.112772
+
 ## Coded fields
 
 **year**: 2022 | title page date, "Renewable and Sustainable Energy Reviews

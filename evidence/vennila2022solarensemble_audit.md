@@ -11,6 +11,8 @@ This is the thinnest paper on methodology reporting coded in this batch:
 almost none of the survey's judgement fields have any supporting text at
 all, positive or negative.
 
+DOI: https://doi.org/10.1155/2022/7797488
+
 ## Coded fields
 
 **year**: 2022 | "Volume 2022, Article ID 7797488"

@@ -13,6 +13,8 @@ different authors, different journal issue (14:17101 vs 15:30177),
 different model architecture, despite both being Scientific Reports
 papers using EEMD/hybrid-CNN naming conventions.)
 
+DOI: https://doi.org/10.1038/s41598-024-68030-5
+
 ## Coded fields
 
 **year**: 2024 | "Scientific Reports | (2024) 14:17101"

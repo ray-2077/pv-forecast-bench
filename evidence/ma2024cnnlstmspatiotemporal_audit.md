@@ -8,6 +8,8 @@ Feature Fusion." *Engineering Reports* (Wiley). https://doi.org/10.1002/eng2.130
 (received 22 Feb 2024, published as a 2025 issue per the extracted Wiley
 running header "2025, 1")
 
+DOI: https://doi.org/10.1002/eng2.13088
+
 ## Coded fields
 
 **year**: 2024 (received date) / 2025 (issue header shows "2025, 1") -

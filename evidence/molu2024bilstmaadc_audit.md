@@ -15,6 +15,8 @@ same batch discusses irradiance-to-power conversion directly). Coded using
 the same schema; "PV power" in the schema's intent is read as "solar
 irradiance" throughout for this entry.
 
+DOI: https://doi.org/10.1016/j.rineng.2024.102461
+
 ## Coded fields
 
 **year**: 2024 | "Results in Engineering 23 (2024) 102461"

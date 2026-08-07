@@ -119,6 +119,7 @@ EXPECTED_COLUMNS = [
     "notes",
     "evidence_level",
     "leakage_flag",
+    "doi",
 ]
 
 TRIGGER_TERMS = {
@@ -560,6 +561,16 @@ def code_one_paper(path: Path, text: str, page_offsets, metadata: dict, done_key
     # hand and correct to "suspected" or "documented" before treating this
     # value as coded.
     row["leakage_flag"] = "none"
+
+    # doi is NOT auto-extracted either - the same "no auto-classify"
+    # caution applies, and a wrong DOI is worse than a missing one (it
+    # points a reader at the wrong paper). Check the PDF's first page
+    # header/footer or its citation/CrossMark block, add a "DOI:
+    # https://doi.org/..." line to the evidence log, and set this field
+    # by hand. Use the literal string "not_stated" only after confirming
+    # the paper's own text genuinely never states one - do not leave this
+    # default in place unreviewed.
+    row["doi"] = "not_stated"
 
     return row, "\n".join(ev) + "\n"
 

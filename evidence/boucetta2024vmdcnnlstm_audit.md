@@ -9,6 +9,8 @@ Boucetta, L.N., Amrane, Y., Chouder, A., Arezki, S., Kichou, S. (2024).
 Plant: A Novel Approach Using Hybrid Variational Mode Decomposition and a
 CNN-LSTM Model." *Energies* (MDPI) 17:1781.
 
+DOI: https://doi.org/10.3390/en17071781
+
 ## Coded fields
 
 **year**: 2024 | "Energies 2024, 17, 1781"

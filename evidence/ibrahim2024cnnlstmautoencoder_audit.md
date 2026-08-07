@@ -6,6 +6,8 @@ Ibrahim, M.S., Gharghory, S.M., Kamal, H.A. (2024). "A hybrid model of CNN
 and LSTM autoencoder-based short-term PV power generation forecasting."
 *Electrical Engineering* (Springer) 106:4239-4255.
 
+DOI: https://doi.org/10.1007/s00202-023-02220-8
+
 ## Coded fields
 
 **year**: 2024 | "Electrical Engineering (2024) 106:4239-4255"

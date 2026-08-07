@@ -16,6 +16,8 @@ batch drawing on the DKA Solar Centre family (after zhou2024, hou2024, and
 implicitly related to this project's own data source), and the first to
 use the identical site rather than a sister site.
 
+DOI: https://doi.org/10.1093/ijlct/ctaf131
+
 ## Coded fields
 
 **year**: 2026 | "International Journal of Low-Carbon Technologies, 2026,

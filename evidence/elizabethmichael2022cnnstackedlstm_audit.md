@@ -10,6 +10,8 @@ SCOPE NOTE: forecasts solar IRRADIANCE (GHI) and Plane-of-Array (POA)
 irradiance, not PV power output directly - same scope caveat as
 molu2024bilstmaadc elsewhere in this batch.
 
+DOI: https://doi.org/10.3390/en15062150
+
 ## Coded fields
 
 **year**: 2022 | "Energies 2022, 15, 2150"

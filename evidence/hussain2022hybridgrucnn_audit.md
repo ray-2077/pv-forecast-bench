@@ -18,6 +18,8 @@ here - but this is the fourth paper in this survey batch drawing on the
 DKASC/DKA Solar Centre family, and the first to use multiple DKASC arrays
 simultaneously the way this project does.
 
+DOI: https://doi.org/10.1155/2022/7040601
+
 ## Coded fields
 
 **year**: 2022 | "Volume 2022, Article ID 7040601"

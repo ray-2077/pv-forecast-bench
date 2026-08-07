@@ -15,6 +15,8 @@ DKASC portal URL as its own data-availability statement (see
 code_available below) - directly confirming that this is the same open
 dataset this project's own CLAUDE.md describes.
 
+DOI: https://doi.org/10.3390/s24051593
+
 ## Coded fields
 
 **year**: 2024 | "Sensors 2024, 24, 1593"

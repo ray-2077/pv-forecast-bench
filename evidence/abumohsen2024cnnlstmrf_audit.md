@@ -14,6 +14,8 @@ learning model combining of CNN-LSTM-RF for time series forecasting of
 Solar Power Generation." *e-Prime - Advances in Electrical Engineering,
 Electronics and Energy* 9:100636.
 
+DOI: https://doi.org/10.1016/j.prime.2024.100636
+
 ## Coded fields (verified against source; existing CSV values checked one by one)
 
 **year = 2024** | "e-Prime - Advances in Electrical Engineering, Electronics

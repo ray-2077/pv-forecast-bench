@@ -6,6 +6,8 @@ Salman, D., Direkoglu, C., Kusaf, M., Fahrioglu, M. (2024). "Hybrid deep
 learning models for time series forecasting of solar power." *Neural
 Computing and Applications* (Springer) 36:9095-9112.
 
+DOI: https://doi.org/10.1007/s00521-024-09558-5
+
 ## Coded fields
 
 **year**: 2024 | "Neural Computing and Applications (2024) 36:9095-9112"

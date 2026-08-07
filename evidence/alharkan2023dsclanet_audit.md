@@ -20,6 +20,8 @@ arrays the way this project itself does (3 arrays here vs. this project's
 3 arrays, though the specific arrays differ - Trina 1A/1B and Eco 2 here
 vs. this project's array11/array12/array17).
 
+DOI: https://doi.org/10.3390/s23020945
+
 ## Coded fields
 
 **year**: 2023 | "Sensors 2023, 23, 945"
