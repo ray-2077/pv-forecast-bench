@@ -3,12 +3,25 @@ a seed-variance summary: mean and std of skill_vs_convex,
 skill_vs_persistence, and daylight RMSE, per model x array x horizon,
 across the 5 sweep seeds.
 
-Reads results/<model>_<array>_h<horizon>_lagged_seed<seed>.json for every
-(model, array, horizon, seed) in the same grid run_seed_sweep.py sweeps -
-now five models: xgboost, lstm, cnn_lstm, lstm_residual, cnn_lstm_residual
-(src/models/residual.py). A cell with fewer than 5 seeds present (sweep
-not finished, or a run failed) is still reported, with n_seeds showing how
-many contributed.
+Reads results/<model>_<array>_h<horizon>_<regime>_seed<seed>.json for
+every (model, array, horizon, seed) in the same grid run_seed_sweep.py
+sweeps - now five models: xgboost, lstm, cnn_lstm, lstm_residual,
+cnn_lstm_residual (src/models/residual.py). --regime selects lagged
+(default) or oracle, mirroring run_seed_sweep.py's flag exactly - see
+CLAUDE.md rule 5, lagged and oracle must never be mixed in one table. A
+cell with fewer than 5 seeds present (sweep not finished, or a run
+failed) is still reported, with n_seeds showing how many contributed.
+
+CHANGE LOG (2026-08-07): this script used to have no --regime flag at
+all - REGIME was a hardcoded "lagged" constant, and results/
+seed_sweep_summary.csv had no regime in its name. Running this script
+with `--regime oracle` silently ignored the flag (there was no argparse,
+so nothing even looked at sys.argv) and re-aggregated the lagged files
+under a name that gave no indication anything was wrong. The output
+looked like an oracle summary but was byte-identical to the lagged one
+to four decimal places. Fixed by adding a real, strict argparse --regime
+flag and moving the output to results/seed_sweep_summary_<regime>.csv so
+the two can never shadow each other again.
 
 Per src/models/residual.py's docstring, lstm_residual and
 cnn_lstm_residual's own validation-split metrics are optimistic (their
@@ -17,10 +30,10 @@ this script reports their seed variance the same way as the other three
 models for comparability, but that caveat applies to every row and
 pairwise comparison involving either residual model below.
 
-Writes results/seed_sweep_summary.csv (one row per model x array x
-horizon) and, for each array x horizon, prints the difference in mean
-skill_vs_convex for every pairwise model comparison (with five models,
-that is all 10 pairs, not just one or three).
+Writes results/seed_sweep_summary_<regime>.csv (one row per model x
+array x horizon) and, for each array x horizon, prints the difference in
+mean skill_vs_convex for every pairwise model comparison (with five
+models, that is all 10 pairs, not just one or three).
 
 This script used to also print a verdict ("exceeds 2*std of BOTH ->
 likely a real difference", and similar) based on whether a pairwise
@@ -40,9 +53,10 @@ for the real test. Seed mean/std stays in this script and in Table 3: it
 is a legitimate reproducibility statistic, just not a significance test.
 
 Usage:
-    python scripts/aggregate_seed_sweep.py
+    python scripts/aggregate_seed_sweep.py [--regime {lagged,oracle}]
 """
 
+import argparse
 import csv
 import itertools
 import json
@@ -57,7 +71,6 @@ MODELS = ["xgboost", "lstm", "cnn_lstm", "lstm_residual", "cnn_lstm_residual"]
 ARRAYS = ["array11", "array12", "array17"]
 HORIZONS = [1, 3, 6]
 SEEDS = [0, 1, 2, 3, 4]
-REGIME = "lagged"
 
 CSV_FIELDS = [
     "model",
@@ -73,7 +86,17 @@ CSV_FIELDS = [
 ]
 
 
-def load_daylight_metrics():
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--regime", choices=("lagged", "oracle"), default="lagged")
+    # parse_args() (not parse_known_args()) is what makes an unrecognised
+    # flag a hard error instead of being silently dropped - this is the
+    # exact failure mode that made `--regime oracle` a no-op before this
+    # script had any argparse at all. Keep it this way.
+    return parser.parse_args()
+
+
+def load_daylight_metrics(regime):
     """(model, array, horizon) -> list of metrics['daylight'] dicts, one
     per seed found on disk.
     """
@@ -83,7 +106,7 @@ def load_daylight_metrics():
             for horizon in HORIZONS:
                 metrics_list = []
                 for seed in SEEDS:
-                    run_id = f"{model}_{array}_h{horizon}_{REGIME}_seed{seed}"
+                    run_id = f"{model}_{array}_h{horizon}_{regime}_seed{seed}"
                     path = RESULTS_DIR / f"{run_id}.json"
                     if not path.exists():
                         continue
@@ -181,15 +204,17 @@ def print_pairwise_comparisons(summary):
 
 
 def main():
-    metrics_by_key = load_daylight_metrics()
+    regime = parse_args().regime
+
+    metrics_by_key = load_daylight_metrics(regime)
     n_found = sum(len(v) for v in metrics_by_key.values())
     n_expected = len(MODELS) * len(ARRAYS) * len(HORIZONS) * len(SEEDS)
-    print(f"found {n_found}/{n_expected} run JSONs for this grid\n")
+    print(f"regime={regime!r}: found {n_found}/{n_expected} run JSONs for this grid\n")
 
     summary = summarize(metrics_by_key)
     print_summary_table(summary)
 
-    out_path = RESULTS_DIR / "seed_sweep_summary.csv"
+    out_path = RESULTS_DIR / f"seed_sweep_summary_{regime}.csv"
     write_csv(summary, out_path)
     print(f"\nwrote {out_path}")
 
