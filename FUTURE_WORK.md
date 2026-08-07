@@ -14,7 +14,7 @@ Add Yulara as a genuinely separate site. Different schema, second pipeline.
 
 ## Low-elevation clear-sky bias
 Twilight diffuse and pyranometer thermal offset inflate k_ghi below 20 deg
-elevation. Candidate protocol knob for RQ2: does the daylight threshold change
+elevation. Candidate protocol knob for RQ1: does the daylight threshold change
 reported accuracy?
 
 ## Smart persistence degrades at long horizons (found 2026-07-28)
@@ -23,7 +23,7 @@ fallback_fraction on 2014 daylight hours: 3.3 pct at h=1, 22.6 pct at h=3,
 forward-filled from the previous afternoon. Baseline is therefore weaker at
 long horizons, which INFLATES every model skill score at h=6.
 DECISION: keep forward-fill, record fallback_fraction in every results JSON,
-and add daylight-issued-only as a protocol configuration for RQ2 Table 4.
+and add daylight-issued-only as a protocol configuration for RQ1 Table 4.
 
 ## Night-inclusion inflation is analytic
 nRMSE_all / nRMSE_daylight = sqrt(N_daylight / N_all) when night errors are

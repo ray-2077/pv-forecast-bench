@@ -84,7 +84,7 @@ input and target)."
   not just a vague "daylight" mention.
 - Ablates its own pipeline stage-by-stage (LSTM -> +PCC -> +EEMD -> +SSA)
   rather than reporting only the full stack - a real component-attribution
-  table, closer to this project's own RQ1 approach than most of the
+  table, closer to this project's own RQ2 approach than most of the
   literature surveyed so far.
 
 ## MAJOR FLAG: decomposition stated to occur BEFORE the train/test split

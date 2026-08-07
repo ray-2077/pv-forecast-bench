@@ -1,5 +1,5 @@
 """Validate src/models/persistence.py (SmartPersistence) on all three
-arrays, and give a first preview of RQ2 (how much reported accuracy comes
+arrays, and give a first preview of RQ1 (how much reported accuracy comes
 from including night hours).
 
 Evaluated on the VALIDATION split (2014) only, NOT the test split (2015).

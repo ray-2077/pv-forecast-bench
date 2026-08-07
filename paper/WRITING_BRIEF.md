@@ -71,19 +71,19 @@ Confidence levels used throughout this brief:
 
 | # | Claim | Source (exact) | Finding # | Section / Table-Fig | Confidence |
 |---|---|---|---|---|---|
-| C1 | XGBoost and LSTM are statistically indistinguishable at h=1 and h=3 (all 6 array x horizon cells, p_holm=1.0) | `results/table6_dm_lagged.csv`, rows where model_1/model_2={xgboost,lstm}, horizon in {1,3} | 8, 12A | Results RQ1; T5 | established |
-| C2 | LSTM shows higher mean skill_vs_convex than XGBoost at h=6 on all 3 arrays (+0.0157/+0.0149/+0.0239), but is Holm-significant only on array17 | `results/table6_dm_lagged.csv`, xgboost-vs-lstm rows, horizon=6; means from `results/seed_sweep_summary_lagged.csv` | 8, 12A | Results RQ1; T3, T5 | suggestive (array17 leg only: established) |
-| C3 | LSTM's 5-seed skill_vs_convex std is 2-3x XGBoost's at the same cell (e.g. array17 h6: 0.0061 vs 0.0027) | `results/seed_sweep_summary_lagged.csv`, std_skill_vs_convex column | 8 | Results RQ1/RQ4; T3 | descriptive |
-| C4 | CNN-LSTM's mean skill_vs_convex is lower than plain LSTM's in 8 of 9 array x horizon cells | `results/seed_sweep_summary_lagged.csv`, mean_skill_vs_convex, model in {lstm,cnn_lstm} | 9 | Results RQ1; T3, T5 | descriptive (direction) |
-| C5 | lstm vs cnn_lstm is NOT Holm-significant in any of the 9 cells; largest \|hln_stat\| is 2.30 (array12 h6, p_holm=0.13) | `results/table6_dm_lagged.csv`, model_1/model_2={lstm,cnn_lstm} | 9, 12A | Results RQ1; T5, T6 | established (non-effect) |
-| C6 | CNN-LSTM has higher seed variance than XGBoost in all 9 cells, and higher than LSTM in 7 of 9 | `results/seed_sweep_summary_lagged.csv`, std_skill_vs_convex, three-way compare | 9 | Results RQ1/RQ4; T3 | descriptive |
-| C7 | Residual correction (out-of-fold, corrected scheme) on the LSTM base at array11 h6 seed0: skill_vs_convex +0.2110 (plain LSTM) -> +0.1768 (corrected residual), a -0.034 penalty | `results/lstm_array11_h6_lagged_seed0.json` vs `results/lstm_residual_array11_h6_lagged_seed0.json`, metrics.daylight.skill_vs_convex | 10 | Results RQ1; T4 (row 3) | descriptive (single seed) |
-| C8 | lstm vs lstm_residual at array11 h6 is Holm-significant in the direction of plain LSTM (hln_stat -3.45, p_holm 0.0056) | `results/table6_dm_lagged.csv`, array=array11, horizon=6, model_1/model_2={lstm,lstm_residual} | 10, 12A | Results RQ1; T6 | established |
-| C9 | Residual correction (default 3yr/2fold, lagged) is net negative in all 18 array x horizon cells (5-model sweep) | `results/seed_sweep_summary_lagged.csv`, mean_skill_vs_convex, model={lstm_residual,cnn_lstm_residual} vs base | 10, 11 | Results RQ1; T3 | descriptive (direction) |
-| C10 | Under DM, lstm vs lstm_residual is Holm-significant in 5 of 9 cells (array11 h3/h6, array12 h1/h3, array17 h1), NOT in the other 4 (array11 h1, array12 h6, array17 h3/h6) - no clean h-based split | `results/table6_dm_lagged.csv`, model_1/model_2={lstm,lstm_residual}, all 9 rows | 11, 12A | Results RQ1; T6 | established (per-cell); the "clean split" reading is explicitly NOT supported |
-| C11 | cnn_lstm vs cnn_lstm_residual is Holm-significant in ALL 9 array x horizon cells (p_holm 0.000147 to 0.0350) | `results/table6_dm_lagged.csv`, model_1/model_2={cnn_lstm,cnn_lstm_residual} | 12A | Results RQ1; T6 | established |
-| C12 | 5-year/4-fold training window (arrays 11+12, 3 seeds) recovers 19-96% of the residual penalty vs the 3-year/2-fold default, but does not eliminate it at h=6 (recovery 43% array11, 19% array12) | `results/train5yr/` run JSONs, 36 files; recovery arithmetic against `results/seed_sweep_summary_lagged.csv`'s 3yr numbers | 11 | Results RQ1; T4 (row 4) | suggestive (3 seeds, never DM-tested - see Section 3) |
-| C13 | Mechanism: out-of-fold predicted/actual residual correlation is +0.76 to +0.79, but the same correlation on the validation split is only +0.04-0.13 (3yr window) - the corrector is overconfident by 2.0-4.7x the break-even ratio | `scripts/diagnose_residual_signal.py` output (rho_oof, rho_val, sigma_p/sigma_r columns) | 11 | Results RQ1 / Methodology; text only, no table assigned | suggestive |
+| C1 | XGBoost and LSTM are statistically indistinguishable at h=1 and h=3 (all 6 array x horizon cells, p_holm=1.0) | `results/table6_dm_lagged.csv`, rows where model_1/model_2={xgboost,lstm}, horizon in {1,3} | 8, 12A | Results RQ2; T5 | established |
+| C2 | LSTM shows higher mean skill_vs_convex than XGBoost at h=6 on all 3 arrays (+0.0157/+0.0149/+0.0239), but is Holm-significant only on array17 | `results/table6_dm_lagged.csv`, xgboost-vs-lstm rows, horizon=6; means from `results/seed_sweep_summary_lagged.csv` | 8, 12A | Results RQ2; T3, T5 | suggestive (array17 leg only: established) |
+| C3 | LSTM's 5-seed skill_vs_convex std is 2-3x XGBoost's at the same cell (e.g. array17 h6: 0.0061 vs 0.0027) | `results/seed_sweep_summary_lagged.csv`, std_skill_vs_convex column | 8 | Results RQ2/RQ4; T3 | descriptive |
+| C4 | CNN-LSTM's mean skill_vs_convex is lower than plain LSTM's in 8 of 9 array x horizon cells | `results/seed_sweep_summary_lagged.csv`, mean_skill_vs_convex, model in {lstm,cnn_lstm} | 9 | Results RQ2; T3, T5 | descriptive (direction) |
+| C5 | lstm vs cnn_lstm is NOT Holm-significant in any of the 9 cells; largest \|hln_stat\| is 2.30 (array12 h6, p_holm=0.13) | `results/table6_dm_lagged.csv`, model_1/model_2={lstm,cnn_lstm} | 9, 12A | Results RQ2; T5, T6 | established (non-effect) |
+| C6 | CNN-LSTM has higher seed variance than XGBoost in all 9 cells, and higher than LSTM in 7 of 9 | `results/seed_sweep_summary_lagged.csv`, std_skill_vs_convex, three-way compare | 9 | Results RQ2/RQ4; T3 | descriptive |
+| C7 | Residual correction (out-of-fold, corrected scheme) on the LSTM base at array11 h6 seed0: skill_vs_convex +0.2110 (plain LSTM) -> +0.1768 (corrected residual), a -0.034 penalty | `results/lstm_array11_h6_lagged_seed0.json` vs `results/lstm_residual_array11_h6_lagged_seed0.json`, metrics.daylight.skill_vs_convex | 10 | Results RQ2; T4 (row 3) | descriptive (single seed) |
+| C8 | lstm vs lstm_residual at array11 h6 is Holm-significant in the direction of plain LSTM (hln_stat -3.45, p_holm 0.0056) | `results/table6_dm_lagged.csv`, array=array11, horizon=6, model_1/model_2={lstm,lstm_residual} | 10, 12A | Results RQ2; T6 | established |
+| C9 | Residual correction (default 3yr/2fold, lagged) is net negative in all 18 array x horizon cells (5-model sweep) | `results/seed_sweep_summary_lagged.csv`, mean_skill_vs_convex, model={lstm_residual,cnn_lstm_residual} vs base | 10, 11 | Results RQ2; T3 | descriptive (direction) |
+| C10 | Under DM, lstm vs lstm_residual is Holm-significant in 5 of 9 cells (array11 h3/h6, array12 h1/h3, array17 h1), NOT in the other 4 (array11 h1, array12 h6, array17 h3/h6) - no clean h-based split | `results/table6_dm_lagged.csv`, model_1/model_2={lstm,lstm_residual}, all 9 rows | 11, 12A | Results RQ2; T6 | established (per-cell); the "clean split" reading is explicitly NOT supported |
+| C11 | cnn_lstm vs cnn_lstm_residual is Holm-significant in ALL 9 array x horizon cells (p_holm 0.000147 to 0.0350) | `results/table6_dm_lagged.csv`, model_1/model_2={cnn_lstm,cnn_lstm_residual} | 12A | Results RQ2; T6 | established |
+| C12 | 5-year/4-fold training window (arrays 11+12, 3 seeds) recovers 19-96% of the residual penalty vs the 3-year/2-fold default, but does not eliminate it at h=6 (recovery 43% array11, 19% array12) | `results/train5yr/` run JSONs, 36 files; recovery arithmetic against `results/seed_sweep_summary_lagged.csv`'s 3yr numbers | 11 | Results RQ2; T4 (row 4) | suggestive (3 seeds, never DM-tested - see Section 3) |
+| C13 | Mechanism: out-of-fold predicted/actual residual correlation is +0.76 to +0.79, but the same correlation on the validation split is only +0.04-0.13 (3yr window) - the corrector is overconfident by 2.0-4.7x the break-even ratio | `scripts/diagnose_residual_signal.py` output (rho_oof, rho_val, sigma_p/sigma_r columns) | 11 | Results RQ2 / Methodology; text only, no table assigned | suggestive |
 | C14 | Night-hour inclusion: nRMSE ratio (all-24h / daylight-only) is 0.658, matching the closed-form prediction sqrt(N_day/N_all)=0.658, at array11 h=3 | `results/table4_protocol_lagged.csv`, array11/h3, config C5 (nrmse, n=3762) vs C6 (nrmse, n=8694) | 2 | Intro; Methodology 4.1; T4 (row 1) | established (closed-form, verified) |
 | C15 | Skill vs smart persistence is essentially unchanged by night-hour inclusion (0.5265 daylight-only vs 0.5279 all-24h, array11 h3) | `results/table4_protocol_lagged.csv`, array11/h3, config C2 (skill) vs C4 (skill) | 2 | Intro; T4 (row 1) | established |
 | C16 | Reference-forecast choice: at array11 h=6, skill vs plain persistence is +0.652, skill vs the convex reference is +0.194 - roughly two-thirds of apparent skill is a baseline artifact | `results/reference_comparison.csv`, array11/h=6, xgb_skill_vs_persistence vs xgb_skill_vs_convex | 5 | Intro; T4 (row 2); F1 | established (single seed=0, all 3 arrays consistent - see Section 3) |
@@ -464,15 +464,18 @@ rows of its own; sets up Results.
 ### 6. Results, organized BY RESEARCH QUESTION, not by model (~2.5
 columns - the paper's core)
 
-**6.1 RQ2 Protocol sensitivity (HEADLINE, present first despite the
-numbering, per PROJECT_CHECKPOINT.md's "protocol FIRST" instruction -
-or renumber RQs in the paper so RQ1 in the text is protocol; resolve
-before drafting, see Section 9).** Table 4, all 5 rows (C14, C16-C19,
-C20). Figure F2 (waterfall/bar of the 5 effect sizes). This is where the
-sign-flip (C19) and the reference-choice shape change (C17) get full
-prose treatment; both are the paper's strongest single results.
+**6.1 RQ1 Protocol sensitivity (HEADLINE).** RESOLVED 2026-08-08 (was an
+open ordering question as of this brief's original writing - see gap 9
+below): PROJECT_CHECKPOINT.md Section 0 was renumbered so RQ1 IS
+protocol sensitivity, matching both "present protocol first" and literal
+RQ numeric order - Results now follows RQ1/RQ2/RQ3/RQ4 straight through
+with no ordering exception to explain to a reader. Table 4, all 5 rows
+(C14, C16-C19, C20). Figure F2 (waterfall/bar of the 5 effect sizes).
+This is where the sign-flip (C19) and the reference-choice shape change
+(C17) get full prose treatment; both are the paper's strongest single
+results.
 
-**6.2 RQ1 Component attribution.** C1-C11 (architecture and residual
+**6.2 RQ2 Component attribution.** C1-C11 (architecture and residual
 findings), Table 3 (seed reproducibility), Table 5 (component-attribution
 summary), Table 6 (DM matrix, or a condensed version - 189 rows is too
 large to print in full; likely a per-model-pair summary with the full
@@ -532,7 +535,7 @@ order, not sourced. This is flagged again in Section 9 (GAPS).
 | T2 (proposed) | Literature survey summary: per-column counts (C27-C33) | none | NO | A small aggregation script over `results/literature_survey.csv`, or a manually built table - the counts themselves are all in Section 2 (C27-C33) and directly queryable |
 | T3 (attested: "Table 3" in code docstrings) | Seed-variance reproducibility: mean/std skill_vs_convex, skill_vs_persistence, RMSE per model x array x horizon | `scripts/aggregate_seed_sweep.py` | YES | `results/seed_sweep_summary_lagged.csv` (45 rows) and `results/seed_sweep_summary_oracle.csv` (45 rows) both exist and are ready to typeset; needs a LaTeX table generator (none exists yet) |
 | T4 (attested: "Table 4" in code docstring + prose) | Protocol inflation, 6 configs x 3 arrays x 3 horizons, both regimes | `scripts/build_table4_protocol.py` | YES | `results/table4_protocol_lagged.csv` (54 rows) and `results/table4_protocol_oracle.csv` (54 rows) both exist. Needs: a LaTeX generator, AND the 5-row "effect summary" framing (C14-C20) is currently prose in this brief and PROJECT_CHECKPOINT.md, not a generated sub-table |
-| T5 (attested: "Table 5" in prose only) | RQ1 component-attribution summary (condensed view of the architecture comparison) | none dedicated - would be built from `results/seed_sweep_summary_lagged.csv` filtered to the 3 base models plus a DM-significance annotation column | NO | A script joining seed_sweep_summary and table6_dm_lagged into one compact table; does not exist |
+| T5 (attested: "Table 5" in prose only) | RQ2 component-attribution summary (condensed view of the architecture comparison) | none dedicated - would be built from `results/seed_sweep_summary_lagged.csv` filtered to the 3 base models plus a DM-significance annotation column | NO | A script joining seed_sweep_summary and table6_dm_lagged into one compact table; does not exist |
 | T6 (attested: "Table 6" in code docstring + prose) | DM significance matrix, all 21 pairs x 3 arrays x 3 horizons | `scripts/build_table6_dm.py` | YES (lagged) / IN PROGRESS (oracle) | `results/table6_dm_lagged.csv` (189 rows) exists. `results/table6_dm_oracle.csv` does not exist yet as of this brief (background run in progress - see Section 9). 189 rows is too large to print in full in an 8-page paper; needs a condensation script (e.g. per-model-pair summary across cells, full matrix as supplementary CSV) |
 | T7 (proposed) | RQ3 sky-condition stratification: skill_vs_convex by class x model x array x horizon | `scripts/build_table_sky.py` | YES (data), NO (as a formatted table) | `results/table_sky.csv` (81 rows) exists and is ready to aggregate; needs a condensation script (likely mean skill by class x horizon, pooled correctly across the 3 arrays given they are identical - see Section 5 item 8's duplication warning) and a LaTeX generator |
 | F1 (proposed) | Skill vs horizon, two lines (vs persistence, vs convex), one panel per array - visualizes C16/C17's monotonic-vs-non-monotonic shape result | none | NO | Plotting script reading `results/reference_comparison.csv`; this is very likely the paper's single most important figure and does not exist in any form |
@@ -686,26 +689,25 @@ is.
    Section 5 item 8. Table 7 / Figure F5 should cite this figure, named
    explicitly as one array's pooled-over-horizon count in the caption.
 
-8. **T5's exact content (RQ1 component-attribution summary table) is not
+8. **T5's exact content (RQ2 component-attribution summary table) is not
    specified anywhere** beyond "Table 5" being named in prose. This brief
    proposes joining `seed_sweep_summary_lagged.csv` with a
    DM-significance annotation column, but the exact columns/format need
    deciding before `scripts/build_table5_*.py` (does not exist) can be
    written.
 
-9. **RQ numbering in the paper vs. PROJECT_CHECKPOINT.md's stated
-   drafting order is inconsistent and needs a decision before Results is
-   drafted.** PROJECT_CHECKPOINT.md Section 0 lists RQ1=component
-   attribution, RQ2=protocol sensitivity (marked HEADLINE). Section 7
-   says Methodology should present "4.1 protocol FIRST, then 4.2
-   architectures - the ordering is deliberate," and this brief's Section
-   6 outline follows that same protocol-first instinct for Results
-   (6.1=protocol, 6.2=architecture) despite RQ1/RQ2's numeric order
-   implying the opposite. Resolve whether Results literally follows
-   RQ1/RQ2/RQ3/RQ4 numeric order (architecture before protocol) or
-   protocol-first regardless of RQ number, and either renumber the RQs in
-   Section 0 or make Results' ordering explicitly independent of RQ
-   number, before drafting.
+9. **RESOLVED 2026-08-08.** PROJECT_CHECKPOINT.md Section 0 has been
+   renumbered: RQ1 is now protocol sensitivity (HEADLINE), RQ2 is
+   component attribution. This brief's Section 6 outline already put
+   protocol first (6.1) and architecture second (6.2), so no reordering
+   of Results was needed - only the RQ labels attached to each
+   subsection changed (6.1 is now literally RQ1, 6.2 is literally RQ2,
+   see the updated headers above). Results follows RQ1/RQ2/RQ3/RQ4
+   numeric order straight through with no exception to flag for a
+   reader. Every RQ1/RQ2 cross-reference in this brief's Claims Table
+   (Section 2) and elsewhere was updated in the same pass to match the
+   new numbering - see PROJECT_CHECKPOINT.md Section 0's own note on the
+   rename for the full list of files touched.
 
 10. **The recurrent_base.py "bit-for-bit" determinism claim is
     unverified.** PROJECT_CHECKPOINT.md Section 6 itself flags this: "a

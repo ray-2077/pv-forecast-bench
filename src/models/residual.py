@@ -373,7 +373,7 @@ class ResidualCorrected(BaseForecaster):
         with, sorted descending. Features never selected for a split get
         0.0 rather than being omitted, so the dict always covers the full
         feature set - same convention as XGBForecaster.feature_importance
-        (src/models/xgb.py). This answers RQ1 directly: which features
+        (src/models/xgb.py). This answers RQ2 directly: which features
         carry signal the recurrent base model missed.
         """
         if self._residual_model is None:

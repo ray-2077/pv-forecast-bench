@@ -22,7 +22,7 @@ opinion. THE cornerstone citation for this paper.
   forecasting situations, allowing comparison by relative improvement rather
   than absolute error size.
 
-### CRITICAL for our RQ2 - the zenith angle filter
+### CRITICAL for our RQ1 - the zenith angle filter
 Direct paraphrase of their argument: during sunrise and sunset, at small solar
 elevation angles, both the clear-sky index and the clearness index can become
 very large, because of measurement uncertainty and clear-sky model
@@ -38,7 +38,7 @@ the example) before computing errors.
 Implications for us:
 - Our threshold is solar_elevation > 10 deg, i.e. zenith < 80 deg. That is
   STRICTER than their example of 85 deg. State this explicitly and cite.
-- The threshold itself becomes a legitimate RQ2 protocol knob:
+- The threshold itself becomes a legitimate RQ1 protocol knob:
   zenith < 85 vs < 80 vs no filter. Cheap to run, directly citable.
 - They note multiplicative seasonality (which our smart persistence uses,
   k_p * P_cs) is what causes the problem; an ADDITIVE alternative exists:
@@ -260,7 +260,7 @@ baselines to translate into value. Low priority otherwise.
 
 2. **Cite Yang et al. (2020) for the daylight threshold** and state that our
    10 deg elevation cutoff (80 deg zenith) is stricter than the 85 deg zenith
-   they give as typical. Add the threshold as an RQ2 protocol knob.
+   they give as typical. Add the threshold as an RQ1 protocol knob.
 
 3. **Reframe Section 4.1 as a model info sheet** per Kapoor & Narayanan,
    with the L1-L3 labels mapped to our seven rules.

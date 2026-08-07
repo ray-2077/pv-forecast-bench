@@ -5,7 +5,7 @@ Splits are whole calendar years in Australia/Darwin local time:
 train = 2011-2013, val = 2014, test = 2015.
 
 CRITICAL - do NOT filter daylight here. Keep all 24 hours in every split.
-Daylight filtering is an EVALUATION choice, not a data choice: RQ2 measures
+Daylight filtering is an EVALUATION choice, not a data choice: RQ1 measures
 how much reported accuracy changes when night hours are included versus
 excluded. If the daylight filter were baked into the splits, that
 comparison would be impossible to run later - there would be no night

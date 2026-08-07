@@ -90,7 +90,7 @@ twenty-four hours." (p.16)
   axis crossed with model architecture, and reports that architecture
   choice interacts with optimizer choice (best/worst results both involve
   specific optimizer pairings) - a genuine two-factor sensitivity study,
-  relevant in spirit to this project's own RQ2 protocol-sensitivity
+  relevant in spirit to this project's own RQ1 protocol-sensitivity
   framing even though the varied factor here is a training
   hyperparameter, not an evaluation-construction choice.
 - Explicit, single, stated forecast horizon (24 hours).

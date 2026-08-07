@@ -33,11 +33,20 @@ than model capacity.
 Repo: https://github.com/ray-2077/pv-forecast-bench (private; make public
 at camera-ready, after any double-blind review is done)
 
-Research questions:
-- RQ1 Component attribution. Which parts of the hybrid contribute, and
-  does the residual stage justify its complexity?
-- RQ2 Protocol sensitivity (HEADLINE). How much does reported accuracy
+Research questions (RENUMBERED 2026-08-08, per paper/WRITING_BRIEF.md
+gap 9: RQ1 and RQ2 were swapped so the numeric order matches the
+protocol-first drafting order already used in Section 7 and in
+WRITING_BRIEF.md's Results outline - see that gap's discussion for why
+the old numbering, with protocol as RQ2, was inconsistent with "present
+protocol first" being called out as deliberate everywhere else in this
+document. Every RQ1/RQ2 cross-reference in this file, and in
+WRITING_BRIEF.md, evidence/*.md, literature_notes.md, FUTURE_WORK.md,
+src/data/splits.py, src/models/residual.py and
+scripts/validate_persistence.py, was updated in the same pass):
+- RQ1 Protocol sensitivity (HEADLINE). How much does reported accuracy
   change under common evaluation choices?
+- RQ2 Component attribution. Which parts of the hybrid contribute, and
+  does the residual stage justify its complexity?
 - RQ3 Conditional performance. Clear skies vs variable cloud.
 - RQ4 Cost-effectiveness. Accuracy gain per unit training compute.
 
@@ -269,7 +278,7 @@ the end. A negative result is publishable.
 
 Daylight threshold: solar_elevation > 10 deg (zenith < 80 deg). Note this
 is STRICTER than the zenith < 85 deg that Yang et al. (2020) give as
-typical practice. The threshold is itself an RQ2 knob.
+typical practice. The threshold is itself an RQ1 knob.
 
 ---
 
@@ -308,7 +317,7 @@ the geometric horizon; the real sky keeps scattering) and the
 pyranometer's ~2.7 W/m2 thermal offset, which is 7-10% of an hourly
 ghi_cs of only 25-40 W/m2. Out of scope; goes in Limitations.
 
-PAPER: Methodology 4.1, and this is a concrete instance of the RQ2 thesis
+PAPER: Methodology 4.1, and this is a concrete instance of the RQ1 thesis
 — an evaluation-construction error that inflates or deflates a headline
 index without any model being involved. Yang et al. (2020) independently
 document the same low-elevation instability and the zenith-filter
@@ -552,7 +561,7 @@ entirely.
 A proper training-length ablation is cheap and already possible: only
 arrays 11 and 12 have clean data back to 2009, TRAIN_YEARS is a parameter.
 
-### Finding 8: a suggestive, not established, architecture edge at long horizons (RQ1)
+### Finding 8: a suggestive, not established, architecture edge at long horizons (RQ2)
 90-run seed sweep: 2 models x 3 arrays x 3 horizons x lagged x 5 seeds.
 21 minutes wall clock, 0 failures. All 90 run JSONs committed.
 
@@ -718,7 +727,7 @@ to be built as a 2x2 - {LSTM, CNN-LSTM} x {no residual, residual} -
 rather than only on CNN-LSTM as originally planned. Testing the residual
 stage only on the weaker base would have confounded two questions.
 
-PAPER: RQ1 component attribution, Table 5. Also RQ4, since the compute
+PAPER: RQ2 component attribution, Table 5. Also RQ4, since the compute
 cost is measured. Note explicitly that this is an ABLATION, which most of
 the surveyed hybrid papers do not run - they report the full architecture
 against its own components or against nothing.
@@ -801,7 +810,7 @@ FEATURE IMPORTANCES ALSO REORDERED, which matters as much as the metric.
 Leaked run's top features: k_p_hours_stale (2.461),
 Active_Power_roll24_std (2.388), k_p_issue_m1 (2.267), k_p_issue_m2
 (2.192), k_ghi_issue_m2 (1.883). Corrected run's top features: hour_cos,
-k_ghi_issue_m2, Active_Power_roll24_std. Any RQ1 component-attribution
+k_ghi_issue_m2, Active_Power_roll24_std. Any RQ2 component-attribution
 claim drawn from the leaked run would have been wrong about WHICH
 features carried residual signal, not merely by how much.
 
@@ -932,7 +941,7 @@ window. That would have produced a "no change" result reading as
 confirmation of claim A - a stronger claim than the data supports. A bug
 that produces a plausible NULL is more dangerous than one that crashes.
 
-PAPER: RQ1, and a row in Table 4. The 3-year sweep is the main table
+PAPER: RQ2, and a row in Table 4. The 3-year sweep is the main table
 (2011-2013 is the window all three arrays share); the 5-year run is the
 sensitivity analysis that makes it credible. Report both.
 
@@ -1244,7 +1253,7 @@ STALE ITEMS FOUND (beyond the three the user already named):
 
 | Finding | Section | Artifact |
 |---------|---------|----------|
-| 1 clear-sky sampling | 4.1 Methodology; RQ2 | diagnose_clearsky_bias.py |
+| 1 clear-sky sampling | 4.1 Methodology; RQ1 | diagnose_clearsky_bias.py |
 | 2 night inclusion + closed form | Intro; Table 4 | run JSONs |
 | 3 coverage collapse | 4.1; report n per cell | check_feature_coverage.py |
 | 4 persistence degradation | 4.1; Limitations | diagnose_baseline_error.py |
@@ -1252,9 +1261,9 @@ STALE ITEMS FOUND (beyond the three the user already named):
 | 6 dead array / audit blind spots | Data; Intro motivation | dead_period_audit.csv |
 | 7 training length | ablation | seed sweep |
 | 8 architecture x horizon | Table 3, Table 5 | seed_sweep_summary_lagged.csv |
-| 9 convolution ablation | RQ1, Table 5; RQ4 compute | seed_sweep_summary_lagged.csv |
+| 9 convolution ablation | RQ2, Table 5; RQ4 compute | seed_sweep_summary_lagged.csv |
 | 10 residual leakage | Table 4 (largest effect); Intro | leaked_*.json + residual.py |
-| 11 residual penalty fold-sensitivity | RQ1; Table 4 | rerun_residual_5yr.py, diagnose_residual_signal.py |
+| 11 residual penalty fold-sensitivity | RQ2; Table 4 | rerun_residual_5yr.py, diagnose_residual_signal.py |
 
 Table 4 (protocol inflation) now has at least five rows, in ascending
 order of severity:

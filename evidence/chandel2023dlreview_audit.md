@@ -97,7 +97,7 @@ architecture of DLNM for PV systems is proposed" (p.15).
 - Explicitly identifies "grouping datasets based on input feature
   similarity" as an accuracy-relevant methodological choice (p.1) - a
   protocol-sensitivity observation in the same spirit as this project's
-  own RQ2, even though it is not empirically demonstrated here.
+  own RQ1, even though it is not empirically demonstrated here.
 
 ## Recommendation for the survey writeup
 
