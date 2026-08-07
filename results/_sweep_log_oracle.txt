@@ -1,0 +1,216 @@
+seed sweep: 225 runs planned (models=['xgboost', 'lstm', 'cnn_lstm', 'lstm_residual', 'cnn_lstm_residual'], arrays=['array11', 'array12', 'array17'], horizons=[1, 3, 6], regime='oracle', seeds=[0, 1, 2, 3, 4])
+
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[  1/225] xgboost_array11_h1_oracle_seed0    20.6s  skill_vs_convex=+0.7152  skill_vs_persistence=+0.7336  rmse=0.1133
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[  2/225] xgboost_array11_h1_oracle_seed1    20.5s  skill_vs_convex=+0.7150  skill_vs_persistence=+0.7334  rmse=0.1134
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[  3/225] xgboost_array11_h1_oracle_seed2    20.3s  skill_vs_convex=+0.7040  skill_vs_persistence=+0.7231  rmse=0.1177
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[  4/225] xgboost_array11_h1_oracle_seed3    20.4s  skill_vs_convex=+0.7129  skill_vs_persistence=+0.7315  rmse=0.1142
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[  5/225] xgboost_array11_h1_oracle_seed4    20.7s  skill_vs_convex=+0.7120  skill_vs_persistence=+0.7306  rmse=0.1146
+[  6/225] xgboost_array11_h3_oracle_seed0  skip (already exists)
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[  7/225] xgboost_array11_h3_oracle_seed1    20.8s  skill_vs_convex=+0.7838  skill_vs_persistence=+0.8588  rmse=0.1337
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[  8/225] xgboost_array11_h3_oracle_seed2    19.6s  skill_vs_convex=+0.7805  skill_vs_persistence=+0.8566  rmse=0.1358
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[  9/225] xgboost_array11_h3_oracle_seed3    21.0s  skill_vs_convex=+0.7815  skill_vs_persistence=+0.8572  rmse=0.1352
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 10/225] xgboost_array11_h3_oracle_seed4    21.9s  skill_vs_convex=+0.7830  skill_vs_persistence=+0.8582  rmse=0.1342
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 11/225] xgboost_array11_h6_oracle_seed0    20.2s  skill_vs_convex=+0.7955  skill_vs_persistence=+0.9119  rmse=0.1356
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 12/225] xgboost_array11_h6_oracle_seed1    19.7s  skill_vs_convex=+0.7982  skill_vs_persistence=+0.9131  rmse=0.1338
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 13/225] xgboost_array11_h6_oracle_seed2    19.3s  skill_vs_convex=+0.7926  skill_vs_persistence=+0.9106  rmse=0.1375
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 14/225] xgboost_array11_h6_oracle_seed3    21.2s  skill_vs_convex=+0.7940  skill_vs_persistence=+0.9113  rmse=0.1365
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 15/225] xgboost_array11_h6_oracle_seed4    21.2s  skill_vs_convex=+0.7945  skill_vs_persistence=+0.9115  rmse=0.1362
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 16/225] xgboost_array12_h1_oracle_seed0    23.0s  skill_vs_convex=+0.7928  skill_vs_persistence=+0.8066  rmse=0.0797
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 17/225] xgboost_array12_h1_oracle_seed1    23.7s  skill_vs_convex=+0.7968  skill_vs_persistence=+0.8103  rmse=0.0781
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 18/225] xgboost_array12_h1_oracle_seed2    21.3s  skill_vs_convex=+0.7951  skill_vs_persistence=+0.8087  rmse=0.0788
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 19/225] xgboost_array12_h1_oracle_seed3    22.9s  skill_vs_convex=+0.7930  skill_vs_persistence=+0.8068  rmse=0.0796
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 20/225] xgboost_array12_h1_oracle_seed4    21.7s  skill_vs_convex=+0.7970  skill_vs_persistence=+0.8105  rmse=0.0781
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 21/225] xgboost_array12_h3_oracle_seed0    23.4s  skill_vs_convex=+0.8506  skill_vs_persistence=+0.8990  rmse=0.0899
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 22/225] xgboost_array12_h3_oracle_seed1    23.1s  skill_vs_convex=+0.8564  skill_vs_persistence=+0.9029  rmse=0.0864
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 23/225] xgboost_array12_h3_oracle_seed2    21.2s  skill_vs_convex=+0.8473  skill_vs_persistence=+0.8968  rmse=0.0919
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 24/225] xgboost_array12_h3_oracle_seed3    22.2s  skill_vs_convex=+0.8463  skill_vs_persistence=+0.8961  rmse=0.0925
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 25/225] xgboost_array12_h3_oracle_seed4    21.0s  skill_vs_convex=+0.8509  skill_vs_persistence=+0.8993  rmse=0.0897
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 26/225] xgboost_array12_h6_oracle_seed0    21.6s  skill_vs_convex=+0.8620  skill_vs_persistence=+0.9377  rmse=0.0903
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 27/225] xgboost_array12_h6_oracle_seed1    22.5s  skill_vs_convex=+0.8615  skill_vs_persistence=+0.9375  rmse=0.0906
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 28/225] xgboost_array12_h6_oracle_seed2    22.7s  skill_vs_convex=+0.8608  skill_vs_persistence=+0.9372  rmse=0.0911
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 29/225] xgboost_array12_h6_oracle_seed3    22.6s  skill_vs_convex=+0.8606  skill_vs_persistence=+0.9371  rmse=0.0912
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 30/225] xgboost_array12_h6_oracle_seed4    21.0s  skill_vs_convex=+0.8625  skill_vs_persistence=+0.9379  rmse=0.0900
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 31/225] xgboost_array17_h1_oracle_seed0    21.4s  skill_vs_convex=+0.7385  skill_vs_persistence=+0.7513  rmse=0.1256
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 32/225] xgboost_array17_h1_oracle_seed1    20.9s  skill_vs_convex=+0.7399  skill_vs_persistence=+0.7527  rmse=0.1249
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 33/225] xgboost_array17_h1_oracle_seed2    20.8s  skill_vs_convex=+0.7434  skill_vs_persistence=+0.7560  rmse=0.1232
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 34/225] xgboost_array17_h1_oracle_seed3    20.8s  skill_vs_convex=+0.7393  skill_vs_persistence=+0.7521  rmse=0.1252
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 35/225] xgboost_array17_h1_oracle_seed4    23.1s  skill_vs_convex=+0.7410  skill_vs_persistence=+0.7537  rmse=0.1244
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 36/225] xgboost_array17_h3_oracle_seed0    18.7s  skill_vs_convex=+0.7975  skill_vs_persistence=+0.8366  rmse=0.1470
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 37/225] xgboost_array17_h3_oracle_seed1    19.2s  skill_vs_convex=+0.8021  skill_vs_persistence=+0.8403  rmse=0.1437
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 38/225] xgboost_array17_h3_oracle_seed2    21.5s  skill_vs_convex=+0.7970  skill_vs_persistence=+0.8361  rmse=0.1474
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 39/225] xgboost_array17_h3_oracle_seed3    23.2s  skill_vs_convex=+0.8050  skill_vs_persistence=+0.8426  rmse=0.1416
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 40/225] xgboost_array17_h3_oracle_seed4    18.8s  skill_vs_convex=+0.8028  skill_vs_persistence=+0.8409  rmse=0.1432
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 41/225] xgboost_array17_h6_oracle_seed0    18.6s  skill_vs_convex=+0.8185  skill_vs_persistence=+0.8717  rmse=0.1497
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 42/225] xgboost_array17_h6_oracle_seed1    18.3s  skill_vs_convex=+0.8263  skill_vs_persistence=+0.8772  rmse=0.1433
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 43/225] xgboost_array17_h6_oracle_seed2    18.9s  skill_vs_convex=+0.8172  skill_vs_persistence=+0.8708  rmse=0.1508
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 44/225] xgboost_array17_h6_oracle_seed3    18.9s  skill_vs_convex=+0.8199  skill_vs_persistence=+0.8727  rmse=0.1486
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 45/225] xgboost_array17_h6_oracle_seed4    19.1s  skill_vs_convex=+0.8195  skill_vs_persistence=+0.8723  rmse=0.1489
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 46/225] lstm_array11_h1_oracle_seed0   112.3s  skill_vs_convex=+0.7277  skill_vs_persistence=+0.7459  rmse=0.1086
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 47/225] lstm_array11_h1_oracle_seed1   111.2s  skill_vs_convex=+0.7348  skill_vs_persistence=+0.7525  rmse=0.1058
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 48/225] lstm_array11_h1_oracle_seed2   107.4s  skill_vs_convex=+0.7321  skill_vs_persistence=+0.7501  rmse=0.1069
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 49/225] lstm_array11_h1_oracle_seed3   109.8s  skill_vs_convex=+0.7352  skill_vs_persistence=+0.7529  rmse=0.1057
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 50/225] lstm_array11_h1_oracle_seed4   114.4s  skill_vs_convex=+0.7301  skill_vs_persistence=+0.7482  rmse=0.1077
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 51/225] lstm_array11_h3_oracle_seed0   100.4s  skill_vs_convex=+0.7934  skill_vs_persistence=+0.8666  rmse=0.1269
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 52/225] lstm_array11_h3_oracle_seed1    87.8s  skill_vs_convex=+0.7913  skill_vs_persistence=+0.8652  rmse=0.1281
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 53/225] lstm_array11_h3_oracle_seed2    79.6s  skill_vs_convex=+0.7904  skill_vs_persistence=+0.8647  rmse=0.1287
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 54/225] lstm_array11_h3_oracle_seed3   105.9s  skill_vs_convex=+0.7937  skill_vs_persistence=+0.8668  rmse=0.1266
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 55/225] lstm_array11_h3_oracle_seed4   115.0s  skill_vs_convex=+0.7939  skill_vs_persistence=+0.8669  rmse=0.1265
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 56/225] lstm_array11_h6_oracle_seed0   116.7s  skill_vs_convex=+0.8065  skill_vs_persistence=+0.9181  rmse=0.1263
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 57/225] lstm_array11_h6_oracle_seed1    80.8s  skill_vs_convex=+0.8039  skill_vs_persistence=+0.9170  rmse=0.1280
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 58/225] lstm_array11_h6_oracle_seed2    96.5s  skill_vs_convex=+0.8055  skill_vs_persistence=+0.9177  rmse=0.1270
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 59/225] lstm_array11_h6_oracle_seed3    74.6s  skill_vs_convex=+0.8029  skill_vs_persistence=+0.9166  rmse=0.1287
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 60/225] lstm_array11_h6_oracle_seed4    92.2s  skill_vs_convex=+0.8027  skill_vs_persistence=+0.9165  rmse=0.1288
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 61/225] lstm_array12_h1_oracle_seed0    88.0s  skill_vs_convex=+0.8147  skill_vs_persistence=+0.8275  rmse=0.0715
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 62/225] lstm_array12_h1_oracle_seed1    72.4s  skill_vs_convex=+0.8033  skill_vs_persistence=+0.8169  rmse=0.0758
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 63/225] lstm_array12_h1_oracle_seed2    71.1s  skill_vs_convex=+0.8032  skill_vs_persistence=+0.8168  rmse=0.0759
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 64/225] lstm_array12_h1_oracle_seed3    78.7s  skill_vs_convex=+0.8108  skill_vs_persistence=+0.8238  rmse=0.0730
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 65/225] lstm_array12_h1_oracle_seed4    77.4s  skill_vs_convex=+0.8126  skill_vs_persistence=+0.8255  rmse=0.0722
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 66/225] lstm_array12_h3_oracle_seed0    73.7s  skill_vs_convex=+0.8657  skill_vs_persistence=+0.9102  rmse=0.0802
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 67/225] lstm_array12_h3_oracle_seed1    60.9s  skill_vs_convex=+0.8595  skill_vs_persistence=+0.9061  rmse=0.0839
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 68/225] lstm_array12_h3_oracle_seed2    71.3s  skill_vs_convex=+0.8643  skill_vs_persistence=+0.9093  rmse=0.0810
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 69/225] lstm_array12_h3_oracle_seed3    70.8s  skill_vs_convex=+0.8640  skill_vs_persistence=+0.9091  rmse=0.0812
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 70/225] lstm_array12_h3_oracle_seed4    85.1s  skill_vs_convex=+0.8654  skill_vs_persistence=+0.9101  rmse=0.0804
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 71/225] lstm_array12_h6_oracle_seed0    57.0s  skill_vs_convex=+0.8682  skill_vs_persistence=+0.9415  rmse=0.0848
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 72/225] lstm_array12_h6_oracle_seed1    51.5s  skill_vs_convex=+0.8668  skill_vs_persistence=+0.9409  rmse=0.0857
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 73/225] lstm_array12_h6_oracle_seed2    94.5s  skill_vs_convex=+0.8819  skill_vs_persistence=+0.9476  rmse=0.0760
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 74/225] lstm_array12_h6_oracle_seed3    76.0s  skill_vs_convex=+0.8733  skill_vs_persistence=+0.9438  rmse=0.0815
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 75/225] lstm_array12_h6_oracle_seed4    72.0s  skill_vs_convex=+0.8705  skill_vs_persistence=+0.9426  rmse=0.0833
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 76/225] lstm_array17_h1_oracle_seed0    76.6s  skill_vs_convex=+0.7915  skill_vs_persistence=+0.8020  rmse=0.1004
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 77/225] lstm_array17_h1_oracle_seed1    78.3s  skill_vs_convex=+0.7831  skill_vs_persistence=+0.7941  rmse=0.1044
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 78/225] lstm_array17_h1_oracle_seed2    67.5s  skill_vs_convex=+0.7648  skill_vs_persistence=+0.7767  rmse=0.1132
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 79/225] lstm_array17_h1_oracle_seed3    78.5s  skill_vs_convex=+0.7900  skill_vs_persistence=+0.8006  rmse=0.1011
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 80/225] lstm_array17_h1_oracle_seed4    79.3s  skill_vs_convex=+0.7935  skill_vs_persistence=+0.8039  rmse=0.0995
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 81/225] lstm_array17_h3_oracle_seed0    61.6s  skill_vs_convex=+0.8069  skill_vs_persistence=+0.8452  rmse=0.1395
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 82/225] lstm_array17_h3_oracle_seed1    55.1s  skill_vs_convex=+0.7996  skill_vs_persistence=+0.8393  rmse=0.1447
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 83/225] lstm_array17_h3_oracle_seed2    74.5s  skill_vs_convex=+0.8115  skill_vs_persistence=+0.8489  rmse=0.1361
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 84/225] lstm_array17_h3_oracle_seed3    50.7s  skill_vs_convex=+0.7960  skill_vs_persistence=+0.8365  rmse=0.1473
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 85/225] lstm_array17_h3_oracle_seed4    78.1s  skill_vs_convex=+0.8211  skill_vs_persistence=+0.8566  rmse=0.1292
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 86/225] lstm_array17_h6_oracle_seed0    58.5s  skill_vs_convex=+0.8294  skill_vs_persistence=+0.8807  rmse=0.1387
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 87/225] lstm_array17_h6_oracle_seed1    45.2s  skill_vs_convex=+0.8169  skill_vs_persistence=+0.8720  rmse=0.1488
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 88/225] lstm_array17_h6_oracle_seed2    86.5s  skill_vs_convex=+0.8236  skill_vs_persistence=+0.8767  rmse=0.1434
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 89/225] lstm_array17_h6_oracle_seed3    62.8s  skill_vs_convex=+0.8228  skill_vs_persistence=+0.8761  rmse=0.1440
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 90/225] lstm_array17_h6_oracle_seed4    55.8s  skill_vs_convex=+0.8346  skill_vs_persistence=+0.8843  rmse=0.1345
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 91/225] cnn_lstm_array11_h1_oracle_seed0   127.7s  skill_vs_convex=+0.7444  skill_vs_persistence=+0.7615  rmse=0.1020
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 92/225] cnn_lstm_array11_h1_oracle_seed1   100.7s  skill_vs_convex=+0.7436  skill_vs_persistence=+0.7608  rmse=0.1023
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 93/225] cnn_lstm_array11_h1_oracle_seed2    99.8s  skill_vs_convex=+0.7414  skill_vs_persistence=+0.7587  rmse=0.1032
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 94/225] cnn_lstm_array11_h1_oracle_seed3   170.3s  skill_vs_convex=+0.7528  skill_vs_persistence=+0.7694  rmse=0.0986
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 95/225] cnn_lstm_array11_h1_oracle_seed4   124.2s  skill_vs_convex=+0.7439  skill_vs_persistence=+0.7610  rmse=0.1022
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 96/225] cnn_lstm_array11_h3_oracle_seed0   106.2s  skill_vs_convex=+0.7891  skill_vs_persistence=+0.8638  rmse=0.1295
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 97/225] cnn_lstm_array11_h3_oracle_seed1   100.2s  skill_vs_convex=+0.7898  skill_vs_persistence=+0.8643  rmse=0.1291
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 98/225] cnn_lstm_array11_h3_oracle_seed2   109.6s  skill_vs_convex=+0.7925  skill_vs_persistence=+0.8660  rmse=0.1274
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[ 99/225] cnn_lstm_array11_h3_oracle_seed3   167.0s  skill_vs_convex=+0.7910  skill_vs_persistence=+0.8650  rmse=0.1283
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[100/225] cnn_lstm_array11_h3_oracle_seed4    80.8s  skill_vs_convex=+0.7917  skill_vs_persistence=+0.8655  rmse=0.1279
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[101/225] cnn_lstm_array11_h6_oracle_seed0    77.5s  skill_vs_convex=+0.8002  skill_vs_persistence=+0.9154  rmse=0.1304
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[102/225] cnn_lstm_array11_h6_oracle_seed1    93.9s  skill_vs_convex=+0.8031  skill_vs_persistence=+0.9167  rmse=0.1285
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[103/225] cnn_lstm_array11_h6_oracle_seed2    76.3s  skill_vs_convex=+0.8024  skill_vs_persistence=+0.9164  rmse=0.1290
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[104/225] cnn_lstm_array11_h6_oracle_seed3   113.2s  skill_vs_convex=+0.8010  skill_vs_persistence=+0.9158  rmse=0.1299
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[105/225] cnn_lstm_array11_h6_oracle_seed4    86.6s  skill_vs_convex=+0.8014  skill_vs_persistence=+0.9160  rmse=0.1296
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[106/225] cnn_lstm_array12_h1_oracle_seed0   111.5s  skill_vs_convex=+0.8101  skill_vs_persistence=+0.8232  rmse=0.0732
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
+[107/225] cnn_lstm_array12_h1_oracle_seed1   127.1s  skill_vs_convex=+0.8137  skill_vs_persistence=+0.8266  rmse=0.0718
+split_chronological: 17520 row(s) fall outside [2011-01-01, 2015-12-31] and were excluded from every split (expected when the input covers more years than train_years/val_years/test_years)
