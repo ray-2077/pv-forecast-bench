@@ -330,13 +330,26 @@ one that resists the most common inflating protocol choice.
 
 PAPER: Table 4 (protocol inflation), and probably the Introduction.
 
-CAVEAT / OPEN ITEM: the current all_hours metrics block in run JSONs
+CAVEAT, RESOLVED 2026-07-28 (same day, later commit - this section was not
+updated at the time): the all_hours metrics block WRITTEN INTO RUN JSONS
 intersects XGBoost, persistence, climatology AND convex. Climatology has
 no prediction at always-night cells, so the block shrank from 8694 to
-4247 rows and NO LONGER SPANS A 24-HOUR CYCLE. It cannot answer the
-night-inclusion question as written. NEEDS a separate
-`all_hours_vs_persistence` metrics subset intersecting only
-XGBoost + persistence. This is a known outstanding fix.
+4247 rows and NO LONGER SPANS A 24-HOUR CYCLE, and cannot answer the
+night-inclusion question as written. This is why src/eval/runner.py
+renamed that quantity "common_hours" for runs from 2026-07-28 onward
+(see its module docstring CAVEAT) - it does not claim to be all_hours.
+
+The actual all_hours_vs_persistence question is answered separately by
+scripts/build_table4_protocol.py's config C4 ("all 24 hours, skill vs
+smart persistence"): model + persistence only, no daylight filter,
+SmartPersistence forward-fills through the night so this genuinely spans
+8694 rows, a true 24h cycle, for every array x horizon cell. Written to
+results/table4_protocol.csv (config_id C4, hours_included all_24h).
+Confirmed consistent with this finding's own closed-form prediction: at
+array11 h=3, nRMSE(C6)/nRMSE(C5) = 5.90/8.97 = 0.658 against a predicted
+sqrt(3762/8694) = 0.658, and skill vs persistence is 0.5265 (C2,
+daylight) vs 0.5279 (C4, all 24h) - unchanged, as predicted. No further
+fix needed here; the Section 6 remaining-work item is stale and removed.
 
 ### Finding 3: feature coverage collapse at long horizons
 TRIGGER: build_features drops rows with any NaN feature. k_p is NaN at
@@ -959,54 +972,130 @@ scripts/build_table_sky.py
 
 ## 6. WHAT IS BUILT vs WHAT REMAINS
 
-BUILT AND VALIDATED:
+Rewritten from scratch 2026-08-03 by checking every claim against the repo
+(file existence, row/run counts, git log) rather than editing the previous
+version in place - that version had drifted from what was actually true.
+See "STALE ITEMS FOUND" below for what was wrong and since when.
+
+BUILT AND VALIDATED (each line checked against the repo on 2026-08-03):
 - data layer (load, clean, resample, clear-sky irradiance, clear-sky
-  power, splits, exclusions)
-- feature layer (tabular both regimes, sequences, scaler) with leakage
-  assertions proven to catch injected leaks
+  power, splits, exclusions) - src/data/
+- feature layer (tabular both regimes, sequences, scaler); leakage guard
+  is src/features/build.py assert_no_leakage, exercised by
+  scripts/validate_features.py (PASS/FAIL per regime, plus a >0.99
+  feature/target correlation tripwire)
 - models: SmartPersistence, Climatology, ConvexCombination, XGBoost,
-  LSTM, CNN-LSTM, ResidualCorrected (wraps either recurrent base)
+  LSTM, CNN-LSTM, ResidualCorrected (wraps either recurrent base) -
+  src/models/
 - src/models/recurrent_base.py: shared training loop, scalers, early
-  stopping, prediction. Refactor verified behaviour-preserving by
-  re-running LSTM array11/h6/seed0 and diffing bit-for-bit against the
-  previously committed result.
-- metrics, run-record writer with environment capture
-- 225-run 5-seed sweep for lstm_residual and cnn_lstm_residual, complete,
-  0 failures: residual correction is net negative in all 18 array x
-  horizon cells under the default 3-year TRAIN_YEARS (Finding 10 addendum
-  / results/seed_sweep_summary.csv)
+  stopping, prediction (claim of a bit-for-bit-diff verification against
+  a prior committed result is carried over from the 2026-07-28 checkpoint
+  text and not independently re-checked here - would require re-running
+  the fit, which this pass did not do)
+- metrics (src/eval/metrics.py), run-record writer with environment
+  capture (src/eval/runner.py)
+- Diebold-Mariano significance testing: src/eval/dm.py (HAC variance,
+  Bartlett kernel, HLN small-sample correction, Holm-Bonferroni within
+  cell), written via scripts/build_table6_dm.py to
+  results/table6_dm.csv - confirmed 189 data rows (21 pairs x 3 arrays x
+  3 horizons) via file line count. This is the paper's significance test;
+  see Finding 12 Part A.
+- sky-condition classification for RQ3: src/eval/sky.py classify_sky
+  (k_ghi mean/std only, not k_p - by design, see that module's
+  docstring), written via scripts/build_table_sky.py to
+  results/table_sky.csv - confirmed 81 data rows (3 forecasters x 3
+  arrays x 3 horizons x 3 classes). See Finding 12 Part B.
+- protocol-inflation Table 4: scripts/build_table4_protocol.py, six
+  configs (C1-C6) computed from scratch per array x horizon, written to
+  results/table4_protocol.csv - confirmed 54 data rows (6 configs x 3
+  arrays x 3 horizons). Config C4 ("all 24 hours, skill vs smart
+  persistence") is the all_hours_vs_persistence fix - genuinely spans
+  8694 rows/year with no daylight filter, confirmed against Finding 2's
+  own closed-form prediction (array11 h=3: nRMSE ratio 0.658 vs predicted
+  sqrt(3762/8694)=0.658). See Finding 2's CAVEAT, RESOLVED note.
+- lagged-regime seed sweep: scripts/run_seed_sweep.py, one execution
+  covering all 5 models x 3 arrays x 3 horizons x 5 seeds = 225 combos.
+  Confirmed via file count: exactly 45 result JSONs per model
+  (xgboost/lstm/cnn_lstm/lstm_residual/cnn_lstm_residual), 225 total,
+  0 gaps. The 3-model (xgboost/lstm/cnn_lstm) portion is 135 runs and is
+  Finding 8/9's architecture-attribution evidence; the 2-model
+  (lstm_residual/cnn_lstm_residual) portion is 90 runs across 18 array x
+  horizon cells and is Finding 10/11's residual-penalty evidence -
+  residual correction is net negative in all 18 cells under the default
+  3-year TRAIN_YEARS, though Finding 12 Part A shows only 5 of those 18
+  are Holm-significant under DM. results/seed_sweep_summary.csv aggregates
+  all 225.
 - 5-year/4-fold training-length ablation for the residual stage
-  (scripts/rerun_residual_5yr.py, 36 runs, results/train5yr/): the
-  penalty shrinks (43-96% recovery depending on horizon) but does not
-  vanish at h=6 - see Finding 11
+  (scripts/rerun_residual_5yr.py, results/train5yr/) - confirmed 36
+  result JSONs. Penalty shrinks (19-96% recovery depending on
+  array/horizon) but does not vanish at h=6 - see Finding 11.
 - scripts/diagnose_residual_signal.py: out-of-fold vs validation
   correlation and predicted/actual residual-std diagnostic behind
   Finding 11's OVERCONFIDENCE mechanism, parameterised over horizon and
-  train_years
-- 262 committed runs (135-run architecture sweep + 225-run residual sweep
-  + 36-run 5yr ablation + residual dev runs, some overlapping the sweeps)
+  train_years (file present; underlying numbers already appear in
+  Finding 11, not independently re-run here)
+- 262 committed runs total - recounted directly: 225 lagged-regime run
+  JSONs + 1 leaked-by-design run + 36 train5yr run JSONs = 262. Matches.
 
-REMAINING — REQUIRED:
-- Diebold-Mariano tests with HAC variance and the Harvey-Leybourne-Newbold
-  small-sample correction. MUST replace the 2x-std heuristic before
-  publication.
-- fix the all_hours metrics block (see Finding 2 caveat) - needs a
-  separate all_hours_vs_persistence subset intersecting only the model
-  and persistence, so it spans a true 24-hour cycle again
-- sky-condition classification for RQ3, from k_ghi and its variability,
-  NOT k_p (k_p is derived from the target; also sky condition is shared
-  across arrays while k_p is not)
-- oracle-regime runs
-- aggregation into LaTeX tables; figures F1-F7
-- ONE final test-set (2015) run, at the very end
+REMAINING - REQUIRED (each confirmed absent from the repo on 2026-08-03):
+- oracle-regime runs. The feature code is fully wired (src/features/
+  build.py REGIMES=("lagged","oracle"), src/features/sequences.py, and
+  all four --regime {lagged,oracle} CLI flags in run_xgb_dev.py /
+  run_lstm_dev.py / run_cnn_lstm_dev.py / run_residual_dev.py already
+  accept it) but zero oracle result JSONs exist anywhere under results/.
+  Nothing has ever called these scripts with --regime oracle.
+- aggregation into LaTeX tables; figures F1-F7. Confirmed: paper/
+  contains only PROJECT_CHECKPOINT.md, literature_notes.md, .gitkeep -
+  no .tex file and no figure anywhere in the repo.
+- ONE final test-set (2015) run, at the very end. Confirmed: no script
+  and no result JSON anywhere sets eval_split to "test" - every
+  run_*_dev.py, run_seed_sweep.py, rerun_residual_5yr.py, and
+  build_table4_protocol.py is hardcoded to "val" / the validation split.
+  2015 has not been touched for a forecast metric, only for the dead-
+  period data-quality audit (Finding 6), which reads availability only.
+- literature survey. results/literature_survey.csv has 3 coded rows
+  (abumohsen2024, xu2025, energyeng2025). data/papers/ has 24 source
+  PDFs. scripts/code_literature_survey.py (685 lines, uncommitted as of
+  2026-08-03) is the coding tool - deliberately non-classifying, prompts
+  a human for every judgement column, "not_stated" is a first-class
+  value. ~27 papers remain to code against the ~10-13 target in
+  literature_notes.md's action items / PROJECT IDENTITY's literature
+  plan.
 
-REMAINING — OPTIONAL, and probably worth SKIPPING to protect writing time:
+REMAINING - OPTIONAL, probably worth SKIPPING to protect writing time:
 - extending the 5-year/4-fold ablation to array17 and to the 6-seed grid
   the main sweep uses (currently 3 seeds, arrays 11/12 only, per Finding
   11's CONTROL) - the horizon-structured pattern is already clear enough
   to report as a sensitivity analysis, not a second main result
-- caching the prepared dataframe per array (only matters if a wider grid
-  is run; ~10 s of redundant setup per run)
+- caching the prepared dataframe per array - confirmed still not done
+  (every run_*_dev.py reloads and rebuilds per call); costs roughly
+  9-10s/run of setup overhead, calculated from sweep-log wall time minus
+  summed fit_seconds+predict_seconds across the three committed sweep
+  logs. Only matters if a much wider grid is run.
+
+STALE ITEMS FOUND (beyond the three the user already named):
+1. The old bullet "225-run 5-seed sweep for lstm_residual and
+   cnn_lstm_residual" was wrong in scope, not just outdated. 225 is the
+   size of the FULL 5-model grid that one run_seed_sweep.py execution
+   produces; the lstm_residual + cnn_lstm_residual portion of it is 90
+   runs (18 array x horizon cells x 5 seeds), confirmed by file count (45
+   JSONs per model). The bullet conflated "the sweep that happened to
+   also produce this finding" with "runs dedicated to this finding." Fixed
+   above by splitting the 225-run sweep into its 135-run architecture
+   portion and 90-run residual portion.
+2. Old REMAINING - REQUIRED still listed Diebold-Mariano tests and
+   sky-condition classification as outstanding. Both are done and both
+   are documented above Section 6 in this same file as Finding 12 Parts A
+   and B - the checkpoint was edited after they landed (commit 265ef76)
+   but Section 6 was never synced to that edit. Same root cause as the
+   all_hours_vs_persistence staleness the user flagged: Section 6 is
+   written once and not revisited when later commits change what is
+   true underneath it.
+3. Everything else checked (data/model/eval layer bullets, the 262-run
+   total, the 36-run 5yr ablation, the recurrent_base refactor bullet)
+   matched the repo on inspection. The recurrent_base bit-for-bit claim
+   is the one exception noted above - plausible but not re-verified,
+   since doing so would mean re-running a fit rather than reading a file.
 
 ---
 
