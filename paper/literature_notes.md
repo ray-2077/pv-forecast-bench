@@ -271,3 +271,121 @@ baselines to translate into value. Low priority otherwise.
 
 5. **Report skill score separately per horizon**, never pooled - the
    meta-analysis is explicit that horizon dominates every other factor.
+
+---
+
+## 9. Mayer (2022), "Benefits of physical and machine learning
+hybridization for photovoltaic power forecasting"
+Renewable and Sustainable Energy Reviews 168:112772.
+
+### Why it matters
+The single paper in our 27-paper survey that meets the evaluation
+standard we adopt. Existence proof that the standard is achievable in
+this literature, not a bar we invented. Without it the survey reads as a
+strawman.
+
+### What it does that the other 26 do not
+- Skill score against the optimal convex combination of climatology and
+  persistence (Eq. 8), citing Yang et al. (2020); for day-ahead he uses
+  the convex combination of 48-h persistence and climatology.
+- Explicit daylight filter as protocol: solar zenith < 90 deg, neither
+  power nor NWP data missing, PV output positive.
+- Genuine hold-out: 2019-2020 train, 2021 test only, "not involved in
+  the training and selection of the models in any way".
+- Reports MBE, MAE, RMSE, correlation, variance ratio AND skill score;
+  criticises measure-only evaluation, cites the Murphy-Winkler
+  framework.
+- Operational realism: checks NWP dissemination time against the
+  Hungarian grid's 10 a.m. deadline, notes dissemination time "is often
+  neglected even in such studies that otherwise care about the
+  operability of the presented forecasts".
+- Reports which of his own methods lose (ML methods 1 and 2 "fall far
+  behind the others in all PV plants").
+
+### The consistency principle (Section 2.6) - a protocol effect we did NOT measure
+Different error metrics are minimised by different functionals (MSE by
+the mean, MAE by the median), so a forecast optimised for one is
+suboptimal for the others. He runs the entire study twice and shows it
+changes conclusions: "if only MSE-optimized forecasts were created, the
+results would suggest that hybridization slightly reduces the RMSE but
+increases the MAE... which conclusion is far from the reality." We train
+on MSE loss and report RMSE-based skill, so we are internally consistent
+
+>>> but this must go in Limitations as a protocol axis we did not vary.
+
+### Regime positioning
+His weather inputs are NWP FORECASTS, so his setup is neither our lagged
+nor our oracle regime. It is the operationally realistic middle case our
+framework lacks: oracle is an upper bound, lagged a lower bound, real
+day-ahead forecasting sits between them with NWP error included.
+
+>>> State this explicitly - do not let a reader assume his setup maps
+>>> onto either of our two regimes.
+
+### His results, for contrast
+Hybrid gives 5.2% MAE and 1.0% RMSE reduction over optimised physical
+modelling, 10.4% MAE and 3.3% RMSE over ML without physical predictors,
+with two years of training data. Modest, honestly reported, against a
+real baseline.
+
+>>> Contrast with survey papers reporting 30-60% improvements against
+>>> their own components.
+
+### Where to cite
+Introduction and Related Work (existence proof); Methodology (convex
+reference, zenith filter); Limitations (consistency principle, NWP
+middle regime); Discussion (magnitude contrast).
+
+---
+
+## 10. Nguyen & Musgens (2021), "What drives the accuracy of PV output
+forecasts?"
+arXiv 2111.02092.
+
+### Correction to earlier notes
+This is NOT arXiv 2208.10536, entry 2 above ("A Meta-Analysis of Solar
+Forecasting Based on Skill Score"). Different paper, same first two
+authors. The claim in entry 2 that forecast skill improves with training
+length up to roughly 2000 days is NOT in this paper and must not be
+cited from it - that claim stays attributed to 2208.10536 only.
+
+### What it is
+A statistical meta-analysis of 180 PV forecasting papers published since
+2007, with an extracted database of reported forecast errors analysed by
+OLS regression. They note 13 prior literature surveys exist but none
+performed statistical analysis - all narrative.
+
+### The finding we use - "cherry picking", their term
+Test-set length is NEGATIVELY correlated with reported accuracy. Their
+explanation: "reporting errors on a small number of days possibly
+enables 'cherry picking', i.e., for researchers to focus on specific
+days when models achieve the lowest errors." They recommend test sets of
+at least one year, and state this "has not been addressed in any
+previous work on PV output forecasts".
+
+>>> Our test set is exactly one calendar year, chosen for seasonal
+>>> completeness - we meet their standard and should cite it.
+
+They also state the mechanism our paper measures: "a large variety of
+data sets and error report methods used by PV output forecasters...
+strongly affect the level of errors reported in individual studies and
+must be therefore considered when examining models' performance."
+
+### Their headline, to be contrasted carefully
+"Hybrid models consistently outperform the others and will most likely
+be the future of PV output forecasting." This conclusion is drawn from
+the same literature our survey coded, in which 26 of 27 papers report no
+reference forecast at all. Their finding aggregates reported errors, not
+skill scores.
+
+### Notable absence
+The term "skill score" does not appear in the paper. A 180-paper
+meta-analysis of PV forecast error that does not use the reference-based
+metric Yang et al. (2020) recommend.
+
+>>> Worth one sentence, stated neutrally.
+
+### Where to cite
+Introduction (cherry picking, one-year test set justification); Related
+Work (scale of the literature, absence of statistical evaluation
+practice); Methodology (test-set length justification).
