@@ -1102,10 +1102,11 @@ BUILT AND VALIDATED (each line checked against the repo on 2026-08-03):
   LSTM, CNN-LSTM, ResidualCorrected (wraps either recurrent base) -
   src/models/
 - src/models/recurrent_base.py: shared training loop, scalers, early
-  stopping, prediction (claim of a bit-for-bit-diff verification against
-  a prior committed result is carried over from the 2026-07-28 checkpoint
-  text and not independently re-checked here - would require re-running
-  the fit, which this pass did not do)
+  stopping, prediction (bit-for-bit-diff determinism was VERIFIED
+  2026-07-28, NOT RE-CHECKED SINCE - would require re-running the fit,
+  which no pass since has done. Soften any restatement of this claim in
+  the paper to "verified 2026-07-28, not re-checked since," not as a
+  standing guarantee)
 - metrics (src/eval/metrics.py), run-record writer with environment
   capture (src/eval/runner.py)
 - Diebold-Mariano significance testing: src/eval/dm.py (HAC variance,
