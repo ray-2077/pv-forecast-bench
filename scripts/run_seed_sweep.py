@@ -8,8 +8,9 @@ scripts/aggregate_seed_sweep.py can report a mean and standard deviation
 per model x array x horizon.
 
 Grid: models [xgboost, lstm, cnn_lstm, lstm_residual, cnn_lstm_residual] x
-arrays [array11, array12, array17] x horizons [1, 3, 6] x regime [lagged]
-x seeds [0, 1, 2, 3, 4] = 225 runs. Evaluated on the VALIDATION split
+arrays [array11, array12, array17] x horizons [1, 3, 6] x regime
+[lagged] OR [oracle], never mixed within one run (see --regime below) x
+seeds [0, 1, 2, 3, 4] = 225 runs per regime. Evaluated on the VALIDATION split
 (2014) only - this script never reads 2015, exactly like run_xgb_dev.py,
 run_lstm_dev.py, run_cnn_lstm_dev.py, and run_residual_dev.py, which it
 calls directly. Per src/models/residual.py's docstring, the two residual
@@ -37,10 +38,20 @@ own FileExistsError-on-overwrite guard in src/eval/runner.py, which this
 script relies on by checking existence first rather than catching that
 error.
 
+--regime defaults to "lagged" (the original grid this script was written
+for). Pass --regime oracle to run the same 225-combo grid against the
+oracle feature regime instead (src/features/build.py ORACLE_PREFIX -
+measured weather AT TARGET TIME, an explicit perfect-forecast upper
+bound per CLAUDE.md rule 5, never to be mixed with lagged results in one
+table). Lagged and oracle runs write to distinct run_ids
+(..._lagged_seedN.json vs ..._oracle_seedN.json), so both can coexist
+under results/ without collision.
+
 Usage:
-    python scripts/run_seed_sweep.py
+    python scripts/run_seed_sweep.py [--regime {lagged,oracle}]
 """
 
+import argparse
 import functools
 import sys
 import time
@@ -63,7 +74,6 @@ RESULTS_DIR = REPO_ROOT / "results"
 ARRAYS = ["array11", "array12", "array17"]
 HORIZONS = [1, 3, 6]
 SEEDS = [0, 1, 2, 3, 4]
-REGIME = "lagged"
 
 # model name (matches XGBForecaster.name / LSTMForecaster.name /
 # CNNLSTMForecaster.name / ResidualCorrected.name, and the run_id string)
@@ -85,7 +95,15 @@ MODEL_RUNNERS = {
 }
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--regime", choices=("lagged", "oracle"), default="lagged")
+    return parser.parse_args()
+
+
 def main():
+    regime = parse_args().regime
+
     combos = [
         (model, array, horizon, seed)
         for model in MODEL_RUNNERS
@@ -97,7 +115,7 @@ def main():
     print(
         f"seed sweep: {total} runs planned "
         f"(models={list(MODEL_RUNNERS)}, arrays={ARRAYS}, horizons={HORIZONS}, "
-        f"regime={REGIME!r}, seeds={SEEDS})\n"
+        f"regime={regime!r}, seeds={SEEDS})\n"
     )
 
     n_run = 0
@@ -110,7 +128,7 @@ def main():
             "model": model,
             "array": array,
             "horizon": horizon,
-            "regime": REGIME,
+            "regime": regime,
             "seed": seed,
             "eval_split": "val",
         }
@@ -125,7 +143,7 @@ def main():
 
         run_start = time.perf_counter()
         try:
-            _, metrics = MODEL_RUNNERS[model](array, horizon, REGIME, seed, verbose=False)
+            _, metrics = MODEL_RUNNERS[model](array, horizon, regime, seed, verbose=False)
         except Exception as exc:
             print(f"{prefix}  FAILED: {exc}")
             n_failed += 1
