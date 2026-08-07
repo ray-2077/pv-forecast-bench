@@ -31,11 +31,8 @@ feature variables: received active energy (AE_Power), current phase average
 (Temp), weather relative humidity (Humidity), global horizontal irradiance
 (GHI), diffuse horizontal irradiance (DHI), wind direction (Wind_dir),
 rainfall (Rainfall), global tilted radiation (RGT), and diffuse tilted
-radiation (RDT)." (p.8) NOTE: Current_Phase_Average and
-Active_Energy_Delivered_Received are two of the three columns this
-project's own src/data/loader.py explicitly drops as target-derived leakage
-traps (CLAUDE.md, "DROPPED COLUMNS"). This paper uses both as model input
-features without discussion.
+radiation (RDT)." (p.8) See MAJOR FLAG below - two of these twelve are
+target-derived leakage-trap columns, used without discussion.
 
 **night_hours_excluded = yes** | "a PV power system requires ample
 sunshine and sufficient daylight. Therefore, data pertaining to night-time
@@ -144,6 +141,26 @@ which at the paper's stated 5-min sampling is only ~25 hours per period -
 consistent with two short illustrative windows rather than a full test-set
 aggregate, but this is a plausible reading of a plot axis, not a stated
 fact, so it is not coded as established.
+
+## MAJOR FLAG: two target-derived DKASC leakage-trap columns used as model INPUT features [leakage_flag = documented, 2026-08-07]
+
+Of the twelve input features stated on p.8 (quoted above), two are
+Current_Phase_Average ("current phase average (Current)") and
+Active_Energy_Delivered_Received ("received active energy (AE_Power)").
+These are DKASC's own column names - this project uses the SAME DKASC
+dataset (see the SAME SITE note at the top of this file) - and this
+project's own src/data/loader.py explicitly drops both of them, by name,
+as two of exactly three named leakage-trap columns (CLAUDE.md, "DROPPED
+COLUMNS"): Active_Energy_Delivered_Received accumulates the same power
+output the model is trying to predict, and Current_Phase_Average is
+electrically coupled to instantaneous power output on the same circuit.
+This paper uses both as input features to its CNN-LSTM-attention model,
+alongside Power (AE_Power) itself, with no discussion of the
+target-derived relationship anywhere in the text. Same standard as
+bhutta2024hcrnhcln's Performance-Ratio flag: a feature-legitimacy concern
+([L2] in Kapoor & Narayanan's taxonomy), not a night-hour/baseline/split/
+variance/code issue, and not inferred - both column names are directly
+quoted from the paper's own feature list (p.8).
 
 ## What this paper does WELL
 

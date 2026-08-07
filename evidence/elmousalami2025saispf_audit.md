@@ -113,20 +113,47 @@ given.
   comparisons common elsewhere in this batch, even though ARIMA is not
   persistence/climatology/convex.
 
+## MAJOR FLAG: MAE > RMSE in 6 of 7 models per site table, both sites [confirmed 2026-08-07, re-extracted directly from clean, unscrambled table text]
+
+Table 5 (Benban, p.15) and Table 6 (Sakaka, p.19), full rows, columns are
+MAPE / RMSE / MAE / R2 as printed in the header ("Model Notation AI Model
+MAPE RMSE MAE R*2"):
+
+Table 5 (Benban): RF 4.47/332.8/516/0.95; SVM 8.42/416.4/789.6/0.88; GBM
+6.88/724/502.4/0.87; LSTM 3.44/840/936/0.84; CNNs 4.26/336/528/0.85;
+CNN-LSTM 2.04/184/252/0.99; ARIMA 11.77/300/464/0.91.
+
+Table 6 (Sakaka): RF 4.5/335/520/0.94; SVM 8.4/420/790/0.87; GBM
+6.9/730/505/0.86; LSTM 3.4/850/940/0.83; CNNs 4.3/340/530/0.84; CNN-LSTM
+2/190/255/0.98; ARIMA 11.8/310/470/0.9.
+
+Under the header's own column labels, MAE > RMSE for RF, SVM, LSTM, CNNs,
+and CNN-LSTM in BOTH tables - only GBM has RMSE > MAE, in both tables.
+That is 6 of 7 models violating RMSE >= MAE identically across two
+independently-labeled site tables. HYPOTHESIS, not a correction: assuming
+the RMSE and MAE column headers are swapped (i.e. the column printed
+under "RMSE" is actually MAE and vice versa) makes 6 of the 7 rows in
+each table internally consistent, and leaves GBM as the sole outlier
+instead of the other six - the more parsimonious reading of the two, but
+the paper's own header literally reads "MAPE RMSE MAE R*2" and this audit
+does not resolve which is correct. Recorded as a hypothesis for your
+judgment, not applied as a recode to key_claim or notes.
+
+Two further findings from the same re-extraction, recorded rather than
+resolved:
+- Table 5 and Table 6 report near-identical values across two different
+  plants in two different countries (Benban, Egypt vs. Sakaka, Saudi
+  Arabia) - e.g. RF: 332.8/516 vs. 335/520; CNN-LSTM: 184/252 vs.
+  190/255; every model's numbers differ by only 1-2%, site to site. This
+  is unusual for independently-fit models on independent sites, but not
+  necessarily wrong; noted, not asserted as an error.
+- The Sakaka discussion paragraph (p.19, immediately following Table 6)
+  reads "achieving the lowest MAPE (2.04%) and RMSE (184) among all
+  models" - these are Table 5's Benban CNN-LSTM values, not Table 6's own
+  Sakaka CNN-LSTM row (MAPE 2, RMSE 190). This looks like a copy-paste
+  carryover from the Benban section's write-up into the Sakaka section.
+
 ## Other observations / consistency checks
 
-- RMSE > MAE holds for both sites as printed (Benban 184 > 252 does NOT
-  hold - RMSE=184 < MAE=252). FLAG: this is the same MAE>RMSE pattern
-  found in molu2024bilstmaadc elsewhere in this batch (RMSE should always
-  be >= MAE by definition, since RMSE is an L2 and MAE an L1 norm of the
-  same residuals). Checked both sites: Benban RMSE=184 vs MAE=252 (MAE
-  exceeds RMSE); Sakaka RMSE=190 vs MAE=255 (same pattern). This is
-  consistent across both reported sites, which makes a random
-  transcription/extraction artifact somewhat less likely than in the
-  single-instance molu2024bilstmaadc case, though still not confirmed
-  against the original PDF's table layout - flagged for the user's
-  judgment rather than resolved. If genuine, either the metric labels are
-  swapped in the abstract, or the units/scaling differ between the two
-  reported figures in a way the text does not explain.
 - No shared authors/institution with any other paper coded in this batch
   (University of Melbourne / King Saud University).

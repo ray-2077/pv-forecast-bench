@@ -117,6 +117,37 @@ the abstract from separate result tables - but the effect either way is
 that the headline number a reader takes from the abstract alone does not
 correspond to a single, coherent evaluation.
 
+## MAJOR FLAG: MAE > RMSE for the proposed model at every forecast horizon [confirmed 2026-08-07, re-extracted directly from clean table text, not the earlier scrambled reading]
+
+RMSE >= MAE is a mathematical identity for any sample (RMSE is an L2 norm,
+MAE an L1 norm, of the same per-point errors), so MAE > RMSE is never
+possible for two metrics computed on the same data. Re-extracting Tables
+3-6 (next-day, 5-day, 7-day, 15-day) directly, cleanly, column-by-column
+(ANN, LSTM, BiLSTM, BiLSTM-AA, BiLSTM-AADC in that order):
+
+- Next-day: RMSE row 117.4586 / 204.5819 / 145.1278 / 119.0530 / 17.0718;
+  MAE row 58.3540 / 158.7977 / 91.7301 / 64.1064 / 57.5241.
+- 5-day: RMSE 140.0578 / 233.3878 / 166.7302 / 123.1981 / 22.9445; MAE
+  70.3145 / 181.3889 / 106.0118 / 67.4150 / 65.5817.
+- 7-day: RMSE 154.0636 / 252.5137 / 178.9897 / 146.6333 / 26.9407; MAE
+  77.3459 / 196.9270 / 115.3587 / 83.3946 / 73.1371.
+- 15-day: RMSE 195.8436 / 306.4404 / 213.6873 / 170.0822 / 40.6394; MAE
+  98.3211 / 238.9826 / 138.1536 / 96.7307 / 110.3254.
+
+At every one of the four horizons, MAE > RMSE holds for the BiLSTM-AADC
+(proposed) column only - ANN, LSTM, BiLSTM, and BiLSTM-AA all show the
+normal RMSE >= MAE relationship in every row. The proposed-model numbers
+are stated identically in the running prose as well as the tables (e.g.
+p.10: "the lowest RMSE of 17.0718, MAE of 57.5241"; p.14: "BiLSTM-AADC
+model achieves an RMSE of 22.9445, MAE of 65.5817"), so this is not a
+one-off scrambled-table extraction artifact - the same pairing recurs
+verbatim in prose, independent of table layout, at all four horizons.
+This is recorded as a documented inconsistency in the paper's own
+reported numbers, isolated specifically to its own best-performing model.
+No cause is speculated here (mismatched metric definition for that one
+model, a transcription error carried consistently into the prose, or
+something else) - only the pattern itself is recorded.
+
 ## Other observations / consistency checks
 
 - Additional unresolved scale question (recorded as an ambiguity, not
@@ -128,27 +159,6 @@ correspond to a single, coherent evaluation.
   and the other a dimensionless ratio - plausible either as very good
   percentage errors or as values the reader must additionally multiply,
   and the text does not clarify which. Not resolved here.
-- RMSE > MAE holds in every table row checked (e.g. next-day BiLSTM-AADC:
-  17.07 > not applicable comparison since MAE=57.52 > RMSE=17.07 here -
-  see NEXT flag) -
-  ACTUAL CHECK: Table 3 next-day BiLSTM-AADC row shows MAE=57.5241 >
-  RMSE=17.0718, i.e. MAE EXCEEDS RMSE, which is mathematically impossible
-  for the standard definitions of both (RMSE >= MAE always, since RMSE is
-  an L2 norm and MAE an L1 norm of the same errors). This is a second,
-  independent internal-consistency problem, verified directly from Table 3
-  as extracted (p.10 in the raw extraction): "RMSE 117.4586 204.5819
-  145.1278 119.0530 17.0718 / MAE 58.3540 158.7977 91.7301 64.1064
-  57.5241" - for the proposed model (last column), RMSE=17.0718 while
-  MAE=57.5241. The same MAE>RMSE pattern holds for the ANN column too
-  (RMSE=117.46 > MAE=58.35 - that one is fine) but BREAKS specifically for
-  the two best-performing columns (BiLSTM-AA: RMSE=119.05 > MAE=64.11 is
-  fine; BiLSTM-AADC: RMSE=17.07 < MAE=57.52 is NOT fine). This suggests a
-  possible column-alignment or transcription artifact specific to the
-  proposed model's RMSE cell in Table 3 - flagged for the user's own
-  judgment rather than resolved, since the raw PDF table extraction could
-  itself be misaligned (text was extracted from a dense multi-column PDF
-  table); this should ideally be checked against the original PDF table
-  layout, not just this extraction.
 - Shared-institution check: Mohit Bajaj (Graphic Era, India) is a
   co-author here; no overlap with any other paper's author list coded so
   far in this batch.

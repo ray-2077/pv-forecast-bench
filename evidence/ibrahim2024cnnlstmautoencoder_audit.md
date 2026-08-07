@@ -46,13 +46,24 @@ paper's own comparison.
 score"/"forecast skill"/"relative to persistence"/"SS"/"improvement over
 persistence". Metrics are RMSE and MAE only (Abstract, p.1).
 
-**weather_source = measured** | "the weather data corresponding to same
-location and time intervals" (Abstract, p.1) as the UK solar farm's power
-data; no NWP/forecast-weather language anywhere. NOTABLE: the paper
-explicitly runs its comparison "with and without weather data" (p.9) as a
-stated ablation axis - i.e., it separately reports a weather-free
-(power-only) variant alongside the weather-including variant, for every
-compared model and horizon.
+**weather_source = reanalysis** [RECODED 2026-08-06, was "measured" -
+"reanalysis" did not exist as an allowed value when this paper was first
+coded; the audit's original exhaustive check searched the vocabulary in
+force at the time and could not have found this] | "a weather data is
+used in this study as well, it includes temperature and irradiance data
+that has been extracted for the same period from several sites
+surrounding the solar farms using the MERRA-2 reanalysis data, and then
+they had been averaged to get the weather condition at the solar farm."
+(p.10, Section 3.1 Dataset - text extraction interleaves two PDF columns
+around this passage, see raw extraction if re-verifying) - explicit named
+reanalysis product (MERRA-2), spatially interpolated from surrounding
+sites, not a station observation. The Abstract's "weather data
+corresponding to same location and time intervals" (p.1) is a looser
+paraphrase of this same MERRA-2-derived series, not a separate measured
+source. NOTABLE: the paper explicitly runs its comparison "with and
+without weather data" (p.9) as a stated ablation axis - i.e., it
+separately reports a weather-free (power-only) variant alongside the
+weather-including variant, for every compared model and horizon.
 
 **split_type = not_stated** | Ratio (70/30) and exact sample counts given
 (quoted above), but no statement of chronological vs. random ordering
