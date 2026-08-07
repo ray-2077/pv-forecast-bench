@@ -635,7 +635,7 @@ and DM as the significance test (Table 6). Do not let the 2x std
 heuristic stand in for either.
 
 Scripts: scripts/run_seed_sweep.py, scripts/aggregate_seed_sweep.py
-Data: results/seed_sweep_summary.csv, 90 run JSONs
+Data: results/seed_sweep_summary_lagged.csv, 90 run JSONs
 
 ### Finding 9: convolution shows a consistent directional cost, not a significant one
 
@@ -723,7 +723,7 @@ cost is measured. Note explicitly that this is an ABLATION, which most of
 the surveyed hybrid papers do not run - they report the full architecture
 against its own components or against nothing.
 
-Data: results/seed_sweep_summary.csv, 135 run JSONs,
+Data: results/seed_sweep_summary_lagged.csv, 135 run JSONs,
 results/_sweep_log_cnn.txt
 
 ### Finding 10: residual-stage leakage (the largest effect measured)
@@ -1054,6 +1054,19 @@ Rewritten from scratch 2026-08-03 by checking every claim against the repo
 version in place - that version had drifted from what was actually true.
 See "STALE ITEMS FOUND" below for what was wrong and since when.
 
+SYNCED 2026-08-08 (per paper/WRITING_BRIEF.md gap 6): this section had
+drifted again in the five days since the 2026-08-03 rewrite - the oracle
+regime went from zero result JSONs to a complete 225-run sweep plus all
+three oracle-regime tables, and the literature survey went from 3 coded
+rows to 27, in that window, without this section being revisited. The
+oracle-regime and literature-survey bullets below have moved from
+REMAINING - REQUIRED to BUILT AND VALIDATED accordingly. File names
+below also now use the `_lagged`/`_oracle` suffixes
+(results/seed_sweep_summary.csv, results/table4_protocol.csv and
+results/table6_dm.csv were renamed to `_lagged` variants with `_oracle`
+counterparts added alongside; both regimes are named consistently as of
+this sync).
+
 BUILT AND VALIDATED (each line checked against the repo on 2026-08-03):
 - data layer (load, clean, resample, clear-sky irradiance, clear-sky
   power, splits, exclusions) - src/data/
@@ -1100,8 +1113,8 @@ BUILT AND VALIDATED (each line checked against the repo on 2026-08-03):
   horizon cells and is Finding 10/11's residual-penalty evidence -
   residual correction is net negative in all 18 cells under the default
   3-year TRAIN_YEARS, though Finding 12 Part A shows only 5 of those 18
-  are Holm-significant under DM. results/seed_sweep_summary.csv aggregates
-  all 225.
+  are Holm-significant under DM. results/seed_sweep_summary_lagged.csv
+  aggregates all 225.
 - 5-year/4-fold training-length ablation for the residual stage
   (scripts/rerun_residual_5yr.py, results/train5yr/) - confirmed 36
   result JSONs. Penalty shrinks (19-96% recovery depending on
@@ -1113,31 +1126,42 @@ BUILT AND VALIDATED (each line checked against the repo on 2026-08-03):
   Finding 11, not independently re-run here)
 - 262 committed runs total - recounted directly: 225 lagged-regime run
   JSONs + 1 leaked-by-design run + 36 train5yr run JSONs = 262. Matches.
+- oracle-regime full sweep, CONFIRMED COMPLETE as of this 2026-08-08 sync
+  (was the top REMAINING - REQUIRED item as recently as 2026-08-03):
+  scripts/run_seed_sweep.py --regime oracle produced 225/225 result
+  JSONs (5 models x 3 arrays x 3 horizons x 5 seeds, 0 gaps), matching
+  the lagged-regime sweep exactly. All three oracle-regime tables exist
+  and are confirmed by direct row/line count:
+  results/seed_sweep_summary_oracle.csv (45 rows),
+  results/table4_protocol_oracle.csv (54 rows), and
+  results/table6_dm_oracle.csv (189 rows - 21 pairs x 3 arrays x 3
+  horizons, same shape as the lagged DM matrix). git log:
+  bd9c95b "Complete oracle-regime seed sweep: remaining 103/225 runs",
+  d220c18 "Add oracle-regime Diebold-Mariano tests: 189 pairwise
+  comparisons". See WRITING_BRIEF.md claims C20-C21.
+- literature survey, CONFIRMED COMPLETE as of this 2026-08-08 sync (was
+  "3 coded rows... ~27 remain" as recently as 2026-08-03):
+  results/literature_survey.csv has 27 coded rows, 25 with a
+  verbatim-quoted evidence_level=quoted audit file under evidence/ and
+  2 evidence_level=summary_only (no locatable source PDF) - exceeding
+  the original ~10-13 target in literature_notes.md's action items /
+  PROJECT IDENTITY's literature plan. See WRITING_BRIEF.md claim C27 and
+  Section 7 below for the citation plan built from these 27 rows.
 
-REMAINING - REQUIRED (each confirmed absent from the repo on 2026-08-03):
-- oracle-regime runs. The feature code is fully wired (src/features/
-  build.py REGIMES=("lagged","oracle"), src/features/sequences.py, and
-  all four --regime {lagged,oracle} CLI flags in run_xgb_dev.py /
-  run_lstm_dev.py / run_cnn_lstm_dev.py / run_residual_dev.py already
-  accept it) but zero oracle result JSONs exist anywhere under results/.
-  Nothing has ever called these scripts with --regime oracle.
-- aggregation into LaTeX tables; figures F1-F7. Confirmed: paper/
-  contains only PROJECT_CHECKPOINT.md, literature_notes.md, .gitkeep -
-  no .tex file and no figure anywhere in the repo.
-- ONE final test-set (2015) run, at the very end. Confirmed: no script
-  and no result JSON anywhere sets eval_split to "test" - every
-  run_*_dev.py, run_seed_sweep.py, rerun_residual_5yr.py, and
-  build_table4_protocol.py is hardcoded to "val" / the validation split.
-  2015 has not been touched for a forecast metric, only for the dead-
-  period data-quality audit (Finding 6), which reads availability only.
-- literature survey. results/literature_survey.csv has 3 coded rows
-  (abumohsen2024, xu2025, energyeng2025). data/papers/ has 24 source
-  PDFs. scripts/code_literature_survey.py (685 lines, uncommitted as of
-  2026-08-03) is the coding tool - deliberately non-classifying, prompts
-  a human for every judgement column, "not_stated" is a first-class
-  value. ~27 papers remain to code against the ~10-13 target in
-  literature_notes.md's action items / PROJECT IDENTITY's literature
-  plan.
+REMAINING - REQUIRED (re-confirmed absent from the repo on 2026-08-08;
+the oracle-regime and literature-survey items that were here as of
+2026-08-03 are done - see BUILT AND VALIDATED above):
+- aggregation into LaTeX tables; figures F1-F7. Confirmed 2026-08-08:
+  paper/ contains only PROJECT_CHECKPOINT.md, literature_notes.md,
+  WRITING_BRIEF.md, .gitkeep - no .tex file and no figure anywhere in
+  the repo.
+- ONE final test-set (2015) run, at the very end. Confirmed 2026-08-08:
+  no script and no result JSON anywhere sets eval_split to "test" -
+  every run_*_dev.py, run_seed_sweep.py, rerun_residual_5yr.py, and
+  build_table4_protocol.py / build_table6_dm.py is hardcoded to "val" /
+  the validation split, for both regimes. 2015 has not been touched for
+  a forecast metric, only for the dead-period data-quality audit
+  (Finding 6), which reads availability only.
 
 REMAINING - OPTIONAL, probably worth SKIPPING to protect writing time:
 - extending the 5-year/4-fold ablation to array17 and to the 6-seed grid
@@ -1173,6 +1197,21 @@ STALE ITEMS FOUND (beyond the three the user already named):
    matched the repo on inspection. The recurrent_base bit-for-bit claim
    is the one exception noted above - plausible but not re-verified,
    since doing so would mean re-running a fit rather than reading a file.
+4. FOUND AND FIXED 2026-08-08 (paper/WRITING_BRIEF.md gap 6): five days
+   after item 2 above already documented Section 6 drifting out of sync
+   with landed work, it had drifted again in the same direction. The
+   oracle-regime bullet still read "zero oracle result JSONs exist
+   anywhere" and the literature-survey bullet still read "3 coded rows"
+   against a repo state of 225/225 oracle runs complete (plus all three
+   oracle tables) and 27 coded survey rows. Both are moved to BUILT AND
+   VALIDATED above. Also fixed: five references to the pre-rename
+   `results/seed_sweep_summary.csv` (renamed to `_lagged`/`_oracle`
+   variants) scattered across Findings 8, 9, 11 and this section. This
+   is the same failure mode as items 1-2 above, recurring - Section 6 is
+   written once per pass and not revisited when later commits change
+   what is true underneath it. Treat any specific number or file-existence
+   claim in this section as good only as of the date on the bullet that
+   states it, not as of this document's original 2026-07-28 write date.
 
 ---
 
@@ -1187,8 +1226,8 @@ STALE ITEMS FOUND (beyond the three the user already named):
 | 5 reference choice (HEADLINE) | Table 4; figure | reference_comparison.csv |
 | 6 dead array / audit blind spots | Data; Intro motivation | dead_period_audit.csv |
 | 7 training length | ablation | seed sweep |
-| 8 architecture x horizon | Table 3, Table 5 | seed_sweep_summary.csv |
-| 9 convolution ablation | RQ1, Table 5; RQ4 compute | seed_sweep_summary.csv |
+| 8 architecture x horizon | Table 3, Table 5 | seed_sweep_summary_lagged.csv |
+| 9 convolution ablation | RQ1, Table 5; RQ4 compute | seed_sweep_summary_lagged.csv |
 | 10 residual leakage | Table 4 (largest effect); Intro | leaked_*.json + residual.py |
 | 11 residual penalty fold-sensitivity | RQ1; Table 4 | rerun_residual_5yr.py, diagnose_residual_signal.py |
 
@@ -1201,7 +1240,13 @@ order of severity:
 4. residual training-window length: penalty magnitude changes 19-96%
    depending on TRAIN_YEARS (2011-2013 vs 2009-2013), no sign flip but a
    large swing in a supposedly fixed architectural verdict
-5. (planned) oracle vs lagged weather
+5. oracle vs lagged weather - DONE as of 2026-08-08, not planned: the
+   oracle-regime seed sweep (225/225 runs) and its table4/table6
+   counterparts are complete. Oracle beats lagged on skill_vs_convex in
+   all 45 model x array x horizon cells, gap +0.51 to +0.72, growing
+   with horizon - report as a perfect-forecast UPPER BOUND, never an
+   achievable result (WRITING_BRIEF.md claim C20, Section 4 wording
+   constraint).
 
 Structure (~8 pages, IEEE two-column): Introduction, Related Work, Data
 and Preprocessing, Methodology (4.1 protocol FIRST, then 4.2
@@ -1219,12 +1264,35 @@ Key literature (notes in paper/literature_notes.md):
   A FILLED-IN MODEL INFO SHEET USING THEIR LABELS.
 - Nguyen & Musgens, arXiv 2208.10536 — meta-analysis, 1447 screened /
   320 read. Horizon dominates all other factors, so report per horizon.
+  NOT the same paper as the Nguyen & Musgens entry below - same first
+  two authors, different paper; do not conflate.
 - Hewamalage, Ackermann & Bergmeir, arXiv 2203.10716 — forecast
   evaluation pitfalls from the general ML side.
-- Three coded hybrid papers in results/literature_survey.csv; TEN MORE
-  NEEDED. Code the six columns that matter: night hours excluded,
-  baseline used, skill score reported, weather source, split type, seed
-  variance reported.
+- ADDED 2026-08-08 (was missing from this list; both already existed as
+  literature_notes.md entries 9-10 before this list was last written -
+  see paper/WRITING_BRIEF.md gap 6):
+  - Mayer (2022), Renewable and Sustainable Energy Reviews 168:112772 —
+    the ONE paper in the 27-paper survey that reports a skill score
+    against the exact Yang et al. (2020) convex-combination reference;
+    the paper's positive existence-proof citation. Also source of the
+    Section 2.6 consistency-principle result (different loss functionals
+    change which model wins) - a protocol axis this project did not
+    vary, cite in Limitations.
+  - Nguyen & Musgens (2021), arXiv 2111.02092, "What drives the accuracy
+    of PV output forecasts?" — 180-paper meta-analysis of reported PV
+    forecast errors, 13 prior narrative surveys with no statistical
+    analysis, and their "cherry picking" finding that test-set length is
+    negatively correlated with reported accuracy. Motivates this
+    project's one-calendar-year (2015) test set. NOT the same paper as
+    the Nguyen & Musgens (arXiv 2208.10536) entry above.
+- Literature survey COMPLETE as of 2026-08-08 (was "three coded hybrid
+  papers... TEN MORE NEEDED" as recently as 2026-08-03): 27 papers coded
+  in results/literature_survey.csv against the six columns that matter
+  (night hours excluded, baseline used, skill score reported, weather
+  source, split type, seed variance reported), 25 with a verbatim-quoted
+  evidence file under evidence/. See WRITING_BRIEF.md claims C27-C33 for
+  the aggregate counts and Section 8 (Citation Plan) for how the 27 rows
+  are used in the paper.
 
 REVIEWER RISK TO PRE-EMPT: Yang et al. recommend the convex combination
 as reference. We now report both, which is stronger than either alone —
