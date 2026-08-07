@@ -1,5 +1,12 @@
 # PROJECT CHECKPOINT
 
+AUTHORITY: the results CSVs and run JSONs are the source of truth. Prose
+in this document was written from working notes and has been found to
+drift - four numbers were wrong when audited on 2026-08-07 (sky-class
+pooled counts inflated 9x, RQ4 compute ratio, convex weight range at
+h=6, DKASC paper count). Verify any number here against its source file
+before using it. paper/WRITING_BRIEF.md carries the verified values.
+
 Written 2026-07-28, covering everything from environment setup to the
 90-run seed sweep. Purpose: a self-contained record of what was built,
 what was found, and WHY each decision was made, so the paper can be
@@ -344,7 +351,7 @@ scripts/build_table4_protocol.py's config C4 ("all 24 hours, skill vs
 smart persistence"): model + persistence only, no daylight filter,
 SmartPersistence forward-fills through the night so this genuinely spans
 8694 rows, a true 24h cycle, for every array x horizon cell. Written to
-results/table4_protocol.csv (config_id C4, hours_included all_24h).
+results/table4_protocol_lagged.csv (config_id C4, hours_included all_24h).
 Confirmed consistent with this finding's own closed-form prediction: at
 array11 h=3, nRMSE(C6)/nRMSE(C5) = 5.90/8.97 = 0.658 against a predicted
 sqrt(3762/8694) = 0.658, and skill vs persistence is 0.5265 (C2,
@@ -449,6 +456,18 @@ HIT's better temperature coefficient (-0.30%/degC vs -0.40%) gives less
 thermally-driven scatter in k_p, so the clear-sky index is more
 persistent. Not diagnosed further; one sentence at most.
 
+VERIFIED, 2026-08-07 (WRITING_BRIEF.md audit): re-checked directly
+against results/reference_comparison.csv's convex_weight column. The
+per-array h=6 values above (array11 0.04, array12 0.05, array17 0.31)
+are correct as stated - this is NOT one of the four numbers found wrong
+in the 2026-08-07 audit. It is flagged here anyway because a compressed
+summary of this finding ("w falls to 0.01-0.05 at h=6") was drafted
+once, elsewhere, without array17's exception, and was caught before it
+reached the paper. Never state a single h=6 range for convex weight
+without array17 named as the exception - see
+paper/WRITING_BRIEF.md Section 4 (wording constraints) and Section 5
+item 4.
+
 PAPER: this is Table 4 and probably a figure. It is the paper's single
 strongest evidence.
 
@@ -499,6 +518,21 @@ data/raw/array07_CdTe.csv and its audit rows are RETAINED as evidence.
 PAPER: Data section, and strong Introduction motivation. DKASC is a
 heavily used open dataset; any study taking array 7 through 2014 on the
 strength of a completeness check inherited seven months of zeros.
+
+ADDED, 2026-08-07 (WRITING_BRIEF.md audit) - this file never previously
+stated how heavily used: the 27-paper literature survey
+(results/literature_survey.csv) found 6 papers confirmed to use
+DKASC-family data (zhou2024cnnlstmattnbayes, hou2024vmdwoalstm,
+ye2026distributedcnnlstm, hussain2022hybridgrucnn, alharkan2023dsclanet,
+guo2024qrkddn) and 1 more (vennila2022solarensemble) whose dataset
+description "resembles DKASC tech mix" but never names the site,
+explicitly coded unconfirmed. Report as "6 confirmed, 1 unconfirmed
+resemblance," never rounded to 7. Was flagged as one of four numbers
+this file was audited against on 2026-08-07 (see the AUTHORITY line at
+the top of this document) because no count had been recorded here at
+all prior to this addition - not because a wrong count was previously
+stated. See paper/WRITING_BRIEF.md Section 2 claim C31 and Section 4
+(wording constraints).
 
 Scripts: scripts/diagnose_array_level_shift.py (NOTE: provenance only,
 run against the original 2009-2013 window),
@@ -560,6 +594,18 @@ most claimed improvements in this literature.
 RQ4 PREVIEW: LSTM fit ~16 s vs XGBoost sub-second, roughly 30:1 compute
 for zero measurable gain at h=1 and h=3.
 
+CORRECTION, 2026-08-07 (WRITING_BRIEF.md audit): "~16 s" and "roughly
+30:1" do not match any aggregation of the committed run JSONs. Recomputed
+directly from all 45 results/xgboost_array*_h*_lagged_seed*.json and the
+equivalent lstm files: xgboost mean fit_seconds 0.55s (range 0.43-0.92s),
+lstm mean 10.11s (range 5.86-18.30s) - a ratio of about 18:1, not 30:1,
+checked overall and per-horizon (h=1/h=3/h=6 breakdowns also do not
+produce 16s or 30:1). The qualitative point stands - LSTM is roughly an
+order of magnitude slower than XGBoost for gains that are not
+significant at h=1/h=3 - but use 0.55s/10.11s/~18:1, not this line's
+figures, in the paper. See paper/WRITING_BRIEF.md Section 5 item 7 and
+Section 2 claim C24.
+
 STATISTICAL CAVEAT, IMPORTANT: the aggregator's current test compares the
 difference in means against 2x the std of INDIVIDUAL RUNS. That is not a
 correct two-sample test. This section originally replaced it with a
@@ -574,7 +620,7 @@ Diebold-Mariano on paired forecast error series across the ~3760
 daylight hours (HAC variance, HLN small-sample correction,
 Holm-Bonferroni within cell): the actual array11 h6 statistic is
 hln_stat 2.56, p_holm 0.073, not t~6, and it does not clear
-significance. See Finding 12 Part A and results/table6_dm.csv. This
+significance. See Finding 12 Part A and results/table6_dm_lagged.csv. This
 finding committed, within the same section that goes on to warn against
 it, the exact error of letting seed spread substitute for DM - see
 Record of Wrong Predictions #12.
@@ -647,6 +693,16 @@ THREE AXES:
    +/-0.0061 LSTM vs +/-0.0027 XGBoost.
 3. Compute: fit times ~20-31 s vs ~14-27 s for the LSTM, roughly 20-30
    percent more.
+
+   CORRECTION, 2026-08-07 (WRITING_BRIEF.md audit): "~20-31s" and
+   "~14-27s" do not match any aggregation of the committed run JSONs
+   either (checked overall mean/range and per-horizon). Recomputed
+   directly: lstm mean fit_seconds 10.11s (range 5.86-18.30s), cnn_lstm
+   mean 12.23s (range 6.74-20.88s) - cnn_lstm costs about 21% more mean
+   fit time than lstm, which is the right order of magnitude for "20-30
+   percent more," but the absolute second-count ranges in this line are
+   wrong and should not be quoted. Use 10.11s/12.23s/~21% in the paper.
+   See paper/WRITING_BRIEF.md Section 5 item 7 and Section 2 claim C26.
 
 INTERPRETATION: at h=6, where recurrent models hold a genuine advantage
 over XGBoost, convolution gives back roughly half of it on all three
@@ -725,7 +781,7 @@ TWO SEPARATE RESULTS:
 (a) The residual stage HURTS by about -0.034 once leakage is removed -
     roughly six LSTM seed standard deviations. This is no longer awaiting
     confirmation: Diebold-Mariano (Finding 12 Part A,
-    results/table6_dm.csv) independently confirms lstm vs lstm_residual
+    results/table6_dm_lagged.csv) independently confirms lstm vs lstm_residual
     at array11 h=6 is significant in the direction of plain LSTM
     (hln_stat -3.45, p_holm 0.0056).
 
@@ -735,7 +791,7 @@ TWO SEPARATE RESULTS:
     "Fit the second stage on the validation split" reads as reasonable
     in a methods section. CAVEAT ON THIS COMPARISON: it rests on ONE
     seed, ONE array (array11), ONE horizon (h=6). The leaked variant was
-    never run through the DM pipeline - table6_dm.csv has no leaked-model
+    never run through the DM pipeline - table6_dm_lagged.csv has no leaked-model
     column - so the sign-flip/magnitude claim itself has no significance
     test behind it, only the single-run numbers above. That is adequate
     for demonstrating that the leak is possible and large, but it is not
@@ -811,10 +867,10 @@ was never tested with Diebold-Mariano - the "3-4 standard errors" figure
 is a 3-seed two-sample SE (the same category of statistic Finding 8 had
 to retract, not an autocorrelation-aware test on the daylight-hour error
 series), and it was computed only for the 5-year/4-fold sensitivity run,
-which was never run through the DM pipeline at all: table6_dm.csv has no
+which was never run through the DM pipeline at all: table6_dm_lagged.csv has no
 5-year-window entries, only the standard 3-year/2-fold config. The
 numbers in both tables above stand; the significance status does not.
-On the 3-year/2-fold config that IS in table6_dm.csv, DM on lstm vs
+On the 3-year/2-fold config that IS in table6_dm_lagged.csv, DM on lstm vs
 lstm_residual gives: array11 h1 not significant (hln_stat -2.46, p_holm
 0.069); array11 h3 significant (-3.45, p_holm 0.0040); array11 h6
 significant (-3.45, p_holm 0.0056); array12 h1 significant (-2.89, p_holm
@@ -902,7 +958,7 @@ t(n-1) rather than the normal DM originally used) and dm_matrix (all
 C(7,2)=21 pairwise comparisons per array x horizon cell across the 5
 forecasters plus smart_persistence and convex_reference, Holm-Bonferroni
 corrected within each cell). scripts/build_table6_dm.py writes
-results/table6_dm.csv: 189 pairs (21 x 3 arrays x 3 horizons), 138/189
+results/table6_dm_lagged.csv: 189 pairs (21 x 3 arrays x 3 horizons), 138/189
 significant at Holm-corrected p<0.05 overall - but only 39/90 once the
 two baseline comparators are excluded and only the 5 core forecasters
 are compared against each other. Most of the raw significance count
@@ -940,6 +996,27 @@ writes results/table_sky.csv (xgboost, lstm, lstm_residual x 3 arrays x
 3 horizons x 3 classes). Pooled daylight-hour counts: clear 60,048,
 partly_cloudy 33,021, overcast 6,426 - overcast is the rarest condition
 at this site, ~6.5% of daylight hours.
+
+CORRECTION, 2026-08-07 (WRITING_BRIEF.md audit): the three pooled counts
+above are WRONG - inflated roughly 9x. results/table_sky.csv's n column
+is IDENTICAL across all 3 models (xgboost/lstm/lstm_residual) for the
+same array+horizon+sky_class cell, because n is "how many hours fall
+into this class," independent of which model is evaluated on them - and
+also IDENTICAL across all 3 arrays for the same horizon+sky_class,
+because sky classification depends only on the shared weather-station
+GHI signal (verified directly: array11/array12/array17 all report
+n=2229 at h=1 clear; xgboost/lstm/lstm_residual all report n=2229 at
+array11 h=1 clear). Summing the raw n column over all 81 rows therefore
+counts each distinct set of clock-hours roughly 9 times (3 models x 3
+arrays). The minimally-duplicated citable number is ONE array's ONE
+horizon's three class counts - e.g. array11 h=1: clear 2229,
+partly_cloudy 1223, overcast 239 (results/table_sky.csv, filtered to
+array=array11, horizon=1, model=xgboost). No correctly-deduplicated
+multi-cell "pooled" total exists anywhere in the repo as of this
+correction - see paper/WRITING_BRIEF.md Section 5 item 8 and Section 9
+gap 7. The 6.5% relative-rarity claim survives (239/(2229+1223+239) =
+6.4%, same order as the retracted 6,426/(60048+33021+6426) = 6.1%), but
+do not copy 60,048/33,021/6,426 into the paper as a real headcount.
 
 RESULT - mean skill_vs_convex by class: clear 0.332, overcast 0.235,
 partly_cloudy 0.066. partly_cloudy is the WORST class, below overcast,
@@ -997,7 +1074,7 @@ BUILT AND VALIDATED (each line checked against the repo on 2026-08-03):
 - Diebold-Mariano significance testing: src/eval/dm.py (HAC variance,
   Bartlett kernel, HLN small-sample correction, Holm-Bonferroni within
   cell), written via scripts/build_table6_dm.py to
-  results/table6_dm.csv - confirmed 189 data rows (21 pairs x 3 arrays x
+  results/table6_dm_lagged.csv - confirmed 189 data rows (21 pairs x 3 arrays x
   3 horizons) via file line count. This is the paper's significance test;
   see Finding 12 Part A.
 - sky-condition classification for RQ3: src/eval/sky.py classify_sky
@@ -1007,7 +1084,7 @@ BUILT AND VALIDATED (each line checked against the repo on 2026-08-03):
   arrays x 3 horizons x 3 classes). See Finding 12 Part B.
 - protocol-inflation Table 4: scripts/build_table4_protocol.py, six
   configs (C1-C6) computed from scratch per array x horizon, written to
-  results/table4_protocol.csv - confirmed 54 data rows (6 configs x 3
+  results/table4_protocol_lagged.csv - confirmed 54 data rows (6 configs x 3
   arrays x 3 horizons). Config C4 ("all 24 hours, skill vs smart
   persistence") is the all_hours_vs_persistence fix - genuinely spans
   8694 rows/year with no daylight filter, confirmed against Finding 2's
