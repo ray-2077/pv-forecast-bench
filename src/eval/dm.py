@@ -230,7 +230,7 @@ def dm_matrix(errors_by_model, h, loss="squared", alternative="two-sided"):
         better_model - the raw, un-pivoted results, including BOTH raw and
         Holm-adjusted p-values (p_holm_df above only carries the adjusted
         ones). This is what scripts/build_table6_dm.py writes to
-        results/table6_dm.csv after adding its own array/horizon columns.
+        results/table6_dm_lagged.csv after adding its own array/horizon columns.
     """
     model_names = list(errors_by_model.keys())
     m = len(model_names)

@@ -48,7 +48,7 @@ vs XGBoost - the 2*std heuristic called this "likely a real difference",
 but the actual significance test (Diebold-Mariano, which accounts for the
 autocorrelation of overlapping-horizon forecast errors) gives p_raw =
 0.010, p_holm = 0.073 - not significant after Holm correction across all
-pairs in that cell. See results/table6_dm.csv (scripts/build_table6_dm.py)
+pairs in that cell. See results/table6_dm_lagged.csv (scripts/build_table6_dm.py)
 for the real test. Seed mean/std stays in this script and in Table 3: it
 is a legitimate reproducibility statistic, just not a significance test.
 
@@ -185,7 +185,7 @@ def print_pairwise_comparisons(summary):
     print("\npairwise skill_vs_convex comparisons, per array x horizon:")
     print(
         "Significance is tested by Diebold-Mariano in "
-        "results/table6_dm.csv, not by seed spread. Seed spread measures "
+        "results/table6_dm_lagged.csv, not by seed spread. Seed spread measures "
         "training stochasticity; DM measures whether one model forecasts "
         "better on this data."
     )
