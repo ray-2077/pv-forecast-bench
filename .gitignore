@@ -16,6 +16,11 @@ data/processed/
 *.csv
 *.parquet
 
+# Literature survey source PDFs - copyrighted, not ours to redistribute.
+# results/literature_survey.csv (the coded output) is the audit trail and
+# stays tracked; see the "results/ is deliberately NOT ignored" note below.
+data/papers/
+
 # Model checkpoints - large binaries
 checkpoints/
 *.pt
@@ -23,6 +28,9 @@ checkpoints/
 *.pkl
 *.joblib
 logs/
+
+# Literature survey evidence logs - regenerable from data/papers/, not the
+# audit trail itself (results/literature_survey.csv is; see CLAUDE.md)
 
 # LaTeX build artifacts
 *.aux
