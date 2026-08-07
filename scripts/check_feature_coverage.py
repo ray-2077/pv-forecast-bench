@@ -48,7 +48,7 @@ NAMEPLATE_KW = 5.0
 GAMMA_PDC = GAMMA_PDC_SILICON
 
 HORIZONS = [1, 3, 6]
-REGIME = "lagged"
+REGIME = "lagged"  # lagged-only by design, does not accept --regime (2026-08-07 audit)
 
 
 def load_array11_train_val():

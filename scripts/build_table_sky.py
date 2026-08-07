@@ -65,7 +65,7 @@ RESULTS_DIR = REPO_ROOT / "results"
 
 HORIZONS = (1, 3, 6)
 SEED = 0
-REGIME = "lagged"
+REGIME = "lagged"  # lagged-only by design, does not accept --regime (2026-08-07 audit)
 REPORTED_MODELS = ("xgboost", "lstm", "lstm_residual")
 
 CSV_COLUMNS = [

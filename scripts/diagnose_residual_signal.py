@@ -67,7 +67,7 @@ PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 
 ARRAY = "array11"
 SEED = 0
-REGIME = "lagged"
+REGIME = "lagged"  # lagged-only by design, does not accept --regime (2026-08-07 audit)
 
 TRAIN_YEARS_3YR = (2011, 2012, 2013)
 TRAIN_YEARS_5YR = (2009, 2010, 2011, 2012, 2013)

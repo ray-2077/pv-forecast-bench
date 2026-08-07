@@ -72,7 +72,7 @@ RESULTS_DIR_5YR = REPO_ROOT / "results" / "train5yr"
 ARRAYS = ["array11", "array12"]
 HORIZONS = [1, 3, 6]
 SEEDS = [0, 1, 2]
-REGIME = "lagged"
+REGIME = "lagged"  # lagged-only by design, does not accept --regime (2026-08-07 audit)
 
 TRAIN_YEARS_3YR = (2011, 2012, 2013)
 TRAIN_YEARS_5YR = (2009, 2010, 2011, 2012, 2013)

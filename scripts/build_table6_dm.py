@@ -30,9 +30,16 @@ touched once at the end):
   Holm-Bonferroni correction applied across the 21 pairs within that one
   (array, horizon) cell.
 
-Writes results/table6_dm.csv, one row per (array, horizon, model_1,
-model_2): array, horizon, model_1, model_2, dbar, dm_stat, hln_stat,
-p_raw, p_holm, n, better_model.
+Writes results/table6_dm_<regime>.csv, one row per (array, horizon,
+model_1, model_2): array, horizon, model_1, model_2, dbar, dm_stat,
+hln_stat, p_raw, p_holm, n, better_model.
+
+--regime selects lagged (default) or oracle, mirroring run_seed_sweep.py
+and aggregate_seed_sweep.py's flag exactly - CLAUDE.md rule 5. Output
+path is regime-suffixed so the two can never shadow each other
+(2026-08-07: see build_table4_protocol.py's docstring for why this
+matters - this script had the same hardcoded-REGIME, no-flag,
+un-suffixed-output shape until now).
 
 Prints, for each (array, horizon), the intersection size n and which
 pairs are significant at p_holm < 0.05.
@@ -47,9 +54,10 @@ a real model fit and predict on real data (CLAUDE.md research integrity
 rules).
 
 Usage:
-    python scripts/build_table6_dm.py
+    python scripts/build_table6_dm.py [--regime {lagged,oracle}]
 """
 
+import argparse
 import sys
 import time
 from pathlib import Path
@@ -78,7 +86,6 @@ RESULTS_DIR = REPO_ROOT / "results"
 
 HORIZONS = (1, 3, 6)
 SEED = 0
-REGIME = "lagged"
 ALPHA = 0.05
 
 CSV_COLUMNS = [
@@ -154,13 +161,19 @@ def run_self_test():
 # Model fitting
 # ---------------------------------------------------------------------------
 
-def fit_all_models(train, val, horizon, seed):
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--regime", choices=("lagged", "oracle"), default="lagged")
+    return parser.parse_args()
+
+
+def fit_all_models(train, val, horizon, seed, regime):
     """Fit all 5 benchmark models plus smart persistence and the convex
     reference at `seed`, on this (array, horizon)'s train/val, and return
     {model_name: predictions Series}. Mirrors scripts/run_xgb_dev.py /
     run_lstm_dev.py / run_cnn_lstm_dev.py / run_residual_dev.py exactly,
     minus the per-script result-JSON writing (this script's own output is
-    results/table6_dm.csv, not one run JSON per model).
+    results/table6_dm_<regime>.csv, not one run JSON per model).
 
     Residual models use residual_fit_split='oof' (the default and only
     scheme that should ever produce a reported result, CLAUDE.md rule 6).
@@ -168,30 +181,30 @@ def fit_all_models(train, val, horizon, seed):
     set_all_seeds(seed)
     preds = {}
 
-    xgb_model = XGBForecaster(seed=seed, regime=REGIME)
+    xgb_model = XGBForecaster(seed=seed, regime=regime)
     xgb_model.fit(train, horizon, df_val=val)
     preds["xgboost"] = xgb_model.predict(val, horizon)
     check_no_lookahead(val, preds["xgboost"], horizon)
 
-    lstm_model = LSTMForecaster(seed=seed, regime=REGIME)
+    lstm_model = LSTMForecaster(seed=seed, regime=regime)
     lstm_model.fit(train, horizon, df_val=val)
     preds["lstm"] = lstm_model.predict(val, horizon)
     check_no_lookahead(val, preds["lstm"], horizon)
 
-    cnn_lstm_model = CNNLSTMForecaster(seed=seed, regime=REGIME)
+    cnn_lstm_model = CNNLSTMForecaster(seed=seed, regime=regime)
     cnn_lstm_model.fit(train, horizon, df_val=val)
     preds["cnn_lstm"] = cnn_lstm_model.predict(val, horizon)
     check_no_lookahead(val, preds["cnn_lstm"], horizon)
 
     lstm_residual_model = ResidualCorrected(
-        LSTMForecaster(seed=seed, regime=REGIME), seed=seed, residual_fit_split="oof"
+        LSTMForecaster(seed=seed, regime=regime), seed=seed, residual_fit_split="oof"
     )
     lstm_residual_model.fit(train, horizon, val)
     preds["lstm_residual"] = lstm_residual_model.predict(val, horizon)
     check_no_lookahead(val, preds["lstm_residual"], horizon)
 
     cnn_lstm_residual_model = ResidualCorrected(
-        CNNLSTMForecaster(seed=seed, regime=REGIME), seed=seed, residual_fit_split="oof"
+        CNNLSTMForecaster(seed=seed, regime=regime), seed=seed, residual_fit_split="oof"
     )
     cnn_lstm_residual_model.fit(train, horizon, val)
     preds["cnn_lstm_residual"] = cnn_lstm_residual_model.predict(val, horizon)
@@ -213,8 +226,8 @@ def fit_all_models(train, val, horizon, seed):
     return preds
 
 
-def build_cell(array, horizon, train, val, nameplate_kw):
-    preds = fit_all_models(train, val, horizon, SEED)
+def build_cell(array, horizon, train, val, nameplate_kw, regime):
+    preds = fit_all_models(train, val, horizon, SEED, regime)
 
     common_idx = preds["xgboost"].index
     for name, p in preds.items():
@@ -259,6 +272,8 @@ def build_cell(array, horizon, train, val, nameplate_kw):
 
 
 def main():
+    regime = parse_args().regime
+
     if not run_self_test():
         print("self-test FAILED - aborting before touching any data")
         sys.exit(1)
@@ -273,11 +288,11 @@ def main():
 
         for horizon in HORIZONS:
             print(f"\n{'=' * 90}")
-            print(f"array={array}  horizon={horizon}h  seed={SEED}  regime={REGIME}  (validation split, 2014)")
+            print(f"array={array}  horizon={horizon}h  seed={SEED}  regime={regime}  (validation split, 2014)")
             print("=" * 90)
 
             start = time.perf_counter()
-            pairs_df, hln_df, p_holm_df = build_cell(array, horizon, train, val, nameplate_kw)
+            pairs_df, hln_df, p_holm_df = build_cell(array, horizon, train, val, nameplate_kw, regime)
             elapsed = time.perf_counter() - start
             print(f"  cell done in {elapsed:.1f}s")
 
@@ -287,7 +302,7 @@ def main():
 
     out_df = pd.concat(all_rows, ignore_index=True)[CSV_COLUMNS]
     RESULTS_DIR.mkdir(exist_ok=True)
-    out_path = RESULTS_DIR / "table6_dm.csv"
+    out_path = RESULTS_DIR / f"table6_dm_{regime}.csv"
     out_df.to_csv(out_path, index=False)
     print(f"\nwrote {out_path}  ({len(out_df)} rows)")
 

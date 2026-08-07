@@ -62,18 +62,29 @@ per Finding 2's derivation (RMSE_all = RMSE_day * sqrt(N_day / N_all),
 assuming night errors are ~0 since both truth and a sane forecast are
 ~0 at night).
 
-Writes results/table4_protocol.csv, one row per (array, horizon,
+Writes results/table4_protocol_<regime>.csv, one row per (array, horizon,
 config): array, horizon, config_id, config_description, n_samples,
 rmse, nrmse, mae, mbe, skill, reference_used, hours_included.
+
+--regime selects lagged (default) or oracle, mirroring run_seed_sweep.py
+and aggregate_seed_sweep.py's flag exactly - CLAUDE.md rule 5, lagged and
+oracle must never be mixed in one table. Output path is regime-suffixed
+so the two can never shadow each other (2026-08-07: this script and
+build_table6_dm.py used to hardcode REGIME = "lagged" with no flag at
+all and a single un-suffixed output path - the exact same latent bug
+that made aggregate_seed_sweep.py's --regime oracle a silent no-op,
+just never triggered here because nothing ever tried passing --regime
+to this script before).
 
 No plotting, no test-split access, no fabricated numbers - every row is
 a real XGBoost fit and predict on real data (CLAUDE.md research
 integrity rules).
 
 Usage:
-    python scripts/build_table4_protocol.py
+    python scripts/build_table4_protocol.py [--regime {lagged,oracle}]
 """
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -98,7 +109,6 @@ RESULTS_DIR = REPO_ROOT / "results"
 
 HORIZONS = (1, 3, 6)
 SEED = 0
-REGIME = "lagged"
 
 # (config_id, description, hours_included, reference_key) - reference_key
 # indexes into the reference_preds dict built per (array, horizon), or is
@@ -134,7 +144,13 @@ def drop_outages(array, idx):
     return idx[~mask.to_numpy()]
 
 
-def fit_forecasters(train, val, horizon, seed):
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--regime", choices=("lagged", "oracle"), default="lagged")
+    return parser.parse_args()
+
+
+def fit_forecasters(train, val, horizon, seed, regime):
     """Fit xgboost + the two reference forecasters on this (array,
     horizon)'s train/val, and return their predictions on val plus the
     fitted convex weight. Mirrors scripts/run_xgb_dev.py's pipeline
@@ -143,7 +159,7 @@ def fit_forecasters(train, val, horizon, seed):
     """
     set_all_seeds(seed)
 
-    model = XGBForecaster(seed=seed, regime=REGIME)
+    model = XGBForecaster(seed=seed, regime=regime)
     model.fit(train, horizon, df_val=val)
     preds_xgb = model.predict(val, horizon)
     check_no_lookahead(val, preds_xgb, horizon)
@@ -207,6 +223,8 @@ def print_config_row(row):
 
 
 def main():
+    regime = parse_args().regime
+
     all_rows = []
     closed_form_rows = []
 
@@ -217,11 +235,11 @@ def main():
 
         for horizon in HORIZONS:
             print(f"\n{'=' * 90}")
-            print(f"array = {array}  horizon = {horizon}h  model = xgboost  regime = {REGIME}  "
+            print(f"array = {array}  horizon = {horizon}h  model = xgboost  regime = {regime}  "
                   f"seed = {SEED}  (validation split, 2014)")
             print("=" * 90)
 
-            preds_xgb, reference_preds, convex_w = fit_forecasters(train, val, horizon, SEED)
+            preds_xgb, reference_preds, convex_w = fit_forecasters(train, val, horizon, SEED, regime)
             print(f"convex_weight (fit on validation) = {convex_w:.2f}")
 
             cell_rows = {}
@@ -252,7 +270,7 @@ def main():
             })
 
     RESULTS_DIR.mkdir(exist_ok=True)
-    out_path = RESULTS_DIR / "table4_protocol.csv"
+    out_path = RESULTS_DIR / f"table4_protocol_{regime}.csv"
     out_df = pd.DataFrame(all_rows, columns=[
         "array", "horizon", "config_id", "config_description", "n_samples",
         "rmse", "nrmse", "mae", "mbe", "skill", "reference_used", "hours_included",
