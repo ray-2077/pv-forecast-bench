@@ -676,13 +676,15 @@ is.
    above says otherwise (RQ4 timing figures, sky-stratification pooled
    counts).
 
-7. **No correctly-deduplicated sky-stratification "pooled" figure exists
-   anywhere** (Section 5, item 8). Before Table 7 or Figure F5 can be
-   built, decide and implement the correct aggregation: almost certainly
-   "sum over the 3 horizons within ONE array" (since arrays are
-   redundant but horizons are not, per the verification in Section 5),
-   not the current 9x-duplicated prose figures in PROJECT_CHECKPOINT.md
-   Finding 12B.
+7. **RESOLVED 2026-08-08.** The correctly-deduplicated sky-stratification
+   "pooled" figure now exists: PROJECT_CHECKPOINT.md Finding 12 Part B,
+   dated 2026-08-08 addendum. Aggregation implemented is "sum over the 3
+   horizons within ONE array" (arrays are redundant, horizons are not),
+   giving clear 6672 (60.4%), partly_cloudy 3669 (33.2%), overcast 714
+   (6.5%), total 11055, computed from array11/xgboost and representative
+   of any array per the model/array-invariance already verified in
+   Section 5 item 8. Table 7 / Figure F5 should cite this figure, named
+   explicitly as one array's pooled-over-horizon count in the caption.
 
 8. **T5's exact content (RQ1 component-attribution summary table) is not
    specified anywhere** beyond "Table 5" being named in prose. This brief

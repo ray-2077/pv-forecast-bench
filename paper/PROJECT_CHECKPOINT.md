@@ -1018,6 +1018,30 @@ gap 7. The 6.5% relative-rarity claim survives (239/(2229+1223+239) =
 6.4%, same order as the retracted 6,426/(60048+33021+6426) = 6.1%), but
 do not copy 60,048/33,021/6,426 into the paper as a real headcount.
 
+CORRECTLY-DEDUPLICATED POOLED COUNT, ADDED 2026-08-08 (resolves
+paper/WRITING_BRIEF.md gap 7): the right aggregation is SUM OVER THE 3
+HORIZONS WITHIN ONE ARRAY, not across arrays and not across models -
+arrays are redundant (identical n for the same horizon+class, confirmed
+above) but horizons are not (each horizon's daylight target set is a
+different, non-overlapping slice of the calendar, per Finding 3's
+per-horizon coverage differences), so summing across horizons pools
+genuinely distinct clock-hours while summing across arrays or models
+would still double- or triple-count the same hours. Computed directly
+from results/table_sky.csv, model=xgboost, array=array11, horizons 1/3/6
+(count is model- and array-invariant per the CORRECTION above, so any
+one model/array is representative):
+  clear:         2229 + 2225 + 2218 = 6672  (60.4%)
+  partly_cloudy: 1223 + 1221 + 1225 = 3669  (33.2%)
+  overcast:       239 +  239 +  236 =  714  ( 6.5%)
+  total: 11055 daylight-hour observations (h=1/3/6 pooled, one array)
+This is the number to cite in Table 7 / Figure F5 as "daylight hours by
+sky class, pooled over horizon, array11" (or equivalently array12/17 -
+name the array explicitly in the caption so a reader does not read it as
+a 3-array sum). It replaces both the retracted 60,048/33,021/6,426 line
+above and the single-horizon 2229/1223/239 citation as the table's
+actual pooled figure; the single-horizon numbers remain valid as a
+per-horizon breakdown, not as "the" pooled count.
+
 RESULT - mean skill_vs_convex by class: clear 0.332, overcast 0.235,
 partly_cloudy 0.066. partly_cloudy is the WORST class, below overcast,
 in every one of the 9 array x horizon cells with zero exceptions (e.g.
