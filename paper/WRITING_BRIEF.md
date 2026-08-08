@@ -12,7 +12,7 @@ repo during the writing of this brief (CSV query, JSON read, or file
 count), not copied from memory or from PROJECT_CHECKPOINT.md's prose
 without re-checking. Where PROJECT_CHECKPOINT.md's prose could not be
 reproduced from the committed data, that is stated explicitly in Section
-5 or Section 9 (GAPS), not silently corrected or silently repeated.
+5 or Section 10 (GAPS), not silently corrected or silently repeated.
 
 ASCII only, per CLAUDE.md.
 
@@ -90,14 +90,14 @@ Confidence levels used throughout this brief:
 | C17 | The horizon trend flips sign of curvature depending on reference: monotonically increasing vs persistence (0.253/0.526/0.652 at h1/3/6, array11), non-monotonic and peaking at h=3 vs convex (0.200/0.276/0.194) | `results/reference_comparison.csv`, array11, all 3 horizons | 5 | Intro; T4 (row 2); F1 | established |
 | C18 | Convex weight w is not uniform across arrays at h=6: array11 w=0.04, array12 w=0.05, array17 w=0.31 - persistence remains informative on array17 when it is nearly worthless on the other two | `results/reference_comparison.csv`, convex_weight column | 5 | Methodology 4.1; T4 | descriptive - see Section 5 for the exact-value trap |
 | C19 | Residual fit-split leakage: fitting the residual stage on validation residuals (leaked_by_design) instead of out-of-fold training residuals turns a -0.034 penalty into an apparent +0.334 gain - a sign flip and an order of magnitude, on one seed/array/horizon | `results/leaked_lstm_residual_array11_h6_lagged_seed0.json` (INVALID_LEAKED=true) vs the corrected pair in C7 | 10 | Intro; T4 (row 3) | descriptive (single cell, explicitly not a general effect-size claim - see Section 3) |
-| C20 | Oracle regime beats lagged regime on skill_vs_convex in all 45 model x array x horizon cells, gap +0.51 to +0.72, growing with horizon | `results/seed_sweep_summary_oracle.csv` vs `results/seed_sweep_summary_lagged.csv`, mean_skill_vs_convex, joined on model/array/horizon | (post-checkpoint; not in PROJECT_CHECKPOINT.md - see Section 9) | T4 (row 5); F2 (F7 was reassigned 2026-08-08 - see Section 7) | established (oracle is an upper bound, not itself a forecast result - see Section 4) |
+| C20 | Oracle regime beats lagged regime on skill_vs_convex in all 45 model x array x horizon cells, gap +0.51 to +0.72, growing with horizon | `results/seed_sweep_summary_oracle.csv` vs `results/seed_sweep_summary_lagged.csv`, mean_skill_vs_convex, joined on model/array/horizon | (post-checkpoint; not in PROJECT_CHECKPOINT.md - see Section 10) | T4 (row 5); F2 (F7 was reassigned 2026-08-08 - see Section 7) | established (oracle is an upper bound, not itself a forecast result - see Section 4) |
 | C21 | Oracle-regime protocol machinery is regime-agnostic: the closed-form night-inclusion check (C14's identity) also holds under oracle, within 0.001-0.028 across all 9 cells | `results/table4_protocol_oracle.csv`, same C5/C6 comparison as C14 | (post-checkpoint) | Methodology 4.1 (robustness check) | established |
 | C22 | Sky-condition stratification: mean skill_vs_convex by class (one array x horizon cell, e.g. array11 h1) is NOT monotonic in visible cloudiness - partly_cloudy scores lowest (0.066 pooled mean), below overcast (0.235), below clear (0.332), with zero exceptions across the 9 cells checked | `results/table_sky.csv`, grouped by sky_class, skill_vs_convex column | 12B | Results RQ3; T7; F5 | established (direction; see Section 5 for the "pooled count" trap in the N reported) |
 | C23 | Overcast is the rarest sky condition at this site: at h=6 (any array, all three identical), n=236 daylight hours out of ~3756 | `results/table_sky.csv`, sky_class=overcast, horizon=6 | 12B | Results RQ3; T7 | descriptive - see Section 3, n=236 caveat |
 | C24 | RQ4 compute: mean fit time is 0.55s (xgboost), 10.11s (lstm), 12.23s (cnn_lstm), 22.73s (lstm_residual), 25.02s (cnn_lstm_residual), across all 45 lagged runs per model | Computed directly from `results/<model>_array*_h*_lagged_seed*.json`, timings.fit_seconds, this session - NOT copied from PROJECT_CHECKPOINT.md prose (see Section 5) | 8, 9 (numbers superseded - see Section 5) | Results RQ4; T3 | descriptive |
 | C25 | LSTM costs ~18x XGBoost's fit time (10.11s vs 0.55s mean) for a gain that is not significant at h=1/h=3 and significant on only 1 of 3 arrays at h=6 | Same as C24, joined with C1/C2 | 8 | Results RQ4 | descriptive + established (the "not significant" part) |
 | C26 | CNN-LSTM costs ~21% more fit time than plain LSTM (12.23s vs 10.11s mean) for a non-significant accuracy change (C5) | Same as C24, joined with C5 | 9 | Results RQ4 | descriptive + established (non-effect) |
-| C27 | Literature survey: 27 papers coded, 25 with a verbatim-quoted audit file (`evidence_level=quoted`), 2 coded from pre-existing summary notes only (`evidence_level=summary_only`, no locatable source PDF) | `results/literature_survey.csv`, evidence_level column, 27 rows | (not in PROJECT_CHECKPOINT.md - see Section 9) | Related Work; T2 | descriptive |
+| C27 | Literature survey: 27 papers coded, 25 with a verbatim-quoted audit file (`evidence_level=quoted`), 2 coded from pre-existing summary notes only (`evidence_level=summary_only`, no locatable source PDF) | `results/literature_survey.csv`, evidence_level column, 27 rows | (not in PROJECT_CHECKPOINT.md - see Section 10) | Related Work; T2 | descriptive |
 | C28 | 26 of 27 surveyed papers report NO skill score against any reference forecast; the one exception (mayer2022) uses the exact Yang et al. (2020) convex-combination reference | `results/literature_survey.csv`, skill_score_reported column (no=26, yes=1) and baseline_used column (convex=1) | (existence proof for the paper's whole framing) | Intro; Related Work; T2 | descriptive |
 | C29 | 27 of 27 surveyed papers report ZERO run-to-run (seed) variance | `results/literature_survey.csv`, variance_reported column (no=27) | | Intro; Related Work; T2 | descriptive |
 | C30 | Only 1 of 27 surveyed papers (hussain2022) states code is available; 26 leave code_available not_stated | `results/literature_survey.csv`, code_available column | | Related Work; T2 | descriptive |
@@ -352,7 +352,7 @@ stated.
    The actual current state, verified directly against `results/
    literature_survey.csv` for this brief: 27 rows total, 25 with a
    verbatim-quoted audit file. PROJECT_CHECKPOINT.md is stale on this
-   specific point as of this brief's writing - see Section 9 (GAPS).
+   specific point as of this brief's writing - see Section 10 (GAPS).
 
 7. **RQ4 compute figures in PROJECT_CHECKPOINT.md's prose (Findings 8/9)
    do not match any aggregation this brief could reproduce from the
@@ -388,7 +388,7 @@ stated.
    citable number is ONE array's ONE horizon's three class counts, e.g.
    array11 h=1: clear 2229, partly_cloudy 1223, overcast 239. No
    correctly-deduplicated multi-cell "pooled" total has been computed
-   anywhere in the repo as of this brief - see Section 9 (GAPS). Do not
+   anywhere in the repo as of this brief - see Section 10 (GAPS). Do not
    copy 60,048/33,021/6,426 into the paper as a real headcount.
 
 ---
@@ -406,7 +406,7 @@ protocol effects; this paper is that study, on DKASC data, with a
 specific, closed-form demonstration (night-hour inclusion, C14) that a
 reviewer can check independently. Claims used: C14, C16, C19 (as a
 teaser, full development in Results), C27-C29 (existence-proof framing;
-cite mayer2022 explicitly per Section 8). No tables/figures of its own;
+cite mayer2022 explicitly per Section 9). No tables/figures of its own;
 may forward-reference F1 and T4.
 
 ### 2. Related Work (~1 column)
@@ -416,7 +416,7 @@ failure modes outside solar; (b) the solar-forecasting verification
 literature (Yang et al. 2020) already recommends the fix and documents
 the low-elevation instability this project independently rediscovered;
 (c) the surveyed hybrid-PV literature (27 papers) overwhelmingly does not
-follow either. Claims: C27-C33, all of Section 8's citation plan. Table:
+follow either. Claims: C27-C33, all of Section 9's citation plan. Table:
 T2 (survey summary). No figures.
 
 ### 3. Data and Preprocessing (~1 column)
@@ -425,7 +425,7 @@ co-located-arrays-not-sites framing (C34), chronological split
 rationale, daylight/oracle regime definitions. Claims: C34, C35, C36.
 Table: T1 (data summary - array technology, capacity, years, row counts).
 No figures (or a small site/array map if available - not currently
-generated, see Section 9).
+generated, see Section 10).
 
 ### 4. Methodology (~1.5 columns, two subsections, 4.1 BEFORE 4.2 -
 deliberate ordering per PROJECT_CHECKPOINT.md Section 7)
@@ -458,8 +458,11 @@ backward pass, PROJECT_CHECKPOINT.md Section 1), the 225-combo lagged
 grid and its 45-combo oracle counterpart, DM test configuration (HAC
 variance, Bartlett kernel truncated at lag h-1, HLN small-sample
 correction, Holm-Bonferroni within cell), sky-classification thresholds
-(0.75/0.10/0.40, literature-conventional, not fitted). No claims table
-rows of its own; sets up Results.
+(0.75/0.10/0.40, literature-conventional, not fitted). Cite Section 8
+(REPRODUCIBILITY) here - the clean-state regeneration check and the
+qualified LSTM-refit determinism observation are the evidence for
+contribution 1 (a reproducible benchmark harness), not just an
+assertion of it. No claims table rows of its own; sets up Results.
 
 ### 6. Results, organized BY RESEARCH QUESTION, not by model (~2.5
 columns - the paper's core)
@@ -526,7 +529,7 @@ low-elevation clear-sky residual bias Finding 1 deliberately did not fix
 consistency-principle axis this project did not vary (train on MSE loss,
 report RMSE-based skill - internally consistent but a protocol axis left
 unexplored, per Mayer 2022 Section 2.6); the test set (2015) has not yet
-been touched for a forecast metric at all (see Section 9, GAPS) - if this
+been touched for a forecast metric at all (see Section 10, GAPS) - if this
 remains true at submission time, Limitations must say so explicitly
 rather than the paper silently reporting only validation-split results
 throughout.
@@ -552,7 +555,7 @@ caption. T2's and T7's ACTUAL content diverged from this table's
 original proposals in the same way several figures did (Section 7's
 figure notes above) - flagged per-row below, not silently changed.
 None of the seven is typeset into the paper yet (no paper.tex exists -
-gap 2, Section 9) and none of the .tex fragments has been
+gap 2, Section 10) and none of the .tex fragments has been
 compile-tested (no LaTeX toolchain in this dev environment).
 
 FIGURES UPDATED 2026-08-08: F1-F6 are now built (`scripts/
@@ -594,7 +597,33 @@ CAPTIONS.md for the actual caption of each.
 
 ---
 
-## 8. CITATION PLAN
+## 8. REPRODUCIBILITY
+
+VERIFIED 2026-08-08. All 21 generated outputs (12 figure files, 8 table
+files, 1 F4 prerequisite CSV) were deleted and regenerated from a clean
+state by 11 scripts, all exiting 0. All 8 table files and 6 PNG previews
+were byte-identical to the committed versions. The 6 PDFs differed by
+exactly 4 bytes each, all at the same offset, being matplotlib's
+embedded /CreationDate timestamp; the xref tables were identical.
+
+The F4 prerequisite involves a real LSTM refit and reproduced its
+printed statistics exactly (mean -0.0075 to +0.0143 kW, std 0.5160 to
+0.5383 kW). Report this as observed on this occasion, NOT as a
+determinism guarantee: torch.nn.LSTM has no deterministic CUDA backward
+pass and run JSONs record full_determinism_achieved=False.
+
+T2 was verified two ways: an independently derived shift table computed
+from build.py's constants without importing the table script, matching
+feature-for-feature; and assert_no_leakage() run on real data for both
+regimes across all three horizons, passing all six with exact feature
+counts of 37 lagged and 42 oracle.
+
+This is the evidence for contribution 1 (a reproducible benchmark
+harness) and should be cited in Experimental Setup.
+
+---
+
+## 9. CITATION PLAN
 
 Only papers present in `paper/literature_notes.md` (10 numbered entries)
 or `results/literature_survey.csv` (27 coded rows). No other citation is
@@ -647,7 +676,7 @@ common protocol.
 
 ---
 
-## 9. GAPS
+## 10. GAPS
 
 Exhaustive list of everything the paper needs that does not exist yet,
 or that this brief could not verify. Organized by how blocking each one
