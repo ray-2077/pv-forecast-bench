@@ -1,11 +1,12 @@
 """Build paper figures from committed results/ CSVs.
 
 Currently implements F1 (skill vs forecast horizon, by reference
-forecast) and F3 (error and skill by sky condition) - see
-paper/WRITING_BRIEF.md Section 7 for the full F1-F7 plan and
-paper/PROJECT_CHECKPOINT.md Section 9 for what remains. The other five
-are not implemented; do not add stub functions for them until they are
-actually built (CLAUDE.md: no half-finished implementations).
+forecast), F2 (skill by model and feature regime), and F3 (error and
+skill by sky condition) - see paper/WRITING_BRIEF.md Section 7 for the
+full F1-F7 plan and paper/PROJECT_CHECKPOINT.md Section 9 for what
+remains. The other four are not implemented; do not add stub functions
+for them until they are actually built (CLAUDE.md: no half-finished
+implementations).
 
 F1: one panel per array (array11 poly-Si, array12 mono-Si, array17
 HIT), shared y-axis. x = forecast horizon, plotted at its true numeric
@@ -190,6 +191,130 @@ def build_f1():
 # reinvented at writing time - copy into the LaTeX \caption{} verbatim
 # or edit in place if the figure changes):
 #
+# Fig. 2. Skill against the convex reference, by model and by feature
+# regime (lagged: information available at issue time; oracle: measured
+# weather AT TARGET TIME, a perfect-forecast UPPER BOUND, never an
+# achievable result), array11, three horizons. Within either regime,
+# skill varies by at most 0.03-0.05 across the five models at a given
+# horizon (Table 3). Switching from lagged to oracle features moves
+# skill by 0.51-0.63 for every model and horizon shown here, and by
+# 0.51-0.72 across all three arrays and 45 model x array x horizon
+# cells (Table 4 row 5). Perfect weather knowledge is worth roughly an
+# order of magnitude more than any architecture choice tested here.
+# array11 only; the same lagged-vs-oracle gap holds on array12 and
+# array17 (Table 3).
+def build_f2():
+    """skill_vs_convex by model, lagged vs oracle regime, array11 only,
+    one panel per horizon. Writes F2_skill_by_model_regime.{pdf,png}
+    under paper/figures/.
+
+    SCALE CHOICE, DECIDED 2026-08-08: plain linear axis, checked and
+    kept deliberately rather than a broken axis or log scale. The
+    within-regime model spread (0.03-0.05 lagged, 0.015-0.033 oracle)
+    turns out to be legible as-is: the residual penalty (Findings
+    10-11) is visible as bars 4-5 sitting visibly shorter than bars 1-3
+    within the lagged cluster, at all three horizons - it does not need
+    rescuing. A broken axis would have bought a small legibility gain on
+    that secondary point at the cost of visually shrinking the figure's
+    actual headline (the lagged-to-oracle gap), which is the wrong
+    trade when the plain version already shows both. Revisit only if a
+    reader genuinely cannot make out the within-regime bars at print
+    size.
+    """
+    ARRAY = "array11"
+    MODELS = [
+        ("xgboost", "XGBoost"),
+        ("lstm", "LSTM"),
+        ("cnn_lstm", "CNN-LSTM"),
+        ("lstm_residual", "LSTM+resid"),
+        ("cnn_lstm_residual", "CNN-LSTM+resid"),
+    ]
+    REGIMES = [
+        ("lagged", "lagged", "white", None),
+        ("oracle", "oracle (upper bound)", "0.4", "//"),
+    ]
+
+    lagged = pd.read_csv(RESULTS_DIR / "seed_sweep_summary_lagged.csv")
+    oracle = pd.read_csv(RESULTS_DIR / "seed_sweep_summary_oracle.csv")
+    lagged["regime"] = "lagged"
+    oracle["regime"] = "oracle"
+    df = pd.concat([lagged, oracle], ignore_index=True)
+    df = df[df["array"] == ARRAY]
+
+    expected_rows = len(MODELS) * len(REGIMES) * len(HORIZONS)
+    if len(df) != expected_rows:
+        raise ValueError(
+            f"{ARRAY}: expected {expected_rows} rows across both regime "
+            f"CSVs, got {len(df)}"
+        )
+
+    fig, axes = plt.subplots(1, 3, figsize=(FULL_WIDTH_IN, 2.8), sharey=True)
+
+    bar_width = 0.35
+    offsets = [-bar_width / 2, bar_width / 2]
+    group_positions = range(len(MODELS))
+
+    for ax, horizon in zip(axes, HORIZONS):
+        sub_h = df[df["horizon"] == horizon]
+
+        for (regime_key, regime_label, facecolor, hatch), offset in zip(
+            REGIMES, offsets
+        ):
+            sub = sub_h[sub_h["regime"] == regime_key].set_index("model")
+            sub = sub.loc[[key for key, _ in MODELS]]
+            x = [pos + offset for pos in group_positions]
+
+            ax.bar(
+                x,
+                sub["mean_skill_vs_convex"],
+                yerr=sub["std_skill_vs_convex"],
+                width=bar_width,
+                facecolor=facecolor,
+                edgecolor="black",
+                linewidth=0.6,
+                hatch=hatch,
+                capsize=2,
+                error_kw={"elinewidth": 0.7},
+                label=regime_label,
+            )
+
+        ax.axhline(0, color="grey", linewidth=0.5, zorder=0)
+        ax.set_title(f"h = {horizon}")
+        ax.set_xticks(list(group_positions))
+        ax.set_xticklabels(
+            [label for _, label in MODELS], rotation=30, ha="right"
+        )
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+    axes[0].set_ylabel("skill vs convex")
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        loc="lower center",
+        ncol=2,
+        bbox_to_anchor=(0.5, -0.1),
+        frameon=False,
+    )
+
+    fig.tight_layout()
+
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    pdf_path = FIGURES_DIR / "F2_skill_by_model_regime.pdf"
+    png_path = FIGURES_DIR / "F2_skill_by_model_regime.png"
+    fig.savefig(pdf_path, bbox_inches="tight")
+    fig.savefig(png_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {pdf_path}")
+    print(f"wrote {png_path}")
+
+
+# CAPTION (drafted 2026-08-08, travels with the figure so it is not
+# reinvented at writing time - copy into the LaTeX \caption{} verbatim
+# or edit in place if the figure changes):
+#
 # Fig. 3. Forecast error and skill by sky condition (XGBoost, LSTM,
 # LSTM + residual; array11, h=3, validation year 2014). Left: nRMSE
 # (percent of nameplate capacity). Right: skill against the optimal
@@ -291,7 +416,7 @@ def build_f3():
     print(f"wrote {png_path}")
 
 
-FIGURES = {"F1": build_f1, "F3": build_f3}
+FIGURES = {"F1": build_f1, "F2": build_f2, "F3": build_f3}
 
 
 def main():
@@ -300,7 +425,7 @@ def main():
         "--figure",
         choices=sorted(FIGURES),
         default="F1",
-        help="which figure to build (only F1 and F3 are implemented so far)",
+        help="which figure to build (only F1, F2, F3 are implemented so far)",
     )
     args = parser.parse_args()
     FIGURES[args.figure]()
