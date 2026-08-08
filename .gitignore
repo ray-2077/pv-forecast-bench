@@ -57,3 +57,11 @@ desktop.ini
 # results/ is the audit trail - never ignore anything in it
 !results/*.csv
 !results/*.json
+
+# paper/tables/*.csv are generated table data, the audit trail for the
+# paper's LaTeX tables (same rationale as results/*.csv above) - without
+# this, the blanket *.csv rule above silently drops them from git even
+# though they are meant to be version controlled (caught 2026-08-08:
+# T1/T2/T5/T7's CSVs were untracked despite being explicitly committed
+# artifacts per their generating scripts' own docstrings).
+!paper/tables/*.csv

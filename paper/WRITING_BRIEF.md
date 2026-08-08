@@ -539,15 +539,21 @@ sentence here should trace to a claim already in Section 2's table.
 
 ## 7. TABLES AND FIGURES
 
-Only Tables 3, 4, 5, and 6 have an attested number anywhere in the repo
-(named directly in `scripts/build_table4_protocol.py`'s and
-`scripts/build_table6_dm.py`'s own docstrings, and in
-`scripts/aggregate_seed_sweep.py`'s docstring for Table 3; Table 5 is
-named only in `PROJECT_CHECKPOINT.md` prose, no script docstring uses the
-number). T1, T2, T5, and T7 have NO defined content or generation
-script anywhere in the repo as of this brief - the assignments for
-those four are still PROPOSED, not sourced. This is flagged again in
-Section 9 (GAPS).
+Tables 3, 4, and 6 have an attested number directly in their own
+generating script's docstring (`scripts/aggregate_seed_sweep.py`,
+`scripts/build_table4_protocol.py`, `scripts/build_table6_dm.py`). As
+of 2026-08-08 the remaining four (T1, T2, T5, T7) also have generating
+scripts (`scripts/build_table1_dataset.py`,
+`scripts/build_table2_features.py`,
+`scripts/build_table5_component_attribution.py`,
+`scripts/build_table7_sky.py`) and CSV + LaTeX output under
+paper/tables/ - see that directory's own CAPTIONS.md for each table's
+caption. T2's and T7's ACTUAL content diverged from this table's
+original proposals in the same way several figures did (Section 7's
+figure notes above) - flagged per-row below, not silently changed.
+None of the seven is typeset into the paper yet (no paper.tex exists -
+gap 2, Section 9) and none of the .tex fragments has been
+compile-tested (no LaTeX toolchain in this dev environment).
 
 FIGURES UPDATED 2026-08-08: F1-F6 are now built (`scripts/
 build_figures.py`, captions in `paper/figures/CAPTIONS.md`) and F7 is
@@ -571,13 +577,13 @@ CAPTIONS.md for the actual caption of each.
 
 | ID | What it shows | Generating file | Exists? | Still needed |
 |---|---|---|---|---|
-| T1 (proposed) | Data summary: array technology/capacity/years, row counts, exclusions | none | NO | A small script or manual table from `results/data_audit.csv` + Section 2 facts (C34-C36) |
-| T2 (proposed) | Literature survey summary: per-column counts (C27-C33) | none | NO | A small aggregation script over `results/literature_survey.csv`, or a manually built table - the counts themselves are all in Section 2 (C27-C33) and directly queryable |
+| T1 (built 2026-08-08) | Dataset summary: per-array DKASC site/manufacturer/technology/nameplate kW/tilt/azimuth/install date, per-split row counts, per-split daylight-hour counts, array07 exclusion footnote row with the exact audit numbers | `scripts/build_table1_dataset.py` | YES | Matches its original proposal (with more per-array detail than originally scoped). `paper/tables/T1_dataset.csv` + `.tex`; caption in `paper/tables/CAPTIONS.md` |
+| T2 (REDEFINED 2026-08-08) | Feature list by regime: all 37 lagged + 5 oracle-only features, grouped by category, with the shift applied and a description | `scripts/build_table2_features.py` | YES | Does NOT match the original proposal (a literature-survey summary of per-column counts C27-C33) - that content was never built under any table number and remains unassigned; the counts themselves are already directly stated in Section 2's Claims Table (C27-C33), so this is a nice-to-have presentation table, not a gap in the underlying data. T2 was reassigned because the paper needs a feature-list table more than a literature-survey table has an obvious place in the outline (Section 6) - `paper/tables/T2_features.csv` + `.tex`; caption in `paper/tables/CAPTIONS.md` |
 | T3 (attested: "Table 3" in code docstrings) | Seed-variance reproducibility: mean/std skill_vs_convex, skill_vs_persistence, RMSE per model x array x horizon | `scripts/aggregate_seed_sweep.py` | YES | `results/seed_sweep_summary_lagged.csv` (45 rows) and `results/seed_sweep_summary_oracle.csv` (45 rows) both exist and are ready to typeset; needs a LaTeX table generator (none exists yet) |
 | T4 (attested: "Table 4" in code docstring + prose) | Protocol inflation, 6 configs x 3 arrays x 3 horizons, both regimes | `scripts/build_table4_protocol.py` | YES | `results/table4_protocol_lagged.csv` (54 rows) and `results/table4_protocol_oracle.csv` (54 rows) both exist. Needs: a LaTeX generator, AND the 5-row "effect summary" framing (C14-C20) is currently prose in this brief and PROJECT_CHECKPOINT.md, not a generated sub-table |
-| T5 (attested: "Table 5" in prose only) | RQ2 component-attribution summary (condensed view of the architecture comparison) | none dedicated - would be built from `results/seed_sweep_summary_lagged.csv` filtered to the 3 base models plus a DM-significance annotation column | NO | A script joining seed_sweep_summary and table6_dm_lagged into one compact table; does not exist |
+| T5 (built 2026-08-08) | RQ2 component-attribution summary: all 5 models' skill_vs_convex (mean +/- std, 5 seeds) by array x horizon, plus DM significance for the 3 comparisons that matter (lstm vs xgboost, cnn_lstm vs lstm, lstm_residual vs lstm) | `scripts/build_table5_component_attribution.py` | YES | Matches its original proposal (covers all 5 models, not just 3, and adds the DM annotation the original note didn't specify). `paper/tables/T5_component_attribution.csv` + `.tex`; caption in `paper/tables/CAPTIONS.md` |
 | T6 (attested: "Table 6" in code docstring + prose) | DM significance matrix, all 21 pairs x 3 arrays x 3 horizons | `scripts/build_table6_dm.py` | YES (both regimes) | `results/table6_dm_lagged.csv` (189 rows) and `results/table6_dm_oracle.csv` (189 rows) both exist as of 2026-08-08 - see PROJECT_CHECKPOINT.md's 2026-08-08 sync. 189 rows is too large to print in full in an 8-page paper; needs a condensation script (e.g. per-model-pair summary across cells, full matrix as supplementary CSV) |
-| T7 (proposed) | RQ3 sky-condition stratification: skill_vs_convex by class x model x array x horizon | `scripts/build_table_sky.py` | YES (data), NO (as a formatted table) | `results/table_sky.csv` (81 rows) exists and is ready to aggregate; needs a condensation script (likely mean skill by class x horizon, pooled correctly across the 3 arrays given they are identical - see Section 5 item 8's duplication warning) and a LaTeX generator. F3 (below) previews one cell of this same data. |
+| T7 (PARTIAL, built 2026-08-08) | RQ3 sky-condition stratification: nRMSE and skill_vs_convex by class x model, array11 h=3 ONLY (same single cell as Figure F3, not the full class x model x array x horizon grid originally proposed) | `scripts/build_table7_sky.py` | PARTIAL | `paper/tables/T7_sky_condition.csv` + `.tex` exist for one cell; caption in `paper/tables/CAPTIONS.md`. The full multi-cell version (all 9 array x horizon cells, correctly pooled per Finding 12 Part B's 2026-08-08 addendum - sum over horizon within one array, arrays are redundant) is still an unbuilt need - needs a condensation script and a LaTeX generator. |
 | F1 (built 2026-08-08) | Skill vs horizon, two lines (vs persistence, vs convex), XGBoost only, one panel per array - visualizes C16/C17's monotonic-vs-non-monotonic shape result | `scripts/build_figures.py` (`build_f1`) | YES | Matches its original proposal. `paper/figures/F1_skill_vs_horizon.pdf`; caption in `paper/figures/CAPTIONS.md` |
 | F2 (built 2026-08-08) | Skill vs convex reference by model and by feature regime (lagged vs oracle), array11, three horizons - visualizes C20 (the lagged-to-oracle gap dwarfs any model-to-model difference) | `scripts/build_figures.py` (`build_f2`) | YES | Does NOT match the original proposal (a protocol-inflation waterfall of 5 Table 4 effect sizes) - that idea was superseded and never built, see the note above this table. `paper/figures/F2_skill_by_model_regime.pdf` |
 | F3 (built 2026-08-08) | nRMSE and skill_vs_convex by sky class, three models (XGBoost/LSTM/LSTM+residual), array11 h=3 ONLY - visualizes C22 (nRMSE and skill rank sky classes differently) | `scripts/build_figures.py` (`build_f3`) | YES | Does NOT match the original proposal (skill_vs_convex by model x horizon, boxed over 5 seeds, all arrays) - that idea was superseded and never built. Also distinct from the originally-proposed F5 (sky class grouped by horizon, all 9 cells) - F3 previews one cell of that. `paper/figures/F3_error_by_sky_condition.pdf` |
@@ -679,10 +685,21 @@ is.
    their original proposal and which were superseded by more useful
    content decided during construction.
 
-4. **T1, T2, T5, T7 have no generating script.** Only T3, T4, T6 can be
-   produced today by running an existing script. The other four need new
-   aggregation code before they can be typeset (see Section 7 for exactly
-   what each needs).
+4. **RESOLVED 2026-08-08.** T1, T2, T5, and T7 now have generating
+   scripts (`scripts/build_table1_dataset.py`,
+   `scripts/build_table2_features.py`,
+   `scripts/build_table5_component_attribution.py`,
+   `scripts/build_table7_sky.py`) and all seven tables (T1-T7) can be
+   produced by running an existing script. T2's actual content
+   (feature list by regime) diverged from this table's original
+   proposal (a literature-survey summary) - see Section 7's 2026-08-08
+   note. T7 is PARTIAL: built for one cell (array11 h=3) only, matching
+   Figure F3's scope, not the full 9-cell grid originally proposed -
+   see Section 7's T7 row. None of the seven has been typeset into
+   LaTeX yet (gap 2 still stands - no paper.tex exists), and none of
+   the .tex fragments under paper/tables/ has been compile-tested (no
+   LaTeX toolchain in this dev environment, same caveat as
+   paper/figures/F7_pipeline.tex).
 
 ### Not blocking, but must be resolved before the affected section is drafted
 

@@ -1,0 +1,5 @@
+array,dkasc_site,dkasc_slug,manufacturer,technology,nameplate_kw,tilt_deg,azimuth_deg,install_date,n_rows_total,n_rows_train,n_rows_val,n_rows_test,n_daylight_train,n_daylight_val,n_daylight_test,used_in_evaluation,exclusion_reason
+array11,11,dka-m5-c-phase,BP Solar,poly-Si,5.0,20.0,0.0,not recorded,61344,26304,8760,8760,11414,3799,3802,True,
+array12,12,dka-m5-b-phase,BP Solar,mono-Si,5.1,20.0,0.0,not recorded,61344,26304,8760,8760,11414,3799,3802,True,
+array17,17,dka-m4-b-phase,Sanyo,HIT,6.3,20.0,0.0,2010-03-11,61344,26304,8760,8760,11414,3799,3802,True,
+array07,07,dka-m6-a-phase,First Solar,CdTe,7.0,,,not recorded,61344,26304,8760,8760,11414,3799,3802,False,"Completeness audit (results/data_audit.csv) passed array07 2014 at 99.99% coverage, 0.00% NaN in Active_Power. Dead-period audit (results/dead_period_audit.csv) found 48.41% of 2014 daylight hours at exactly zero power (status=FAIL), plus a 48-day near-zero run in Nov-Dec 2015 (inside the test year). A completeness-only audit is structurally blind to a healthy sensor reporting a dead array (Finding 6)."

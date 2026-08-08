@@ -1,0 +1,239 @@
+"""Build the paper's Table 5 (RQ2 component-attribution summary): one
+row per array x horizon, all five models' mean skill_vs_convex (seed
+std in the same cell), plus a Diebold-Mariano significance annotation
+for the three comparisons RQ2's Results actually turns on -
+lstm vs xgboost, cnn_lstm vs lstm, lstm_residual vs lstm (Findings 8-11).
+
+Not every pairwise DM comparison is included here on purpose - Table 6
+already has the full 21-pair matrix; this table is the condensed
+component-attribution VIEW the Section 6 outline (6.2 RQ2) asks for,
+built from the same two committed CSVs rather than a new computation:
+
+  results/seed_sweep_summary_lagged.csv   mean/std skill_vs_convex, per
+                                           model x array x horizon (5
+                                           seeds)
+  results/table6_dm_lagged.csv            pairwise DM significance
+                                           (HAC variance, HLN small-
+                                           sample correction, Holm-
+                                           Bonferroni within cell),
+                                           single seed=0
+
+Both CSVs are lagged-regime only (CLAUDE.md rule 5) and both are
+single-source-of-truth artifacts already in the repo - this script only
+joins and reformats them, it fits nothing and reads no run JSON
+directly.
+
+table6_dm_lagged.csv orders each pair (model_1, model_2) by a fixed
+model order (xgboost, lstm, cnn_lstm, lstm_residual, cnn_lstm_residual,
+smart_persistence, convex_reference), never the reverse - the three
+comparisons this table needs are looked up as (xgboost, lstm),
+(lstm, cnn_lstm), (lstm, lstm_residual) accordingly. `better_model`
+in that CSV already resolves the sign for us (whichever model the DM
+test favours, independent of significance), so the annotation here
+reports better_model + hln_stat + p_holm rather than re-deriving a
+sign from dbar/dm_stat.
+
+WORDING CAUTION (CLAUDE.md / paper/WRITING_BRIEF.md Section 3): do not
+read a "not significant" cell here as "no difference" - it means the
+DM test did not clear p_holm<0.05 on this one array x horizon cell,
+computed at a single seed (seed=0) over ~3700 paired daylight-hour
+forecast errors. Seed spread (Table 3) is a reproducibility statistic,
+not a substitute significance test - see PROJECT_CHECKPOINT.md
+Finding 8's own retraction of exactly that substitution.
+
+Writes:
+  paper/tables/T5_component_attribution.csv
+  paper/tables/T5_component_attribution.tex (booktabs fragment)
+
+Usage:
+    python scripts/build_table5_component_attribution.py
+"""
+
+import csv
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
+
+RESULTS_DIR = REPO_ROOT / "results"
+TABLES_DIR = REPO_ROOT / "paper" / "tables"
+
+ARRAYS = ["array11", "array12", "array17"]
+HORIZONS = [1, 3, 6]
+
+MODELS = ["xgboost", "lstm", "cnn_lstm", "lstm_residual", "cnn_lstm_residual"]
+MODEL_LABELS = {
+    "xgboost": "XGBoost",
+    "lstm": "LSTM",
+    "cnn_lstm": "CNN-LSTM",
+    "lstm_residual": "LSTM+res",
+    "cnn_lstm_residual": "CNN-LSTM+res",
+}
+
+# (label, model_1, model_2) - the (model_1, model_2) order must match
+# table6_dm_lagged.csv's own fixed model ordering (see module docstring),
+# not the "vs" reading order a human would say out loud.
+DM_COMPARISONS = [
+    ("lstm vs xgboost", "xgboost", "lstm"),
+    ("cnn_lstm vs lstm", "lstm", "cnn_lstm"),
+    ("lstm_residual vs lstm", "lstm", "lstm_residual"),
+]
+
+ALPHA = 0.05
+
+
+def load_skill_summary():
+    """{(array, horizon, model): (mean, std)}"""
+    out = {}
+    with open(RESULTS_DIR / "seed_sweep_summary_lagged.csv") as fh:
+        for row in csv.DictReader(fh):
+            key = (row["array"], int(row["horizon"]), row["model"])
+            out[key] = (
+                float(row["mean_skill_vs_convex"]),
+                float(row["std_skill_vs_convex"]),
+            )
+    return out
+
+
+def load_dm_table():
+    """{(array, horizon, model_1, model_2): row_dict}"""
+    out = {}
+    with open(RESULTS_DIR / "table6_dm_lagged.csv") as fh:
+        for row in csv.DictReader(fh):
+            key = (row["array"], int(row["horizon"]), row["model_1"], row["model_2"])
+            out[key] = row
+    return out
+
+
+def format_dm_cell(dm_row):
+    if dm_row is None:
+        return "n/a"
+    p_holm = float(dm_row["p_holm"])
+    hln_stat = float(dm_row["hln_stat"])
+    better = MODEL_LABELS.get(dm_row["better_model"], dm_row["better_model"])
+    sig = "sig" if p_holm < ALPHA else "ns"
+    return f"{better} better, hln={hln_stat:+.2f}, p_holm={p_holm:.4f} ({sig})"
+
+
+def build_rows():
+    skill = load_skill_summary()
+    dm = load_dm_table()
+
+    rows = []
+    for array in ARRAYS:
+        for horizon in HORIZONS:
+            row = {"array": array, "horizon": horizon}
+            for model in MODELS:
+                mean, std = skill[(array, horizon, model)]
+                row[f"{model}_mean_skill_vs_convex"] = mean
+                row[f"{model}_std_skill_vs_convex"] = std
+
+            for label, m1, m2 in DM_COMPARISONS:
+                dm_row = dm.get((array, horizon, m1, m2))
+                key = label.replace(" ", "_")
+                if dm_row is None:
+                    row[f"dm_{key}_better"] = ""
+                    row[f"dm_{key}_hln_stat"] = ""
+                    row[f"dm_{key}_p_holm"] = ""
+                    row[f"dm_{key}_significant"] = ""
+                else:
+                    row[f"dm_{key}_better"] = dm_row["better_model"]
+                    row[f"dm_{key}_hln_stat"] = float(dm_row["hln_stat"])
+                    row[f"dm_{key}_p_holm"] = float(dm_row["p_holm"])
+                    row[f"dm_{key}_significant"] = float(dm_row["p_holm"]) < ALPHA
+            rows.append(row)
+    return rows
+
+
+def write_csv(rows, path):
+    fieldnames = list(rows[0].keys())
+    with open(path, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def tex_escape(value):
+    return str(value).replace("_", "\\_").replace("%", "\\%")
+
+
+def write_latex(rows, dm, path):
+    lines = []
+    lines.append("% T5_component_attribution.tex - RQ2 summary, booktabs fragment.")
+    lines.append("% NOT compile-tested (no LaTeX toolchain in this dev")
+    lines.append("% environment) - same caveat as paper/tables/T1_dataset.tex,")
+    lines.append("% T2_features.tex, and paper/figures/F7_pipeline.tex. Needs")
+    lines.append("% \\usepackage{booktabs}.")
+    lines.append("% Wide (5 models x mean+-std, plus 3 DM annotation columns):")
+    lines.append("% written as table* (spans both IEEE columns); \\scriptsize")
+    lines.append("% used throughout and the DM columns still may need")
+    lines.append("% shortened annotation text to fit - not tuned without a")
+    lines.append("% real render.")
+    lines.append("\\begin{table*}[t]")
+    lines.append("  \\centering")
+    lines.append("  \\scriptsize")
+    lines.append(
+        "  \\caption{Component attribution (RQ2): skill\\_vs\\_convex by "
+        "model, array, and horizon (mean $\\pm$ 1 seed std, 5 seeds), with "
+        "Diebold-Mariano significance for the three comparisons that "
+        "matter. See paper/tables/CAPTIONS.md for the full caption.}"
+    )
+    lines.append("  \\label{tab:component-attribution}")
+    lines.append("  \\begin{tabular}{ll rrrrr lll}")
+    lines.append("    \\toprule")
+    lines.append(
+        "    & & \\multicolumn{5}{c}{skill\\_vs\\_convex, mean $\\pm$ std (5 seeds)} & "
+        "\\multicolumn{3}{c}{Diebold-Mariano (p\\_holm $<$ 0.05 = sig)} \\\\"
+    )
+    lines.append("    \\cmidrule(lr){3-7} \\cmidrule(lr){8-10}")
+    lines.append(
+        "    Array & $h$ & XGBoost & LSTM & CNN-LSTM & LSTM+res & CNN-LSTM+res & "
+        "LSTM vs XGB & CNN-LSTM vs LSTM & LSTM+res vs LSTM \\\\"
+    )
+    lines.append("    \\midrule")
+
+    for row in rows:
+        cells = [tex_escape(row["array"]), str(row["horizon"])]
+        for model in MODELS:
+            mean = row[f"{model}_mean_skill_vs_convex"]
+            std = row[f"{model}_std_skill_vs_convex"]
+            cells.append(f"{mean:+.3f}$\\pm${std:.3f}")
+        for label, m1, m2 in DM_COMPARISONS:
+            dm_row = dm.get((row["array"], row["horizon"], m1, m2))
+            cells.append(tex_escape(format_dm_cell(dm_row)))
+        lines.append("    " + " & ".join(cells) + " \\\\")
+
+    lines.append("    \\bottomrule")
+    lines.append("  \\end{tabular}")
+    lines.append("\\end{table*}")
+
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+
+
+def main():
+    rows = build_rows()
+    dm = load_dm_table()
+
+    for row in rows:
+        print(f"{row['array']} h={row['horizon']}")
+        for model in MODELS:
+            mean = row[f"{model}_mean_skill_vs_convex"]
+            std = row[f"{model}_std_skill_vs_convex"]
+            print(f"  {MODEL_LABELS[model]:14s} {mean:+.4f} +/- {std:.4f}")
+        for label, m1, m2 in DM_COMPARISONS:
+            dm_row = dm.get((row["array"], row["horizon"], m1, m2))
+            print(f"  DM {label:24s} {format_dm_cell(dm_row)}")
+
+    TABLES_DIR.mkdir(parents=True, exist_ok=True)
+    csv_path = TABLES_DIR / "T5_component_attribution.csv"
+    tex_path = TABLES_DIR / "T5_component_attribution.tex"
+    write_csv(rows, csv_path)
+    write_latex(rows, dm, tex_path)
+    print(f"\nwrote {csv_path}")
+    print(f"wrote {tex_path}")
+
+
+if __name__ == "__main__":
+    main()
