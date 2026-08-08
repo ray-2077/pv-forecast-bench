@@ -90,7 +90,7 @@ Confidence levels used throughout this brief:
 | C17 | The horizon trend flips sign of curvature depending on reference: monotonically increasing vs persistence (0.253/0.526/0.652 at h1/3/6, array11), non-monotonic and peaking at h=3 vs convex (0.200/0.276/0.194) | `results/reference_comparison.csv`, array11, all 3 horizons | 5 | Intro; T4 (row 2); F1 | established |
 | C18 | Convex weight w is not uniform across arrays at h=6: array11 w=0.04, array12 w=0.05, array17 w=0.31 - persistence remains informative on array17 when it is nearly worthless on the other two | `results/reference_comparison.csv`, convex_weight column | 5 | Methodology 4.1; T4 | descriptive - see Section 5 for the exact-value trap |
 | C19 | Residual fit-split leakage: fitting the residual stage on validation residuals (leaked_by_design) instead of out-of-fold training residuals turns a -0.034 penalty into an apparent +0.334 gain - a sign flip and an order of magnitude, on one seed/array/horizon | `results/leaked_lstm_residual_array11_h6_lagged_seed0.json` (INVALID_LEAKED=true) vs the corrected pair in C7 | 10 | Intro; T4 (row 3) | descriptive (single cell, explicitly not a general effect-size claim - see Section 3) |
-| C20 | Oracle regime beats lagged regime on skill_vs_convex in all 45 model x array x horizon cells, gap +0.51 to +0.72, growing with horizon | `results/seed_sweep_summary_oracle.csv` vs `results/seed_sweep_summary_lagged.csv`, mean_skill_vs_convex, joined on model/array/horizon | (post-checkpoint; not in PROJECT_CHECKPOINT.md - see Section 9) | T4 (row 5); F7 | established (oracle is an upper bound, not itself a forecast result - see Section 4) |
+| C20 | Oracle regime beats lagged regime on skill_vs_convex in all 45 model x array x horizon cells, gap +0.51 to +0.72, growing with horizon | `results/seed_sweep_summary_oracle.csv` vs `results/seed_sweep_summary_lagged.csv`, mean_skill_vs_convex, joined on model/array/horizon | (post-checkpoint; not in PROJECT_CHECKPOINT.md - see Section 9) | T4 (row 5); F2 (F7 was reassigned 2026-08-08 - see Section 7) | established (oracle is an upper bound, not itself a forecast result - see Section 4) |
 | C21 | Oracle-regime protocol machinery is regime-agnostic: the closed-form night-inclusion check (C14's identity) also holds under oracle, within 0.001-0.028 across all 9 cells | `results/table4_protocol_oracle.csv`, same C5/C6 comparison as C14 | (post-checkpoint) | Methodology 4.1 (robustness check) | established |
 | C22 | Sky-condition stratification: mean skill_vs_convex by class (one array x horizon cell, e.g. array11 h1) is NOT monotonic in visible cloudiness - partly_cloudy scores lowest (0.066 pooled mean), below overcast (0.235), below clear (0.332), with zero exceptions across the 9 cells checked | `results/table_sky.csv`, grouped by sky_class, skill_vs_convex column | 12B | Results RQ3; T7; F5 | established (direction; see Section 5 for the "pooled count" trap in the N reported) |
 | C23 | Overcast is the rarest sky condition at this site: at h=6 (any array, all three identical), n=236 daylight hours out of ~3756 | `results/table_sky.csv`, sky_class=overcast, horizon=6 | 12B | Results RQ3; T7 | descriptive - see Section 3, n=236 caveat |
@@ -470,30 +470,50 @@ below): PROJECT_CHECKPOINT.md Section 0 was renumbered so RQ1 IS
 protocol sensitivity, matching both "present protocol first" and literal
 RQ numeric order - Results now follows RQ1/RQ2/RQ3/RQ4 straight through
 with no ordering exception to explain to a reader. Table 4, all 5 rows
-(C14, C16-C19, C20). Figure F2 (waterfall/bar of the 5 effect sizes).
-This is where the sign-flip (C19) and the reference-choice shape change
-(C17) get full prose treatment; both are the paper's strongest single
-results.
+(C14, C16-C19, C20). Figure F1 (reference-choice shape, C16/C17) and
+Figure F2 (skill by model and feature regime, lagged vs oracle, C20) -
+both built 2026-08-08, see paper/figures/CAPTIONS.md for captions.
+NOTE: the originally-proposed F2 (a waterfall/bar of all 5 Table 4
+effect sizes) was superseded by this pairing during actual figure
+construction and was never built - Table 4 itself already tabulates
+all 5 effect sizes, so a combined waterfall is a nice-to-have, not a
+gap; if still wanted it needs a new figure number, F1-F7 are now all
+assigned to other content (see Section 7). This is where the sign-flip
+(C19) and the reference-choice shape change (C17) get full prose
+treatment; both are the paper's strongest single results.
 
 **6.2 RQ2 Component attribution.** C1-C11 (architecture and residual
 findings), Table 3 (seed reproducibility), Table 5 (component-attribution
 summary), Table 6 (DM matrix, or a condensed version - 189 rows is too
 large to print in full; likely a per-model-pair summary with the full
-matrix as supplementary data). Figure F3 (skill by model x horizon,
-boxed over 5 seeds) and F4 (DM significance summary, e.g. a heatmap of
-Holm-significant pairs per cell). Full "must not claim" cautions from
-Section 3 apply throughout this subsection especially.
+matrix as supplementary data). Figure F4 (residual distribution before
+and after the residual stage, array11 h=6, built 2026-08-08 - visualizes
+Finding 11's overconfidence mechanism directly, see paper/figures/
+CAPTIONS.md). NOTE: the originally-proposed F3 (skill by model x
+horizon, boxed over 5 seeds) and F4 (DM significance heatmap) were both
+superseded and never built - Table 3 and the condensed Table 6 already
+carry that information; if a dedicated visual is still wanted either
+needs a new figure number. Full "must not claim" cautions from Section
+3 apply throughout this subsection especially.
 
-**6.3 RQ3 Conditional performance.** C22, C23. Table 7. Figure F5
-(skill by sky class, grouped by horizon). State the n=236 caveat (Section
-3, item 5) directly in this subsection, not just in Limitations.
+**6.3 RQ3 Conditional performance.** C22, C23. Table 7. Figure F3
+(error and skill by sky condition, array11 h=3 only, built 2026-08-08 -
+state that single-cell restriction explicitly, see paper/figures/
+CAPTIONS.md) covers this for one cell. NOTE: the originally-proposed F5
+(skill by sky class, grouped by horizon, all 9 cells) was superseded -
+F5 was reassigned to feature importance instead - and was never built;
+if the full multi-cell version is wanted it needs a new figure number
+and Table 7's own condensation script (see Section 7, T7 row). State
+the n=236 caveat (Section 3, item 5) directly in this subsection, not
+just in Limitations.
 
 **6.4 RQ4 Cost-effectiveness.** C24-C26. Reuses Table 3/5's timing
 columns if added, or a small dedicated table (not yet in the T1-T7 plan -
-see Section 7). No dedicated figure currently planned; could reuse F3
-with a compute-vs-skill scatter framing (candidate for F6 or F7 instead
-of the currently proposed content - resolve before drafting, see Section
-7).
+see Section 7). RESOLVED 2026-08-08 (was "no dedicated figure planned"
+as of this brief's original writing): Figure F6 (skill vs mean training
+compute, log scale, array11 h=6, one marker per model) is exactly the
+compute-vs-skill scatter this subsection flagged as a candidate - built,
+see paper/figures/CAPTIONS.md.
 
 ### 7. Limitations (~0.5-0.75 column)
 Must include, per Section 3 and the consistency-principle note from
@@ -524,10 +544,30 @@ Only Tables 3, 4, 5, and 6 have an attested number anywhere in the repo
 `scripts/build_table6_dm.py`'s own docstrings, and in
 `scripts/aggregate_seed_sweep.py`'s docstring for Table 3; Table 5 is
 named only in `PROJECT_CHECKPOINT.md` prose, no script docstring uses the
-number). T1, T2, T7, and ALL of F1-F7 have NO defined content or
-generation script anywhere in the repo as of this brief - the
-assignments below are PROPOSED for this brief, in a sensible reading
-order, not sourced. This is flagged again in Section 9 (GAPS).
+number). T1, T2, T5, and T7 have NO defined content or generation
+script anywhere in the repo as of this brief - the assignments for
+those four are still PROPOSED, not sourced. This is flagged again in
+Section 9 (GAPS).
+
+FIGURES UPDATED 2026-08-08: F1-F6 are now built (`scripts/
+build_figures.py`, captions in `paper/figures/CAPTIONS.md`) and F7 is
+written as a TikZ source file (`paper/figures/F7_pipeline.tex`, not yet
+compile-tested - no LaTeX toolchain in this dev environment). Their
+ACTUAL content was decided during construction, not from this table's
+original proposals, and diverged from several of them - F1 matches its
+original proposal; F2 through F7 do not. Four originally-proposed ideas
+were superseded and never built: the protocol-inflation waterfall
+(original F2), the DM significance heatmap (original F4), the boxed
+skill-by-model-x-horizon reproducibility plot (original F3), and the
+leaked-vs-corrected feature-importance comparison (original F6). None
+of the four is a blocking gap - Table 4 already tabulates the 5 effect
+sizes the waterfall would show, Table 6 already carries DM significance
+in tabular form, Table 3 already carries the seed-reproducibility
+numbers, and F4 (residual distribution) makes a closely related
+mechanism point to the leaked-vs-corrected comparison. If any is still
+wanted for the paper, it needs a new figure number - F1-F7 are now all
+assigned to other content, see the table below and paper/figures/
+CAPTIONS.md for the actual caption of each.
 
 | ID | What it shows | Generating file | Exists? | Still needed |
 |---|---|---|---|---|
@@ -536,15 +576,15 @@ order, not sourced. This is flagged again in Section 9 (GAPS).
 | T3 (attested: "Table 3" in code docstrings) | Seed-variance reproducibility: mean/std skill_vs_convex, skill_vs_persistence, RMSE per model x array x horizon | `scripts/aggregate_seed_sweep.py` | YES | `results/seed_sweep_summary_lagged.csv` (45 rows) and `results/seed_sweep_summary_oracle.csv` (45 rows) both exist and are ready to typeset; needs a LaTeX table generator (none exists yet) |
 | T4 (attested: "Table 4" in code docstring + prose) | Protocol inflation, 6 configs x 3 arrays x 3 horizons, both regimes | `scripts/build_table4_protocol.py` | YES | `results/table4_protocol_lagged.csv` (54 rows) and `results/table4_protocol_oracle.csv` (54 rows) both exist. Needs: a LaTeX generator, AND the 5-row "effect summary" framing (C14-C20) is currently prose in this brief and PROJECT_CHECKPOINT.md, not a generated sub-table |
 | T5 (attested: "Table 5" in prose only) | RQ2 component-attribution summary (condensed view of the architecture comparison) | none dedicated - would be built from `results/seed_sweep_summary_lagged.csv` filtered to the 3 base models plus a DM-significance annotation column | NO | A script joining seed_sweep_summary and table6_dm_lagged into one compact table; does not exist |
-| T6 (attested: "Table 6" in code docstring + prose) | DM significance matrix, all 21 pairs x 3 arrays x 3 horizons | `scripts/build_table6_dm.py` | YES (lagged) / IN PROGRESS (oracle) | `results/table6_dm_lagged.csv` (189 rows) exists. `results/table6_dm_oracle.csv` does not exist yet as of this brief (background run in progress - see Section 9). 189 rows is too large to print in full in an 8-page paper; needs a condensation script (e.g. per-model-pair summary across cells, full matrix as supplementary CSV) |
-| T7 (proposed) | RQ3 sky-condition stratification: skill_vs_convex by class x model x array x horizon | `scripts/build_table_sky.py` | YES (data), NO (as a formatted table) | `results/table_sky.csv` (81 rows) exists and is ready to aggregate; needs a condensation script (likely mean skill by class x horizon, pooled correctly across the 3 arrays given they are identical - see Section 5 item 8's duplication warning) and a LaTeX generator |
-| F1 (proposed) | Skill vs horizon, two lines (vs persistence, vs convex), one panel per array - visualizes C16/C17's monotonic-vs-non-monotonic shape result | none | NO | Plotting script reading `results/reference_comparison.csv`; this is very likely the paper's single most important figure and does not exist in any form |
-| F2 (proposed) | Protocol-inflation summary: bar or waterfall of the 5 Table 4 effect sizes (C14, C16, C19, C12, C20) | none | NO | Needs the 5 effect sizes assembled from 4 different source files (table4_protocol_lagged/oracle.csv, the leaked-vs-corrected JSON pair, train5yr JSONs) into one small dataframe first - no script currently does this join |
-| F3 (proposed) | Skill_vs_convex by model x horizon, boxed/errorbar over 5 seeds, one panel per array | none | NO | Plotting script reading `results/seed_sweep_summary_lagged.csv` (and optionally oracle) |
-| F4 (proposed) | DM significance summary - e.g. count or heatmap of Holm-significant pairs per array x horizon cell | none | NO | Plotting/aggregation script reading `results/table6_dm_lagged.csv` |
-| F5 (proposed) | Skill_vs_convex by sky class, grouped by horizon (visualizes C22, with the n=236 caveat annotated) | none | NO | Plotting script reading `results/table_sky.csv`, with the same pooling-duplication caution as T7 |
-| F6 (proposed) | Feature-importance comparison, leaked vs corrected residual stage (visualizes Finding 10's reordering result: k_p_hours_stale/roll24_std/k_p_issue_m1/m2 top-5 under leakage vs hour_cos/k_ghi_issue_m2/roll24_std under the fix) | none | NO | Data exists in the two run JSONs' `extra.top_features_gain` fields (`results/lstm_residual_array11_h6_lagged_seed0.json` and the leaked JSON); no plotting script yet |
-| F7 (proposed) | Oracle vs lagged skill gap by horizon, one line/bar per model (visualizes C20) | none | NO | Plotting script reading both seed_sweep_summary CSVs, same join as T3/F3 |
+| T6 (attested: "Table 6" in code docstring + prose) | DM significance matrix, all 21 pairs x 3 arrays x 3 horizons | `scripts/build_table6_dm.py` | YES (both regimes) | `results/table6_dm_lagged.csv` (189 rows) and `results/table6_dm_oracle.csv` (189 rows) both exist as of 2026-08-08 - see PROJECT_CHECKPOINT.md's 2026-08-08 sync. 189 rows is too large to print in full in an 8-page paper; needs a condensation script (e.g. per-model-pair summary across cells, full matrix as supplementary CSV) |
+| T7 (proposed) | RQ3 sky-condition stratification: skill_vs_convex by class x model x array x horizon | `scripts/build_table_sky.py` | YES (data), NO (as a formatted table) | `results/table_sky.csv` (81 rows) exists and is ready to aggregate; needs a condensation script (likely mean skill by class x horizon, pooled correctly across the 3 arrays given they are identical - see Section 5 item 8's duplication warning) and a LaTeX generator. F3 (below) previews one cell of this same data. |
+| F1 (built 2026-08-08) | Skill vs horizon, two lines (vs persistence, vs convex), XGBoost only, one panel per array - visualizes C16/C17's monotonic-vs-non-monotonic shape result | `scripts/build_figures.py` (`build_f1`) | YES | Matches its original proposal. `paper/figures/F1_skill_vs_horizon.pdf`; caption in `paper/figures/CAPTIONS.md` |
+| F2 (built 2026-08-08) | Skill vs convex reference by model and by feature regime (lagged vs oracle), array11, three horizons - visualizes C20 (the lagged-to-oracle gap dwarfs any model-to-model difference) | `scripts/build_figures.py` (`build_f2`) | YES | Does NOT match the original proposal (a protocol-inflation waterfall of 5 Table 4 effect sizes) - that idea was superseded and never built, see the note above this table. `paper/figures/F2_skill_by_model_regime.pdf` |
+| F3 (built 2026-08-08) | nRMSE and skill_vs_convex by sky class, three models (XGBoost/LSTM/LSTM+residual), array11 h=3 ONLY - visualizes C22 (nRMSE and skill rank sky classes differently) | `scripts/build_figures.py` (`build_f3`) | YES | Does NOT match the original proposal (skill_vs_convex by model x horizon, boxed over 5 seeds, all arrays) - that idea was superseded and never built. Also distinct from the originally-proposed F5 (sky class grouped by horizon, all 9 cells) - F3 previews one cell of that. `paper/figures/F3_error_by_sky_condition.pdf` |
+| F4 (built 2026-08-08) | Residual distribution (histogram) before and after the residual-correction stage, LSTM base, array11 h=6 seed 0 - visualizes Finding 11's overconfidence mechanism directly | `scripts/build_figures.py` (`build_f4`), data from `scripts/compute_f4_residuals.py` (a real refit - results/f4_residuals_array11_h6_lagged_seed0.csv) | YES | Does NOT match the original proposal (a DM significance heatmap) - that idea was superseded and never built. `paper/figures/F4_residual_distribution.pdf` |
+| F5 (built 2026-08-08) | XGBoost top-10 feature importance (gain), lagged vs oracle, array11 h=3 seed 0 - visualizes that one oracle feature dominates while no lagged feature does | `scripts/build_figures.py` (`build_f5`) | YES | Does NOT match the original proposal (skill by sky class grouped by horizon) - that idea was superseded and never built, see F3's row above. `paper/figures/F5_feature_importance.pdf` |
+| F6 (built 2026-08-08) | Skill_vs_convex vs mean training compute (fit_seconds, log scale), one marker per model, array11 h=6 - visualizes RQ4 (XGBoost reaches comparable skill at ~1/18th LSTM's compute) | `scripts/build_figures.py` (`build_f6`) | YES | Does NOT match the original proposal (leaked-vs-corrected feature importance) - that idea was superseded and never built. This IS the "compute-vs-skill scatter" the Section 6 outline flagged as a candidate for F6/F7 - that note is now resolved. `paper/figures/F6_skill_vs_compute.pdf` |
+| F7 (redefined 2026-08-08) | The evaluation pipeline: raw DKASC data through to skill scores, with protocol decision points marked (daylight filter, chronological split boundaries, lagged/oracle regime fork, clear-sky reference chain, the three reference forecasts) | `paper/figures/F7_pipeline.tex` (TikZ, hand-written, NOT compile-tested - no LaTeX toolchain in this dev environment) | PARTIAL (TikZ source exists, not verified to compile) | The originally-proposed F7 (oracle vs lagged skill gap by horizon) was dropped as redundant with the built F2 above and reassigned to this pipeline/protocol diagram, which nothing else in the figure set covers and which the paper needs since protocol is its actual contribution. Plain-text ASCII sketch of the same structure in `paper/figures/CAPTIONS.md`, reviewable without a LaTeX build. Needs: a real compile-and-check pass (node spacing is estimated by hand, not visually verified) before camera-ready. |
 
 ---
 
@@ -628,11 +668,16 @@ is.
    (this file), and `.gitkeep`. The entire paper needs to be written from
    scratch.
 
-3. **No figure exists in any form.** All of F1-F7 (Section 7) are
-   proposed content with no generating script and no output file. F1 in
-   particular (skill vs horizon, by reference type) is very likely the
-   paper's single most persuasive visual and does not exist even as a
-   draft.
+3. **RESOLVED 2026-08-08.** F1-F6 are built (`scripts/build_figures.py`,
+   PDF+PNG under `paper/figures/`, captions in `paper/figures/
+   CAPTIONS.md`) and F7 (the evaluation-pipeline/protocol diagram) is
+   written as TikZ source (`paper/figures/F7_pipeline.tex`) but not yet
+   compile-tested - no LaTeX toolchain in this dev environment, and no
+   .tex file for the paper itself exists yet (gap 2 above still stands:
+   these figures have nowhere to be `\input` into until the paper is
+   drafted). See Section 7's 2026-08-08 note for which figures matched
+   their original proposal and which were superseded by more useful
+   content decided during construction.
 
 4. **T1, T2, T5, T7 have no generating script.** Only T3, T4, T6 can be
    produced today by running an existing script. The other four need new

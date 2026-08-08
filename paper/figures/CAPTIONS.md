@@ -4,9 +4,16 @@ Working captions for each built figure, kept in sync with the comment
 blocks in scripts/build_figures.py so the caption travels with the
 figure and does not drift or get reinvented at writing time. Appended
 to as each figure is built - see paper/WRITING_BRIEF.md Section 7 for
-the full F1-F7 plan. Only F7 (oracle vs lagged skill gap by horizon,
-one line/bar per model, per WRITING_BRIEF.md Section 7) remains
-unbuilt.
+the full F1-F7 plan and its 2026-08-08 note on which figures matched
+their original proposal and which were superseded during construction.
+
+F1-F6 are matplotlib figures (PDF+PNG) built by scripts/build_figures.py.
+F7 (redefined 2026-08-08 - the original proposal, oracle vs lagged
+skill gap by horizon, was dropped as redundant with the built F2) is a
+TikZ diagram, paper/figures/F7_pipeline.tex, not yet compile-tested (no
+LaTeX toolchain in this dev environment) - the ASCII sketch below is
+its reviewable-before-typesetting form, per that file's own header
+comment.
 
 ASCII only, per CLAUDE.md.
 
@@ -170,3 +177,119 @@ Must visually demonstrate: XGBoost achieves comparable skill at
 roughly one-eighteenth the compute of LSTM, and the two residual
 variants cost even more compute for lower skill than their own base
 models.
+
+---
+
+## F7 - the evaluation pipeline (protocol diagram)
+
+File: paper/figures/F7_pipeline.tex (TikZ source, NOT yet compile-tested
+- no LaTeX toolchain in this dev environment; see that file's own
+header comment for inclusion instructions and a spacing caveat)
+
+REDEFINITION, 2026-08-08: the originally-proposed F7 (oracle vs lagged
+skill gap by horizon, one line/bar per model) turned out to duplicate
+F2, which already shows exactly that. F7 is reassigned to a diagram of
+the evaluation pipeline itself - nothing else in the figure set shows
+protocol STRUCTURE, only protocol RESULTS, and this paper's contribution
+is the protocol, not the architecture (CLAUDE.md's own framing).
+paper/WRITING_BRIEF.md Section 7 updated to match.
+
+ASCII sketch (structure only - the TikZ file is the source of truth for
+exact text; this is here so the structure is reviewable without a LaTeX
+build):
+
+```
+RAW DATA
+[DKASC 5-min CSV, per array + shared weather station]
+        |
+        v
+[load: tz localize, physical-range filter, 5-min -> hourly]  (loader.py)
+        |
+        v
+[processed hourly parquet, 2009-2015, per array]  ------->----+
+        |                                                      |
+        v                                                      v
+=====================================================  +----------------------------------+
+== PROTOCOL: CHRONOLOGICAL SPLIT (never shuffled) ===  | CLEAR-SKY CHAIN                    |
+=====================================================  | solar position -> clear-sky GHI    |
+   TRAIN (2011-2013)   VAL (2014)      TEST (2015)     |  (5-min, hourly-averaged --         |
+   scalers + model     early stopping; touched ONCE,    |  Finding 1 fix) -> daylight mask    |
+   fit HERE ONLY       convex weight w;  at the very     |  (elev > 10deg) -> k_ghi            |
+                        residual OOF     end             |  -- deterministic, whole record     |
+                        folds expand                     | + clear-sky POWER: temperature      |
+                        within TRAIN,                     |  climatology + gain (TRAIN-only     |
+                        not here                          |  fit) -> p_cs feature               |
+        |                                                +----------------------------------+
+        v                                                                |
+=====================================================================    |
+== PROTOCOL: FEATURE REGIME FORK (never mixed) <---------------------------+
+=====================================================================
+   LAGGED                              ORACLE
+   issue-time info only + deter-       + oracle_-prefixed measured
+   ministic quantities at t            weather AT TARGET TIME --
+                                        UPPER BOUND, never achievable
+        |                                        |
+        +--------------------+--------------------+
+                              v
+                    +------------------------+
+                    | MODELS                  |
+                    | reference forecasts:    |
+                    |  SmartPersistence,      |
+                    |  Climatology,           |
+                    |  ConvexCombination      |
+                    |  (w fit on VAL)         |
+                    | forecasting models:     |
+                    |  XGBoost, LSTM,         |
+                    |  CNN-LSTM, +residual    |
+                    |  (OOF stage on TRAIN;   |
+                    |  VAL for early stop     |
+                    |  only)                  |
+                    +------------------------+
+                              |
+                              v
+        =========================================================
+        == PROTOCOL: DAYLIGHT FILTER (at EVALUATION, not baked ==     [elevation > 10deg --
+        == into splits) =========================================---->  stricter than Yang
+        =========================================================     et al. 2020's 85deg
+                              |                                        zenith convention;
+                              v                                        night reported
+                  [metrics: MAE, RMSE, nRMSE, MBE]                     separately]
+                              |
+                              v
+                    [skill score]
+                    /              \
+                   v                v
+     [vs SmartPersistence]   [vs ConvexCombination
+                               == HEADLINE METRIC ==
+                               (Yang et al. 2020)]
+                   \                /
+                    v              v
+        [results/<run_id>.json -- config, git hash, seed,
+                  metrics, timing -- the audit trail]
+                              |
+                              v (aggregated across many committed runs)
+        [Diebold-Mariano significance test -- HAC variance,
+         HLN correction, Holm-Bonferroni within cell -> Table 6]
+```
+
+Caption:
+Fig. 7. The evaluation pipeline, from raw 5-minute DKASC data to skill
+scores, with every protocol decision point marked (double-bordered
+boxes): the chronological split (train/validation/test boundaries,
+what is fit where, test touched once at the end); the lagged/oracle
+feature-regime fork (never mixed in one feature matrix); the daylight
+filter (applied at evaluation, not baked into the splits); and the
+choice of reference forecast (smart persistence vs. the optimal convex
+combination of climatology and persistence, the headline metric per
+Yang et al. 2020). The clear-sky chain (solar position, clear-sky
+irradiance, daylight mask, clear-sky power) is shown as a side input
+feeding the feature build, split into its deterministic
+geometry/irradiance half and its train-only-fit power half. Every
+protocol choice on this diagram is a knob this paper's Table 4
+(protocol-inflation results) turns.
+
+Must visually demonstrate: the protocol is legible as a structure at a
+glance - a reader should be able to locate every decision point this
+paper's Results section turns into a table row (night-hour inclusion,
+reference-forecast choice, residual-stage leakage, oracle vs lagged)
+without reading the Methodology text first.
