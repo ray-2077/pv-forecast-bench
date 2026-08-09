@@ -18,10 +18,29 @@ built from the same two committed CSVs rather than a new computation:
                                            Bonferroni within cell),
                                            single seed=0
 
+(both filenames above are the --eval-split val default; see CHANGE LOG
+below for the test-split filenames)
+
 Both CSVs are lagged-regime only (CLAUDE.md rule 5) and both are
 single-source-of-truth artifacts already in the repo - this script only
 joins and reformats them, it fits nothing and reads no run JSON
 directly.
+
+CHANGE LOG (2026-08-09): added --eval-split {val,test}, default val,
+same strict-argparse shape as scripts/aggregate_seed_sweep.py and
+scripts/build_table6_dm.py. val reads results/seed_sweep_summary_
+<regime>.csv and results/table6_dm_<regime>.csv and writes paper/tables/
+T5_component_attribution.csv/.tex - all UNCHANGED from before this flag
+existed. test reads the _test-suffixed counterparts (results/
+seed_sweep_summary_<regime>_test.csv, results/table6_dm_<regime>_test.csv)
+and writes DISTINCT, _test-suffixed output files (paper/tables/
+T5_component_attribution_test.csv/.tex) - never the same path as the val
+output. Running with --eval-split test requires those two input CSVs to
+already exist: results/seed_sweep_summary_<regime>_test.csv comes from
+`aggregate_seed_sweep.py --eval-split test --regime <regime>`; results/
+table6_dm_<regime>_test.csv comes from `build_table6_dm.py --eval-split
+test --regime <regime>`, which refits every model against the test split
+and is not run automatically by this script.
 
 table6_dm_lagged.csv orders each pair (model_1, model_2) by a fixed
 model order (xgboost, lstm, cnn_lstm, lstm_residual, cnn_lstm_residual,
@@ -44,11 +63,13 @@ Finding 8's own retraction of exactly that substitution.
 Writes:
   paper/tables/T5_component_attribution.csv
   paper/tables/T5_component_attribution.tex (booktabs fragment)
+(or the _test-suffixed counterparts - see CHANGE LOG above)
 
 Usage:
-    python scripts/build_table5_component_attribution.py
+    python scripts/build_table5_component_attribution.py [--eval-split {val,test}]
 """
 
+import argparse
 import csv
 import sys
 from pathlib import Path
@@ -83,10 +104,19 @@ DM_COMPARISONS = [
 ALPHA = 0.05
 
 
-def load_skill_summary():
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--eval-split", choices=("val", "test"), default="val")
+    # parse_args(), not parse_known_args() - an unrecognised flag must be a
+    # hard error, same reasoning as scripts/aggregate_seed_sweep.py and
+    # scripts/build_table6_dm.py's --regime/--eval-split flags.
+    return parser.parse_args()
+
+
+def load_skill_summary(suffix):
     """{(array, horizon, model): (mean, std)}"""
     out = {}
-    with open(RESULTS_DIR / "seed_sweep_summary_lagged.csv") as fh:
+    with open(RESULTS_DIR / f"seed_sweep_summary_lagged{suffix}.csv") as fh:
         for row in csv.DictReader(fh):
             key = (row["array"], int(row["horizon"]), row["model"])
             out[key] = (
@@ -96,10 +126,10 @@ def load_skill_summary():
     return out
 
 
-def load_dm_table():
+def load_dm_table(suffix):
     """{(array, horizon, model_1, model_2): row_dict}"""
     out = {}
-    with open(RESULTS_DIR / "table6_dm_lagged.csv") as fh:
+    with open(RESULTS_DIR / f"table6_dm_lagged{suffix}.csv") as fh:
         for row in csv.DictReader(fh):
             key = (row["array"], int(row["horizon"]), row["model_1"], row["model_2"])
             out[key] = row
@@ -116,9 +146,9 @@ def format_dm_cell(dm_row):
     return f"{better} better, hln={hln_stat:+.2f}, p_holm={p_holm:.4f} ({sig})"
 
 
-def build_rows():
-    skill = load_skill_summary()
-    dm = load_dm_table()
+def build_rows(suffix):
+    skill = load_skill_summary(suffix)
+    dm = load_dm_table(suffix)
 
     rows = []
     for array in ARRAYS:
@@ -213,9 +243,17 @@ def write_latex(rows, dm, path):
 
 
 def main():
-    rows = build_rows()
-    dm = load_dm_table()
+    eval_split = parse_args().eval_split
+    # val output paths are UNCHANGED from before --eval-split existed
+    # (suffix ""); test gets an explicit _test suffix on every input and
+    # output filename, a distinct path rather than just a distinct flag
+    # value, so it can never overwrite or shadow the val artifacts.
+    suffix = "" if eval_split == "val" else "_test"
 
+    rows = build_rows(suffix)
+    dm = load_dm_table(suffix)
+
+    print(f"eval_split={eval_split!r}\n")
     for row in rows:
         print(f"{row['array']} h={row['horizon']}")
         for model in MODELS:
@@ -227,8 +265,8 @@ def main():
             print(f"  DM {label:24s} {format_dm_cell(dm_row)}")
 
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
-    csv_path = TABLES_DIR / "T5_component_attribution.csv"
-    tex_path = TABLES_DIR / "T5_component_attribution.tex"
+    csv_path = TABLES_DIR / f"T5_component_attribution{suffix}.csv"
+    tex_path = TABLES_DIR / f"T5_component_attribution{suffix}.tex"
     write_csv(rows, csv_path)
     write_latex(rows, dm, tex_path)
     print(f"\nwrote {csv_path}")

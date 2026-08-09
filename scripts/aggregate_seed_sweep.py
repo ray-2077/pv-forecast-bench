@@ -23,6 +23,22 @@ to four decimal places. Fixed by adding a real, strict argparse --regime
 flag and moving the output to results/seed_sweep_summary_<regime>.csv so
 the two can never shadow each other again.
 
+CHANGE LOG (2026-08-09): added --eval-split {val,test}, default val,
+same strict-argparse shape as --regime. val reads results/<run_id>.json
+and writes results/seed_sweep_summary_<regime>.csv exactly as before -
+UNCHANGED, so every existing reference to that path (build_table5_
+component_attribution.py, paper/tables/CAPTIONS.md, paper/WRITING_BRIEF.md)
+keeps working with no edit required. test reads results/test/<run_id>.json
+(scripts/run_final_test.py's output directory - run_id itself does not
+encode eval_split, only the directory does, so the two directories are
+what keep val and test runs apart on disk) and writes to a DISTINCT,
+_test-suffixed path, results/seed_sweep_summary_<regime>_test.csv - it
+can never collide with, overwrite, or silently shadow the val output,
+because the two are always different filenames, not just different flag
+values. Each loaded run JSON's own config["eval_split"] is asserted to
+match the requested split, so a JSON placed in the wrong directory by
+mistake fails loudly here instead of silently contaminating the summary.
+
 Per src/models/residual.py's docstring, lstm_residual and
 cnn_lstm_residual's own validation-split metrics are optimistic (their
 residual stage is fit on validation residuals, per CLAUDE.md rule 6) -
@@ -53,7 +69,7 @@ for the real test. Seed mean/std stays in this script and in Table 3: it
 is a legitimate reproducibility statistic, just not a significance test.
 
 Usage:
-    python scripts/aggregate_seed_sweep.py [--regime {lagged,oracle}]
+    python scripts/aggregate_seed_sweep.py [--regime {lagged,oracle}] [--eval-split {val,test}]
 """
 
 import argparse
@@ -89,6 +105,7 @@ CSV_FIELDS = [
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--regime", choices=("lagged", "oracle"), default="lagged")
+    parser.add_argument("--eval-split", choices=("val", "test"), default="val")
     # parse_args() (not parse_known_args()) is what makes an unrecognised
     # flag a hard error instead of being silently dropped - this is the
     # exact failure mode that made `--regime oracle` a no-op before this
@@ -96,10 +113,18 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_daylight_metrics(regime):
+def load_daylight_metrics(regime, eval_split):
     """(model, array, horizon) -> list of metrics['daylight'] dicts, one
     per seed found on disk.
+
+    val reads results/<run_id>.json; test reads results/test/<run_id>.json
+    (scripts/run_final_test.py's output directory - run_id does not encode
+    eval_split, so the directory is what keeps the two apart on disk). Each
+    loaded record's own config["eval_split"] is checked against `eval_split`
+    and raises if they disagree, so a misplaced file fails loudly here
+    rather than silently contaminating the summary.
     """
+    split_dir = RESULTS_DIR if eval_split == "val" else RESULTS_DIR / "test"
     found = {}
     for model in MODELS:
         for array in ARRAYS:
@@ -107,11 +132,17 @@ def load_daylight_metrics(regime):
                 metrics_list = []
                 for seed in SEEDS:
                     run_id = f"{model}_{array}_h{horizon}_{regime}_seed{seed}"
-                    path = RESULTS_DIR / f"{run_id}.json"
+                    path = split_dir / f"{run_id}.json"
                     if not path.exists():
                         continue
                     with open(path) as f:
                         record = json.load(f)
+                    actual_split = record["config"]["eval_split"]
+                    if actual_split != eval_split:
+                        raise ValueError(
+                            f"{path}: expected config.eval_split={eval_split!r}, "
+                            f"found {actual_split!r} - refusing to mix splits"
+                        )
                     metrics_list.append(record["metrics"]["daylight"])
                 found[(model, array, horizon)] = metrics_list
     return found
@@ -204,17 +235,28 @@ def print_pairwise_comparisons(summary):
 
 
 def main():
-    regime = parse_args().regime
+    args = parse_args()
+    regime = args.regime
+    eval_split = args.eval_split
 
-    metrics_by_key = load_daylight_metrics(regime)
+    metrics_by_key = load_daylight_metrics(regime, eval_split)
     n_found = sum(len(v) for v in metrics_by_key.values())
     n_expected = len(MODELS) * len(ARRAYS) * len(HORIZONS) * len(SEEDS)
-    print(f"regime={regime!r}: found {n_found}/{n_expected} run JSONs for this grid\n")
+    print(
+        f"regime={regime!r} eval_split={eval_split!r}: "
+        f"found {n_found}/{n_expected} run JSONs for this grid\n"
+    )
 
     summary = summarize(metrics_by_key)
     print_summary_table(summary)
 
-    out_path = RESULTS_DIR / f"seed_sweep_summary_{regime}.csv"
+    # val output path is UNCHANGED from before --eval-split existed, so
+    # every existing reference to results/seed_sweep_summary_<regime>.csv
+    # keeps working. test gets an explicit _test suffix - a distinct
+    # filename, not just a distinct flag value, so it can never overwrite
+    # or shadow the val output even by accident.
+    suffix = "" if eval_split == "val" else "_test"
+    out_path = RESULTS_DIR / f"seed_sweep_summary_{regime}{suffix}.csv"
     write_csv(summary, out_path)
     print(f"\nwrote {out_path}")
 

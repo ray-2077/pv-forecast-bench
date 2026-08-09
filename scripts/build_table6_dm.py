@@ -11,9 +11,10 @@ with the Harvey-Leybourne-Newbold (1997) small-sample correction. Seed
 spread (Table 3) remains in the paper as a reproducibility statistic, not
 a significance test.
 
-Pipeline, per (array, horizon), VALIDATION split (2014) only - this
-script never reads 2015 (CLAUDE.md research-integrity rule, test set
-touched once at the end):
+Pipeline, per (array, horizon), on the split selected by --eval-split
+(default val, i.e. 2014; CLAUDE.md research-integrity rule, test set
+touched once at the end - this script only reads 2015 if --eval-split
+test is passed explicitly, see CHANGE LOG below):
   load one array's processed parquet -> solar position / clear-sky
   irradiance / daylight mask / clear-sky index of GHI (src.data.clearsky)
   -> chronological split (src.data.splits) -> temperature climatology and
@@ -30,9 +31,10 @@ touched once at the end):
   Holm-Bonferroni correction applied across the 21 pairs within that one
   (array, horizon) cell.
 
-Writes results/table6_dm_<regime>.csv, one row per (array, horizon,
-model_1, model_2): array, horizon, model_1, model_2, dbar, dm_stat,
-hln_stat, p_raw, p_holm, n, better_model.
+Writes results/table6_dm_<regime>.csv (val) or results/table6_dm_
+<regime>_test.csv (test), one row per (array, horizon, model_1, model_2):
+array, horizon, model_1, model_2, dbar, dm_stat, hln_stat, p_raw, p_holm,
+n, better_model.
 
 --regime selects lagged (default) or oracle, mirroring run_seed_sweep.py
 and aggregate_seed_sweep.py's flag exactly - CLAUDE.md rule 5. Output
@@ -49,12 +51,35 @@ run_self_test() below) and prints PASS/FAIL for each; aborts before
 touching any data if a check fails, since a broken significance test is
 worse than none.
 
-No plotting, no test-split access, no fabricated numbers - every row is
-a real model fit and predict on real data (CLAUDE.md research integrity
-rules).
+No plotting, no fabricated numbers - every row is a real model fit and
+predict on real data (CLAUDE.md research integrity rules).
+
+CHANGE LOG (2026-08-09): added --eval-split {val,test}, default val,
+same strict-argparse shape as scripts/aggregate_seed_sweep.py. val is
+UNCHANGED from before this flag existed: models are fit on train (val
+used only for early stopping / the residual oof base refit / the convex
+weight w, exactly as before) and evaluated on val, writing results/
+table6_dm_<regime>.csv - the same path as always. test fits on the same
+train (val still used ONLY for early stopping / oof / convex weight w,
+NEVER for computing the error series - matching scripts/
+run_final_test.py's own convention exactly) but evaluates on test (2015)
+instead, writing a DISTINCT, _test-suffixed path (results/table6_dm_
+<regime>_test.csv) that can never overwrite or shadow the val output.
+Unlike scripts/run_final_test.py, this script does not read from or
+write run JSONs at all - Diebold-Mariano needs a full paired error
+series across all 7 comparators evaluated at the exact same timestamps,
+which no run JSON stores (they hold aggregate metrics only) - so a
+--eval-split test run here REFITS every model against test, independent
+of and in addition to the 450 run JSONs scripts/run_final_test.py
+already wrote. This is deliberately NOT run automatically by this
+change: --eval-split test touches the test split and costs roughly the
+same wall-clock as the existing val path (63 model fits: 3 arrays x 3
+horizons x 7 comparators, at a single seed=0, matching the val path's
+own cost) - run it only when you want DM significance against the held-
+out year specifically.
 
 Usage:
-    python scripts/build_table6_dm.py [--regime {lagged,oracle}]
+    python scripts/build_table6_dm.py [--regime {lagged,oracle}] [--eval-split {val,test}]
 """
 
 import argparse
@@ -68,6 +93,12 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from src.data.clearsky_power import (
+    add_clearsky_power,
+    fit_gain,
+    fit_temperature_climatology,
+    model_clearsky_power,
+)
 from src.data.pipeline import ARRAYS, add_clearsky_power_per_split, load_and_prepare
 from src.data.splits import split_chronological
 from src.eval.dm import dm_matrix, dm_test
@@ -92,6 +123,29 @@ CSV_COLUMNS = [
     "array", "horizon", "model_1", "model_2",
     "dbar", "dm_stat", "hln_stat", "p_raw", "p_holm", "n", "better_model",
 ]
+
+
+def add_clearsky_power_to_test(train, test, nameplate_kw, gamma_pdc):
+    """Apply the SAME train-only-fitted temperature climatology and gain
+    add_clearsky_power_per_split already used for train/val to test too -
+    never refitting anything on val or test. Only called when --eval-split
+    test is passed; the val-only default path never touches this function
+    or the test split at all.
+
+    Deliberately re-derives temp_clim/gain from `train` rather than
+    threading add_clearsky_power_per_split's internal fit results out of
+    that function, mirroring scripts/run_final_test.py's own
+    add_clearsky_power_all_splits (that script is write-once and is not
+    imported from here - see its own docstring). fit_gain is
+    deterministic given `train`, so re-deriving it is equivalent to
+    reusing it, not a second, possibly-different fit.
+    """
+    temp_clim = fit_temperature_climatology(train)
+    p_cs_raw_train = model_clearsky_power(train.index, nameplate_kw, gamma_pdc, temp_clim)
+    gain, _n_gain_hours, _gain_iqr = fit_gain(train, p_cs_raw_train)
+
+    p_cs_raw_test = model_clearsky_power(test.index, nameplate_kw, gamma_pdc, temp_clim)
+    return add_clearsky_power(test, p_cs_raw_test, gain, nameplate_kw)
 
 
 # ---------------------------------------------------------------------------
@@ -164,16 +218,26 @@ def run_self_test():
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--regime", choices=("lagged", "oracle"), default="lagged")
+    parser.add_argument("--eval-split", choices=("val", "test"), default="val")
     return parser.parse_args()
 
 
-def fit_all_models(train, val, horizon, seed, regime):
+def fit_all_models(train, val, eval_df, horizon, seed, regime):
     """Fit all 5 benchmark models plus smart persistence and the convex
     reference at `seed`, on this (array, horizon)'s train/val, and return
-    {model_name: predictions Series}. Mirrors scripts/run_xgb_dev.py /
-    run_lstm_dev.py / run_cnn_lstm_dev.py / run_residual_dev.py exactly,
-    minus the per-script result-JSON writing (this script's own output is
-    results/table6_dm_<regime>.csv, not one run JSON per model).
+    {model_name: predictions Series} evaluated on `eval_df`. Mirrors
+    scripts/run_xgb_dev.py / run_lstm_dev.py / run_cnn_lstm_dev.py /
+    run_residual_dev.py exactly, minus the per-script result-JSON writing
+    (this script's own output is results/table6_dm_<regime>[_test].csv,
+    not one run JSON per model).
+
+    `val` is used ONLY for early stopping, the residual oof base refit,
+    and the convex weight w - never for the predictions this function
+    returns. `eval_df` is val itself when --eval-split val (the default,
+    reproducing the exact previous behaviour), or test when --eval-split
+    test - matching scripts/run_final_test.py's own convention that VAL
+    is still used for early stopping and for fitting the convex weight w
+    even when the final evaluation target is test.
 
     Residual models use residual_fit_split='oof' (the default and only
     scheme that should ever produce a reported result, CLAUDE.md rule 6).
@@ -183,51 +247,51 @@ def fit_all_models(train, val, horizon, seed, regime):
 
     xgb_model = XGBForecaster(seed=seed, regime=regime)
     xgb_model.fit(train, horizon, df_val=val)
-    preds["xgboost"] = xgb_model.predict(val, horizon)
-    check_no_lookahead(val, preds["xgboost"], horizon)
+    preds["xgboost"] = xgb_model.predict(eval_df, horizon)
+    check_no_lookahead(eval_df, preds["xgboost"], horizon)
 
     lstm_model = LSTMForecaster(seed=seed, regime=regime)
     lstm_model.fit(train, horizon, df_val=val)
-    preds["lstm"] = lstm_model.predict(val, horizon)
-    check_no_lookahead(val, preds["lstm"], horizon)
+    preds["lstm"] = lstm_model.predict(eval_df, horizon)
+    check_no_lookahead(eval_df, preds["lstm"], horizon)
 
     cnn_lstm_model = CNNLSTMForecaster(seed=seed, regime=regime)
     cnn_lstm_model.fit(train, horizon, df_val=val)
-    preds["cnn_lstm"] = cnn_lstm_model.predict(val, horizon)
-    check_no_lookahead(val, preds["cnn_lstm"], horizon)
+    preds["cnn_lstm"] = cnn_lstm_model.predict(eval_df, horizon)
+    check_no_lookahead(eval_df, preds["cnn_lstm"], horizon)
 
     lstm_residual_model = ResidualCorrected(
         LSTMForecaster(seed=seed, regime=regime), seed=seed, residual_fit_split="oof"
     )
     lstm_residual_model.fit(train, horizon, val)
-    preds["lstm_residual"] = lstm_residual_model.predict(val, horizon)
-    check_no_lookahead(val, preds["lstm_residual"], horizon)
+    preds["lstm_residual"] = lstm_residual_model.predict(eval_df, horizon)
+    check_no_lookahead(eval_df, preds["lstm_residual"], horizon)
 
     cnn_lstm_residual_model = ResidualCorrected(
         CNNLSTMForecaster(seed=seed, regime=regime), seed=seed, residual_fit_split="oof"
     )
     cnn_lstm_residual_model.fit(train, horizon, val)
-    preds["cnn_lstm_residual"] = cnn_lstm_residual_model.predict(val, horizon)
-    check_no_lookahead(val, preds["cnn_lstm_residual"], horizon)
+    preds["cnn_lstm_residual"] = cnn_lstm_residual_model.predict(eval_df, horizon)
+    check_no_lookahead(eval_df, preds["cnn_lstm_residual"], horizon)
 
     # ALSO includes smart persistence and the convex reference as
     # comparators - not just as the two skill-score denominators
     # (CLAUDE.md rule 4), but as models in their own right in this test.
     sp_model = SmartPersistence()
     sp_model.fit(train, horizon)
-    preds["smart_persistence"] = sp_model.predict(val, horizon)
-    check_no_lookahead(val, preds["smart_persistence"], horizon)
+    preds["smart_persistence"] = sp_model.predict(eval_df, horizon)
+    check_no_lookahead(eval_df, preds["smart_persistence"], horizon)
 
     convex_model = ConvexCombination()
-    convex_model.fit(train, horizon, val)
-    preds["convex_reference"] = convex_model.predict(val, horizon)
-    check_no_lookahead(val, preds["convex_reference"], horizon)
+    convex_model.fit(train, horizon, val)  # w fit on VAL only, never test
+    preds["convex_reference"] = convex_model.predict(eval_df, horizon)
+    check_no_lookahead(eval_df, preds["convex_reference"], horizon)
 
     return preds
 
 
-def build_cell(array, horizon, train, val, nameplate_kw, regime):
-    preds = fit_all_models(train, val, horizon, SEED, regime)
+def build_cell(array, horizon, train, val, eval_df, nameplate_kw, regime):
+    preds = fit_all_models(train, val, eval_df, horizon, SEED, regime)
 
     common_idx = preds["xgboost"].index
     for name, p in preds.items():
@@ -235,7 +299,7 @@ def build_cell(array, horizon, train, val, nameplate_kw, regime):
             continue
         common_idx = common_idx.intersection(p.index)
 
-    daylight_mask = val.loc[common_idx, "is_daylight"].to_numpy()
+    daylight_mask = eval_df.loc[common_idx, "is_daylight"].to_numpy()
     daylight_idx = common_idx[daylight_mask]
 
     outage_mask = exclusion_mask(array, daylight_idx)
@@ -248,7 +312,7 @@ def build_cell(array, horizon, train, val, nameplate_kw, regime):
         f"n_eval={len(eval_idx)}"
     )
 
-    y_true = val.loc[eval_idx, "Active_Power"]
+    y_true = eval_df.loc[eval_idx, "Active_Power"]
     errors = {name: (y_true - p.loc[eval_idx]) for name, p in preds.items()}
 
     hln_df, p_holm_df, pairs_df = dm_matrix(errors, h=horizon)
@@ -272,11 +336,23 @@ def build_cell(array, horizon, train, val, nameplate_kw, regime):
 
 
 def main():
-    regime = parse_args().regime
+    args = parse_args()
+    regime = args.regime
+    eval_split = args.eval_split
+    split_label = "validation split, 2014" if eval_split == "val" else "TEST split, 2015"
 
     if not run_self_test():
         print("self-test FAILED - aborting before touching any data")
         sys.exit(1)
+
+    if eval_split == "test":
+        print(
+            "\n--eval-split test: this run fits on train, uses val ONLY for "
+            "early stopping / residual oof / the convex weight w, and "
+            "evaluates the Diebold-Mariano error series on the TEST split "
+            "(2015). See this script's module docstring, CHANGE LOG "
+            "2026-08-09.\n"
+        )
 
     all_rows = []
     array11_matrices = {}
@@ -286,13 +362,19 @@ def main():
         train, val, test = split_chronological(df)
         train, val, gain_info = add_clearsky_power_per_split(train, val, test, nameplate_kw, gamma_pdc)
 
+        if eval_split == "test":
+            test = add_clearsky_power_to_test(train, test, nameplate_kw, gamma_pdc)
+            eval_df = test
+        else:
+            eval_df = val
+
         for horizon in HORIZONS:
             print(f"\n{'=' * 90}")
-            print(f"array={array}  horizon={horizon}h  seed={SEED}  regime={regime}  (validation split, 2014)")
+            print(f"array={array}  horizon={horizon}h  seed={SEED}  regime={regime}  ({split_label})")
             print("=" * 90)
 
             start = time.perf_counter()
-            pairs_df, hln_df, p_holm_df = build_cell(array, horizon, train, val, nameplate_kw, regime)
+            pairs_df, hln_df, p_holm_df = build_cell(array, horizon, train, val, eval_df, nameplate_kw, regime)
             elapsed = time.perf_counter() - start
             print(f"  cell done in {elapsed:.1f}s")
 
@@ -302,7 +384,11 @@ def main():
 
     out_df = pd.concat(all_rows, ignore_index=True)[CSV_COLUMNS]
     RESULTS_DIR.mkdir(exist_ok=True)
-    out_path = RESULTS_DIR / f"table6_dm_{regime}.csv"
+    # val output path is UNCHANGED from before --eval-split existed; test
+    # gets an explicit _test suffix - a distinct filename, not just a
+    # distinct flag value, so it can never overwrite or shadow val's.
+    suffix = "" if eval_split == "val" else "_test"
+    out_path = RESULTS_DIR / f"table6_dm_{regime}{suffix}.csv"
     out_df.to_csv(out_path, index=False)
     print(f"\nwrote {out_path}  ({len(out_df)} rows)")
 
