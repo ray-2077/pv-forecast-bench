@@ -4,15 +4,17 @@
 % at least once in paper/draft/*.md as of 2026-08-09. ASCII only, per
 % CLAUDE.md.
 %
-% PROVENANCE, per entry: see the comment above each one. Where an entry
-% is built from paper/literature_notes.md, first names/initials are
-% reproduced ONLY where that file (or an evidence/*.md audit) states
-% them explicitly - literature_notes.md itself gives surnames only for
-% Yang et al., Kapoor and Narayanan, Hewamalage/Ackermann/Bergmeir, and
-% both Nguyen and Musgens papers. Rather than fill in initials from
-% memory, those fields are left as surname-only or omitted; fill them in
-% from the original papers before submission, not from this file's
-% author's recollection.
+% PROVENANCE, per entry: see the comment above each one.
+% paper/literature_notes.md itself gives surnames only for Yang et al.,
+% Kapoor and Narayanan, Hewamalage/Ackermann/Bergmeir, and both Nguyen
+% and Musgens papers; first initials for all of those were supplied by
+% the user directly on 2026-08-09 (not derived from memory) and are
+% flagged per-entry as either independently verified against a repo
+% source (Yang et al., against Mayer 2022's own reference list) or
+% taken on the user's word because no verifying source exists in this
+% repo (Kapoor and Narayanan; Hewamalage, Ackermann and Bergmeir; both
+% Nguyen and Musgens entries - see each entry's note for what was
+% checked and where).
 %
 % NOT compile-tested: no LaTeX toolchain in this dev environment, same
 % caveat as every other paper/*.tex fragment in this repo.
@@ -93,25 +95,37 @@
 }
 
 % Cited in 02_related_work.md, 03_data.md, 04_methodology.md,
-% 07_limitations.md. paper/literature_notes.md entry 1: "Yang et al.
-% (2020)... ~33 co-authors (Kleissl, Coimbra, Gueymard, Hong, Perez,
-% Lauret, Zhang...)" - the notes deliberately do not transcribe the full
-% author list, so this entry does not invent one either; "and others" is
-% the standard BibTeX truncation marker for that.
+% 07_limitations.md. Author list CORRECTED 2026-08-09 to the first six
+% names (of ~33) as user-supplied, then INDEPENDENTLY VERIFIED 2026-08-09
+% against Mayer (2022)'s own reference list (data/papers/
+% 1-s2.0-S1364032122006566-main.pdf, ref [91]): "Yang D, Alessandrini S,
+% Antonanzas J, Antonanzas-Torres F, Badescu V, Beyer HG, et al.
+% Verification of deterministic solar forecasts. Sol Energy
+% 2020;210:20-37." - matches exactly, and also supplied the DOI below
+% (not previously in this file). Only initials are given by that source
+% (e.g. "Yang D", not a spelled-out first name) - "Dazhi" from the
+% previous version of this entry was NOT sourced from any repo file and
+% has been removed; do not reintroduce a spelled-out first name without
+% a source.
 @article{yang2020verification,
-  author  = {Yang, Dazhi and others},
+  author  = {Yang, D. and Alessandrini, S. and Antonanzas, J. and Antonanzas-Torres, F. and Badescu, V. and Beyer, H. G. and others},
   title   = {Verification of deterministic solar forecasts},
   journal = {Solar Energy},
   volume  = {210},
   pages   = {20--37},
-  year    = {2020}
+  year    = {2020},
+  doi     = {10.1016/j.solener.2020.04.019}
 }
 
 % Cited in 02_related_work.md, 04_methodology.md.
 % paper/literature_notes.md entry 3: "Kapoor and Narayanan (2023),
 % 'Leakage and the reproducibility crisis in machine-learning-based
 % science', Patterns 4:100804." No issue number given in that source;
-% none invented here.
+% none invented here. Initials CORRECTED 2026-08-09 to user-supplied
+% "S. Kapoor and A. Narayanan" - NOT independently verifiable: this
+% paper has no PDF anywhere in the repo (checked data/papers/ and the
+% whole tree), and it is not among Mayer (2022)'s cited references
+% either (checked). Taken on the user's word only.
 @article{kapoor2023leakage,
   author  = {Kapoor, Sayash and Narayanan, Arvind},
   title   = {Leakage and the reproducibility crisis in machine-learning-based science},
@@ -124,19 +138,23 @@
 % Cited in 02_related_work.md. paper/literature_notes.md entry 4:
 % "Hewamalage, Ackermann & Bergmeir, 'Forecast Evaluation for Data
 % Scientists: Common Pitfalls and Best Practices', arXiv 2203.10716."
-% NO YEAR IS STATED anywhere in literature_notes.md or
-% paper/WRITING_BRIEF.md's citation plan for this entry. The year below
-% (2022) is INFERRED from the arXiv identifier's YYMM encoding
-% (2203 = March 2022), not transcribed from a stated year - flag and
-% confirm against the actual publication before submission.
-@misc{hewamalage2022pitfalls,
-  author        = {Hewamalage, Hansika and Ackermann, Klaus and Bergmeir, Christoph},
-  title         = {Forecast Evaluation for Data Scientists: Common Pitfalls and Best Practices},
-  howpublished  = {arXiv:2203.10716},
-  archivePrefix = {arXiv},
-  eprint        = {2203.10716},
-  year          = {2022},
-  note          = {Year inferred from the arXiv identifier's YYMM encoding, not stated in the source notes - confirm before submission}
+% CHANGED 2026-08-09 from the arXiv preprint (@misc, year inferred from
+% the arXiv ID's YYMM encoding) to the published journal version per
+% user instruction: authors H. Hewamalage, K. Ackermann, C. Bergmeir;
+% Data Mining and Knowledge Discovery, vol. 37, pp. 788-832, 2023 - all
+% user-supplied. NOT independently verifiable: no PDF for this paper
+% (preprint or published) exists anywhere in the repo, and it is not
+% among Mayer (2022)'s cited references (checked). Taken on the user's
+% word only; the arXiv ID is kept in a note for cross-reference, not as
+% the citation target.
+@article{hewamalage2023pitfalls,
+  author  = {Hewamalage, Hansika and Ackermann, Klaus and Bergmeir, Christoph},
+  title   = {Forecast Evaluation for Data Scientists: Common Pitfalls and Best Practices},
+  journal = {Data Mining and Knowledge Discovery},
+  volume  = {37},
+  pages   = {788--832},
+  year    = {2023},
+  note    = {Preprint: arXiv:2203.10716}
 }
 
 % Cited in 04_methodology.md (the "horizon dominates every other
@@ -150,13 +168,13 @@
 % Section 9's 2026-08-09 resolution note and literature_notes.md entry
 % 10's own correction for why these are easy to conflate.
 @misc{nguyenmusgens2022meta,
-  author        = {Nguyen, Duc and Musgens, Friedrich},
+  author        = {Nguyen, T. N. and M{\"u}sgens, F.},
   title         = {A Meta-Analysis of Solar Forecasting Based on Skill Score},
   howpublished  = {arXiv:2208.10536},
   archivePrefix = {arXiv},
   eprint        = {2208.10536},
   year          = {2022},
-  note          = {Year inferred from the arXiv identifier's YYMM encoding, not stated in the source notes - confirm before submission. First names (Duc, Friedrich) are NOT confirmed against the source notes either, which give surnames only - verify before submission}
+  note          = {Year inferred from the arXiv identifier's YYMM encoding, not stated in the source notes - confirm before submission. Initials CORRECTED 2026-08-09 to user-supplied "T. N. Nguyen and F. M{\"u}sgens" (umlaut) - NOT independently verifiable: arXiv 2111.02092's PDF, which the user expected in data/papers/, does not exist anywhere in this repo (checked the full tree) - see nguyenmusgens2021drives below, which shares this same caveat}
 }
 
 % Cited in 02_related_work.md (the "180 studies since 2007" / cherry-
@@ -165,13 +183,13 @@
 % forecasts?' arXiv 2111.02092." NOT THE SAME PAPER as
 % nguyenmusgens2022meta above - see that entry's note.
 @misc{nguyenmusgens2021drives,
-  author        = {Nguyen, Duc and Musgens, Friedrich},
+  author        = {Nguyen, T. N. and M{\"u}sgens, F.},
   title         = {What drives the accuracy of {PV} output forecasts?},
   howpublished  = {arXiv:2111.02092},
   archivePrefix = {arXiv},
   eprint        = {2111.02092},
   year          = {2021},
-  note          = {First names (Duc, Friedrich) are NOT confirmed against the source notes, which give surnames only - verify before submission}
+  note          = {Initials CORRECTED 2026-08-09 to user-supplied "T. N. Nguyen and F. M{\"u}sgens" (umlaut), said to appear on this paper's own title page - but arXiv 2111.02092's PDF does NOT exist anywhere in this repo (checked data/papers/ and the full tree via filename and by opening every PDF present), so this could NOT be independently verified against a repo source and is taken on the user's word only. If a copy of this PDF is added to data/papers/, re-check against its title page directly}
 }
 
 % Cited in 02_related_work.md, 07_limitations.md. Citation key matches
