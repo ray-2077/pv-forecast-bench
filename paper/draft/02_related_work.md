@@ -43,9 +43,10 @@ forecast.
 *No run-to-run variance.* All 27 papers report point estimates without
 any measure of variance across random seeds or repeated runs. Recurrent
 models are stochastic in training, and the seed spread we measure in
-Section [VERIFY] reaches 0.017 in skill score - larger than the
-difference between any two architectures we test, and larger than many
-of the improvements claimed in this literature. Every reported figure in the
+Section [VERIFY] reaches 0.017 in skill score, of the same order as the
+largest difference we find between any two architectures (0.024). A
+single-run comparison in this regime cannot separate an architectural
+effect from retraining noise. Every reported figure in the
 surveyed sample therefore carries an unstated error bar of unknown size.
 
 *No stated split protocol.* Twenty-two of 27 papers do not state whether
