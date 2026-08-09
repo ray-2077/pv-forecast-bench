@@ -52,10 +52,10 @@ included in the repository.
 
 Raw measurements are recorded at five-minute resolution with naive
 timestamps. Timestamps were localised to Australia/Darwin (UTC+9:30, no
-daylight saving); this was verified empirically rather than assumed, by
-confirming that mean global horizontal irradiance peaks in hour 12 with
-a slight afternoon skew consistent with solar noon at approximately
-12:35 local time.
+daylight saving); this was verified empirically rather than assumed: the
+mean hour of maximum measured global horizontal irradiance is 11.98,
+against 12.00 for the modelled clear-sky series, agreeing to within one
+minute.
 
 Values outside physically plausible ranges were set to missing, and
 negative power and irradiance were clipped to zero. No interpolation or
@@ -91,13 +91,16 @@ temperature from a training-period temperature climatology, and PVWatts
 DC conversion - followed by a single scalar gain per array. The gain is
 fitted on training years only, as the median ratio of measured to
 modelled power over clear high-elevation hours. Fitted gains are 0.914,
-0.907 and 1.004 for sites 11, 12 and 17 respectively. The gain above
-unity for site 17 indicates that the physical chain under-predicts
-heterojunction output, consistent with the datasheet temperature
-coefficient assumed for that technology being conservative; since the
-gain is a scalar fitted on training data and cancels in the
-clear-sky-index formulation, this affects interpretation of the modelled
-power rather than any reported metric.
+0.907 and 1.004 for sites 11, 12 and 17 respectively. The gain exceeds
+unity for site 17, meaning the physical chain under-predicts
+heterojunction output at that array. The cause was not diagnosed.
+Because the gain is a scalar fitted on training data, it cancels exactly
+in the clear-sky-index formulation used by the reference forecasts, and
+the gradient-boosted models are invariant to a monotone rescaling of a
+single feature. The recurrent models receive clear-sky power after
+standardisation by a scaler fitted on training data only, which absorbs
+a constant scale; no separate sensitivity analysis to the fitted gain
+was performed.
 
 The temperature climatology is used in place of measured temperature
 deliberately. Clear-sky power appears in the reference forecasts, which
