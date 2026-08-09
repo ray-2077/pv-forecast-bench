@@ -1,0 +1,130 @@
+{
+  "config": {
+    "array": "array17",
+    "best_epoch": 6,
+    "device": "cuda",
+    "epochs_run": 17,
+    "eval_split": "test",
+    "full_determinism_achieved": false,
+    "gain": 1.0041660761488254,
+    "gain_iqr": 0.05894996817817122,
+    "gain_n_hours": 763,
+    "horizon": 6,
+    "hyperparams": {
+      "batch_size": 256,
+      "dropout": 0.0,
+      "hidden_size": 64,
+      "learning_rate": 0.001,
+      "max_epochs": 100,
+      "num_layers": 1,
+      "patience": 10,
+      "seq_len": 24
+    },
+    "model": "lstm",
+    "nameplate_kw": 6.3,
+    "regime": "lagged",
+    "seed": 3
+  },
+  "environment": {
+    "git_branch": "main",
+    "git_commit": "fd1f43c6fa7a43998078c65306d79e7f5d3efaac",
+    "git_dirty": true,
+    "gpu_name": "NVIDIA GeForce RTX 3070 Ti Laptop GPU",
+    "package_versions": {
+      "numpy": "2.5.1",
+      "pandas": "3.0.5",
+      "pvlib": "0.15.2",
+      "scikit-learn": "1.9.0",
+      "statsmodels": "0.14.6",
+      "torch": "2.11.0+cu128",
+      "xgboost": "3.3.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python_version": "3.12.13"
+  },
+  "extra": {
+    "history": {
+      "train_loss": [
+        0.23753889879644519,
+        0.07255120157743945,
+        0.06855440215028898,
+        0.06665826972686884,
+        0.06494546628961659,
+        0.06413985623253717,
+        0.06257618912919001,
+        0.06127205555035611,
+        0.061587344102486216,
+        0.059910461701678505,
+        0.05918456311102467,
+        0.05654316152812856,
+        0.05597692490978674,
+        0.05559230680492791,
+        0.05466695876810888,
+        0.0526155045237204,
+        0.05077513594255604
+      ],
+      "val_rmse": [
+        0.49662265509983844,
+        0.4832721186764945,
+        0.4647533186359768,
+        0.4595541799247735,
+        0.46939748681549226,
+        0.46408239444378546,
+        0.45811020745843806,
+        0.47482707927591133,
+        0.46063228457033223,
+        0.47414966008235243,
+        0.45819878102573364,
+        0.45890967364737306,
+        0.4701408898725878,
+        0.45888682936008407,
+        0.4622709281495843,
+        0.4775721255888476,
+        0.45977754280826144
+      ]
+    },
+    "n_preds_climatology": 4289,
+    "n_preds_convex_reference": 4283,
+    "n_preds_intersection": 4018,
+    "n_preds_lstm": 8224,
+    "n_preds_smart_persistence": 8748
+  },
+  "metrics": {
+    "common_hours": {
+      "convex_weight": 0.31,
+      "mae": 0.3832446644062785,
+      "mbe": -0.02894466333535686,
+      "n_samples": 3963,
+      "nrmse": 9.60509724746342,
+      "rmse": 0.6051211265901955,
+      "rmse_climatology": 0.7950894588533419,
+      "rmse_convex": 0.7123120806193206,
+      "rmse_persistence": 0.9958379093671046,
+      "skill_vs_convex": 0.15048313365109267,
+      "skill_vs_persistence": 0.3923497781132127
+    },
+    "daylight": {
+      "convex_weight": 0.31,
+      "mae": 0.41902163466800385,
+      "mbe": -0.03524783344766076,
+      "n_samples": 3524,
+      "nrmse": 10.158505163304548,
+      "rmse": 0.6399858252881866,
+      "rmse_climatology": 0.8416244382860528,
+      "rmse_convex": 0.7540976474680235,
+      "rmse_persistence": 1.0549785594861485,
+      "skill_vs_convex": 0.1513223420905523,
+      "skill_vs_persistence": 0.39336603617811305
+    }
+  },
+  "run_id": "lstm_array17_h6_lagged_seed3",
+  "timestamp_utc": "2026-08-09T06:17:06.815840+00:00",
+  "timings": {
+    "fit_seconds": 7.6338114000391215,
+    "n_excluded_outage": 55,
+    "n_test": 8760,
+    "n_train": 26304,
+    "n_val": 8760,
+    "predict_seconds": 0.055480999988503754
+  }
+}
