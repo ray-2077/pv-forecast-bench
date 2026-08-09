@@ -23,7 +23,7 @@ models add least.
 
 One evaluation year is used. The horizon range is 1 to 6 hours ahead,
 and forecasts are deterministic; no probabilistic evaluation is
-performed. [CITE Yang 2020] argue that probabilistic verification should
+performed. Yang et al. (2020) argue that probabilistic verification should
 be standard practice, and its absence here is a limitation rather than a
 design choice.
 
@@ -80,7 +80,7 @@ the evaluation period.
 
 *Optimisation directive.* All models here are trained under a squared
 error loss and evaluated by root-mean-square error and skill scores
-derived from it. This is internally consistent, but [CITE Mayer 2022]
+derived from it. This is internally consistent, but Mayer (2022)
 demonstrates that the choice of directive is itself a protocol axis:
 different error metrics are minimised by different functionals, and
 running the same study under a mean-absolute-error directive can reverse

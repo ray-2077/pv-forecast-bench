@@ -8,7 +8,7 @@ work on short-term photovoltaic power forecasting. Aggregate analyses of
 the field support their prominence: a statistical meta-analysis of 180
 studies published since 2007 reports that hybrid models consistently
 outperform alternatives and concludes they are likely to be the future of
-PV output forecasting [CITE Nguyen Musgens].
+PV output forecasting (Nguyen and Musgens, 2021).
 
 That conclusion aggregates reported errors. What follows examines what
 those reported errors are measured against.
@@ -51,8 +51,8 @@ surveyed sample therefore carries an unstated error bar of unknown size.
 their train-test split preserves temporal order. Three state a
 chronological split, one uses rolling-origin evaluation, and one uses
 k-fold cross-validation - which, applied to a time series, is temporal
-leakage in the hyperparameter selection stage [CITE Kapoor Narayanan],
-[CITE Hewamalage]. A stated ratio such as 80/20 is not a statement of
+leakage in the hyperparameter selection stage (Kapoor and Narayanan, 2023;
+Hewamalage et al., arXiv:2203.10716). A stated ratio such as 80/20 is not a statement of
 ordering, and we did not treat it as one.
 
 *No night-hour statement.* Seventeen of 27 papers do not state whether
@@ -64,7 +64,7 @@ over all hours, as we quantify in Section [VERIFY].
 
 Three further observations. Only one paper in the sample makes code
 available. Three papers describe procedures in their own text that
-constitute leakage under the taxonomy of Kapoor and Narayanan [CITE]:
+constitute leakage under the taxonomy of Kapoor and Narayanan (2023):
 two apply signal decomposition or feature selection to the full series
 before splitting [L1.2], and one uses features that are deterministic
 functions of the target as model inputs [L2]. We identify these from the
@@ -76,7 +76,7 @@ or may not be affected.
 
 This is not a claim that solar forecasting lacks evaluation standards.
 The verification of deterministic solar forecasts has been treated
-extensively, and the recommendations are explicit: Yang et al. [CITE],
+extensively, and the recommendations are explicit: Yang et al. (2020),
 writing with more than thirty co-authors, recommend universally
 reporting the root-mean-square-error skill score against the optimal
 convex combination of climatology and persistence, and treat
@@ -86,7 +86,7 @@ instability of the clear-sky index at low solar elevation and the zenith
 filtering convention that exists because of it - practices that are
 routine in the irradiance forecasting literature.
 
-One paper in our sample of 27 meets that standard. Mayer [CITE] evaluates
+One paper in our sample of 27 meets that standard. Mayer (2022) evaluates
 day-ahead forecasts for fourteen plants using the skill score against the
 convex combination of persistence and climatology, states its daylight
 filter as a protocol, holds out a full year that is used in no part of
@@ -105,7 +105,7 @@ standards are published in the same journals.
 
 ## D. Leakage and Evaluation Beyond Solar Forecasting
 
-The pattern is not unique to this domain. Kapoor and Narayanan [CITE]
+The pattern is not unique to this domain. Kapoor and Narayanan (2023)
 document leakage in at least 294 papers across 17 scientific fields and
 provide a taxonomy of eight types, which we adopt in Section [VERIFY].
 Their civil war prediction case study is directly analogous to the
@@ -113,11 +113,11 @@ finding we report: complex machine-learning models believed to
 substantially outperform logistic regression were found, once leakage was
 corrected, not to outperform a decades-old method at all.
 
-From the forecasting side, Hewamalage et al. [CITE] observe that random
+From the forecasting side, Hewamalage et al. (arXiv:2203.10716) observe that random
 cross-validation does not preserve temporal order and that rolling-origin
 evaluation is itself susceptible to leakage, and note encountering
 inadequate benchmark comparisons in top-tier venues. Nguyen and Musgens
-[CITE], in the meta-analysis cited above, find test-set length negatively
+(2021), in the meta-analysis cited above, find test-set length negatively
 correlated with reported accuracy and attribute this in part to selective
 reporting on favourable subsets, recommending test sets of at least one
 year - a recommendation our design follows.

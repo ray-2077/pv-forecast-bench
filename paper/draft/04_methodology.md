@@ -9,8 +9,8 @@ are instruments for measuring what the protocol choices are worth.
 The task is deterministic point forecasting of hourly mean AC power at
 horizons of 1, 3 and 6 hours ahead. Each horizon is treated as a
 separate problem and reported separately; horizon dominates every other
-factor in aggregate analyses of this literature [CITE Nguyen Musgens],
-so pooling across horizons would obscure the effects we set out to
+factor in aggregate analyses of this literature (Nguyen and Musgens,
+arXiv:2208.10536), so pooling across horizons would obscure the effects we set out to
 measure.
 
 The feature matrix is indexed by target time t. A row at target time t
@@ -32,7 +32,7 @@ failure the convention exists to prevent.
 ## B. Evaluation Protocol
 
 We state the protocol as a set of explicit rules, in the spirit of the
-model information sheets proposed by Kapoor and Narayanan [CITE], and
+model information sheets proposed by Kapoor and Narayanan (2023), and
 map each to the leakage type it addresses in their taxonomy.
 
 1. Splits are chronological and never shuffled. Training is 2011-2013,
@@ -51,7 +51,7 @@ map each to the leakage type it addresses in their taxonomy.
 
 4. The headline metric is the root-mean-square-error skill score against
    the optimal convex combination of climatology and persistence,
-   following the recommendation of Yang et al. [CITE]. The skill score
+   following the recommendation of Yang et al. (2020). The skill score
    against plain persistence is reported alongside, because the
    difference between the two is a result rather than a robustness
    check.
@@ -154,7 +154,7 @@ not affect it.
 The convex reference is w x persistence + (1-w) x climatology, with w
 selected by grid search in steps of 0.01 to minimise root-mean-square
 error on the validation split, fitted independently for each array,
-horizon, seed and regime. Following Yang et al. [CITE], this is the
+horizon, seed and regime. Following Yang et al. (2020), this is the
 reference for the headline skill score.
 
 The third reference is necessary because the first degrades structurally
@@ -179,7 +179,7 @@ score
 Normalisation is by nameplate capacity rather than by mean observed
 power, so that values are comparable across arrays of different sizes.
 We note that normalised error is not comparable across studies with
-different data regardless of the normaliser [CITE Yang 2020], and make
+different data regardless of the normaliser (Yang et al., 2020), and make
 no cross-study accuracy comparisons on that basis.
 
 All metrics for a given cell are computed on the intersection of

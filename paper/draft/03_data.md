@@ -135,7 +135,7 @@ modelling and evaluation choices were frozen.
 Evaluation is restricted to hours with solar elevation above 10 deg,
 equivalent to a solar zenith angle below 80 deg. This is stricter than
 the 85 deg zenith filter described as typical practice by Yang et al.
-[CITE Yang 2020], and is applied for the reason they give: at low solar
+(2020), and is applied for the reason they give: at low solar
 elevation the clear-sky index becomes unstable, as both measurement
 uncertainty and clear-sky model error grow relative to a small
 denominator. The filter is a protocol choice, not a data-cleaning step,
