@@ -19,12 +19,15 @@ observed quantity in that row must therefore originate at t-h or
 earlier. Quantities describing t itself are admissible only when they
 are deterministic and computable in advance: solar geometry, clear-sky
 irradiance and power, and calendar encodings. This convention is
-enforced by an assertion that independently reconstructs each lagged
-column from the source series and verifies the applied shift, and by an
-injected-leak test confirming the assertion fires when a target-time
-value is substituted into a feature. Sequence inputs to the recurrent
-models are checked the same way, against the specific failure of a
-window terminating at t rather than t-h.
+enforced for the tabular feature matrix by an assertion that
+independently reconstructs each lagged column from the source series and
+verifies the applied shift, together with a correlation probe that
+flags any feature correlating implausibly with the target. For the
+sequence inputs to the recurrent models, the assertion is additionally
+validated by deliberate corruption: it is confirmed to fire both when
+the window is shifted by one step and when the target-time value is
+substituted into the window's final timestep, which is the specific
+failure the convention exists to prevent.
 
 ## B. Evaluation Protocol
 
@@ -69,13 +72,20 @@ map each to the leakage type it addresses in their taxonomy.
    git commit hash, and a flag indicating whether the working tree was
    clean at execution time.
 
-No hyperparameter tuning was performed, on any split, for any model,
-which removes a further class of leakage [L1.3] at the cost noted in
-Section [VERIFY].
+No hyperparameter tuning was performed, on any split, for any model.
+This removes a class of leakage analogous to [L1.3], which Kapoor and
+Narayanan define for feature selection informed by test-set performance;
+the mechanism - using held-out performance to make a modelling choice -
+is the same. The cost of this decision is noted in Section [VERIFY].
 
 Two properties of this dataset are worth naming against the same
 taxonomy. The three arrays are co-located and share a weather station,
-so their errors are not independent [L3.2]. And three recorded channels
+so their errors are not independent across arrays. This is not [L3.2]
+in Kapoor and Narayanan's sense, which concerns nonindependence between
+training and test samples; it is a separate dependence, across the
+units over which results are aggregated, and it constrains how many
+independent observations an array-by-horizon table contains. And three
+recorded channels
 - cumulative delivered energy, performance ratio, and average phase
 current - are deterministic functions of the target and are excluded as
 illegitimate features [L2]; we note in Section [VERIFY] that published
