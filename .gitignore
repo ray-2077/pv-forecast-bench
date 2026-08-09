@@ -65,3 +65,6 @@ desktop.ini
 # T1/T2/T5/T7's CSVs were untracked despite being explicitly committed
 # artifacts per their generating scripts' own docstrings).
 !paper/tables/*.csv
+
+# Run logs - large, regenerable, not the audit trail
+results/_*.txt
