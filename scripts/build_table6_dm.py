@@ -78,6 +78,35 @@ horizons x 7 comparators, at a single seed=0, matching the val path's
 own cost) - run it only when you want DM significance against the held-
 out year specifically.
 
+CHANGE LOG (2026-08-09, later same day): --eval-split test crashed with
+torch.AcceleratorError (CUDA out of memory) at array12 h=6, five cells
+in, with another GPU process running concurrently - a contributing but
+not sole cause. Nothing in this script freed GPU memory between fits,
+and each residual-corrected model fits its LSTM/CNN-LSTM base THREE
+TIMES within a single build_cell call (once per out-of-fold fold, once
+on the full training period) - 7 models x up to 3 fits each, times 9
+cells, with every intermediate model object kept alive until Python's
+garbage collector got around to it. Fixed two ways:
+  1. fit_all_models and build_cell now del each model object and call
+     torch.cuda.empty_cache() (see _free_gpu_memory below) as soon as
+     its predictions are collected, rather than waiting for the
+     function to return and letting garbage collection reclaim it
+     eventually. No statistical logic changed - this only affects when
+     memory is freed, not what is computed.
+  2. The crash also meant the run threw away all 5 already-completed
+     cells' work - main() wrote the full output CSV only once, at the
+     very end, via a single pd.concat + to_csv. It now appends each
+     cell's rows to the output CSV as soon as that cell completes (mode
+     "a", matching results/table6_dm_<regime>[_test].csv's existing
+     path/naming - unchanged for val), and skips any (array, horizon)
+     already present in that file on startup - the same skip-if-exists
+     resumability scripts/run_seed_sweep.py already has for run JSONs.
+     A crash now loses at most the one in-progress cell, not the whole
+     run.
+The val path was re-run after these changes and its output CSV is
+byte-identical to before (see git history / commit message for that
+verification).
+
 Usage:
     python scripts/build_table6_dm.py [--regime {lagged,oracle}] [--eval-split {val,test}]
 """
@@ -89,6 +118,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import torch
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
@@ -222,6 +252,24 @@ def parse_args():
     return parser.parse_args()
 
 
+def _free_gpu_memory():
+    """Called after each model's predictions are collected in
+    fit_all_models, and again at the end of build_cell. torch.cuda.
+    empty_cache() only releases CUDA blocks its caching allocator can
+    prove are unreferenced by any live Python object - deleting the
+    model object first (at each call site, before this is called) is
+    what makes that memory reclaimable in the first place; calling this
+    alone without the preceding del would do nothing for a model still
+    referenced by a local variable. See this file's 2026-08-09 CHANGE
+    LOG entry for the OOM crash this fixes - a single build_cell call
+    fits 7 models, 3 of which (the residual-corrected pair) internally
+    fit their LSTM/CNN-LSTM base up to 3 times each, and none of that
+    was being freed until the whole function returned.
+    """
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
 def fit_all_models(train, val, eval_df, horizon, seed, regime):
     """Fit all 5 benchmark models plus smart persistence and the convex
     reference at `seed`, on this (array, horizon)'s train/val, and return
@@ -249,23 +297,35 @@ def fit_all_models(train, val, eval_df, horizon, seed, regime):
     xgb_model.fit(train, horizon, df_val=val)
     preds["xgboost"] = xgb_model.predict(eval_df, horizon)
     check_no_lookahead(eval_df, preds["xgboost"], horizon)
+    del xgb_model
+    _free_gpu_memory()
 
     lstm_model = LSTMForecaster(seed=seed, regime=regime)
     lstm_model.fit(train, horizon, df_val=val)
     preds["lstm"] = lstm_model.predict(eval_df, horizon)
     check_no_lookahead(eval_df, preds["lstm"], horizon)
+    del lstm_model
+    _free_gpu_memory()
 
     cnn_lstm_model = CNNLSTMForecaster(seed=seed, regime=regime)
     cnn_lstm_model.fit(train, horizon, df_val=val)
     preds["cnn_lstm"] = cnn_lstm_model.predict(eval_df, horizon)
     check_no_lookahead(eval_df, preds["cnn_lstm"], horizon)
+    del cnn_lstm_model
+    _free_gpu_memory()
 
+    # residual_fit_split='oof' fits the base model up to 3 times inside
+    # a single .fit() call (once per out-of-fold fold, once on the full
+    # training period, CLAUDE.md rule 6) - the biggest single source of
+    # the accumulation this cleanup targets.
     lstm_residual_model = ResidualCorrected(
         LSTMForecaster(seed=seed, regime=regime), seed=seed, residual_fit_split="oof"
     )
     lstm_residual_model.fit(train, horizon, val)
     preds["lstm_residual"] = lstm_residual_model.predict(eval_df, horizon)
     check_no_lookahead(eval_df, preds["lstm_residual"], horizon)
+    del lstm_residual_model
+    _free_gpu_memory()
 
     cnn_lstm_residual_model = ResidualCorrected(
         CNNLSTMForecaster(seed=seed, regime=regime), seed=seed, residual_fit_split="oof"
@@ -273,19 +333,28 @@ def fit_all_models(train, val, eval_df, horizon, seed, regime):
     cnn_lstm_residual_model.fit(train, horizon, val)
     preds["cnn_lstm_residual"] = cnn_lstm_residual_model.predict(eval_df, horizon)
     check_no_lookahead(eval_df, preds["cnn_lstm_residual"], horizon)
+    del cnn_lstm_residual_model
+    _free_gpu_memory()
 
     # ALSO includes smart persistence and the convex reference as
     # comparators - not just as the two skill-score denominators
     # (CLAUDE.md rule 4), but as models in their own right in this test.
+    # Neither holds GPU memory, but deleting + freeing here too keeps
+    # every model in this function following the same pattern rather
+    # than making the recurrent ones a special case to remember.
     sp_model = SmartPersistence()
     sp_model.fit(train, horizon)
     preds["smart_persistence"] = sp_model.predict(eval_df, horizon)
     check_no_lookahead(eval_df, preds["smart_persistence"], horizon)
+    del sp_model
+    _free_gpu_memory()
 
     convex_model = ConvexCombination()
     convex_model.fit(train, horizon, val)  # w fit on VAL only, never test
     preds["convex_reference"] = convex_model.predict(eval_df, horizon)
     check_no_lookahead(eval_df, preds["convex_reference"], horizon)
+    del convex_model
+    _free_gpu_memory()
 
     return preds
 
@@ -315,6 +384,13 @@ def build_cell(array, horizon, train, val, eval_df, nameplate_kw, regime):
     y_true = eval_df.loc[eval_idx, "Active_Power"]
     errors = {name: (y_true - p.loc[eval_idx]) for name, p in preds.items()}
 
+    # preds itself is done with once errors are computed - dm_matrix only
+    # needs `errors` from here on. Same cleanup pattern as fit_all_models
+    # (see _free_gpu_memory's docstring): del the last reference, then
+    # free, so nothing from this cell's 7 models lingers into the next.
+    del preds
+    _free_gpu_memory()
+
     hln_df, p_holm_df, pairs_df = dm_matrix(errors, h=horizon)
 
     pairs_df.insert(0, "horizon", horizon)
@@ -333,6 +409,25 @@ def build_cell(array, horizon, train, val, eval_df, nameplate_kw, regime):
             )
 
     return pairs_df, hln_df, p_holm_df
+
+
+def load_existing_cells(out_path):
+    """Set of (array, horizon) cells already present in out_path, read
+    from the CSV itself rather than tracked separately - the file IS the
+    record of what completed. Empty set if out_path does not exist yet.
+
+    Same purpose as scripts/run_seed_sweep.py's skip-if-exists check for
+    run JSONs: a cell is only ever written here in one shot, all 21 of
+    its pairwise rows at once, right after build_cell returns (see
+    main() below) - so a crash mid-run can leave the file missing its
+    LAST in-progress cell, never a partially-written one, and it is safe
+    to treat "any row for (array, horizon) is present" as "this cell is
+    done."
+    """
+    if not out_path.exists():
+        return set()
+    existing = pd.read_csv(out_path, usecols=["array", "horizon"])
+    return set(zip(existing["array"], existing["horizon"].astype(int)))
 
 
 def main():
@@ -354,8 +449,23 @@ def main():
             "2026-08-09.\n"
         )
 
-    all_rows = []
+    RESULTS_DIR.mkdir(exist_ok=True)
+    # val output path is UNCHANGED from before --eval-split existed; test
+    # gets an explicit _test suffix - a distinct filename, not just a
+    # distinct flag value, so it can never overwrite or shadow val's.
+    suffix = "" if eval_split == "val" else "_test"
+    out_path = RESULTS_DIR / f"table6_dm_{regime}{suffix}.csv"
+
+    done_cells = load_existing_cells(out_path)
+    if done_cells:
+        print(
+            f"resuming {out_path}: {len(done_cells)} (array, horizon) cell(s) "
+            f"already present, will be skipped\n"
+        )
+
     array11_matrices = {}
+    n_computed = 0
+    n_skipped = 0
 
     for array in sorted(ARRAYS):
         df, nameplate_kw, gamma_pdc = load_and_prepare(array, PROCESSED_DIR)
@@ -369,6 +479,11 @@ def main():
             eval_df = val
 
         for horizon in HORIZONS:
+            if (array, horizon) in done_cells:
+                print(f"skip array={array}  horizon={horizon}h  (already in {out_path})")
+                n_skipped += 1
+                continue
+
             print(f"\n{'=' * 90}")
             print(f"array={array}  horizon={horizon}h  seed={SEED}  regime={regime}  ({split_label})")
             print("=" * 90)
@@ -378,29 +493,37 @@ def main():
             elapsed = time.perf_counter() - start
             print(f"  cell done in {elapsed:.1f}s")
 
-            all_rows.append(pairs_df)
+            # Written immediately, one cell at a time, rather than held
+            # in memory and written once at the end - a crash on a LATER
+            # cell (e.g. the array12 h=6 CUDA OOM this fixes) now loses
+            # only the in-progress cell, not every cell already computed
+            # this run. write_header is re-evaluated per cell rather than
+            # cached, since the first successful append is what makes
+            # out_path start existing.
+            write_header = not out_path.exists()
+            pairs_df[CSV_COLUMNS].to_csv(out_path, mode="a", header=write_header, index=False)
+            print(f"  appended {len(pairs_df)} rows to {out_path}")
+
+            n_computed += 1
             if array == "array11":
                 array11_matrices[horizon] = (hln_df, p_holm_df)
 
-    out_df = pd.concat(all_rows, ignore_index=True)[CSV_COLUMNS]
-    RESULTS_DIR.mkdir(exist_ok=True)
-    # val output path is UNCHANGED from before --eval-split existed; test
-    # gets an explicit _test suffix - a distinct filename, not just a
-    # distinct flag value, so it can never overwrite or shadow val's.
-    suffix = "" if eval_split == "val" else "_test"
-    out_path = RESULTS_DIR / f"table6_dm_{regime}{suffix}.csv"
-    out_df.to_csv(out_path, index=False)
-    print(f"\nwrote {out_path}  ({len(out_df)} rows)")
+    print(
+        f"\n{n_computed} cell(s) computed this run, {n_skipped} skipped "
+        f"(already present) - {out_path}"
+    )
 
-    print(f"\n{'=' * 90}")
-    print("array11 DM matrices (HLN statistic; row = model_1, column = model_2 in dm_test's sign")
-    print("convention - hln_df.loc[a, b] < 0 means a has lower loss than b)")
-    print("=" * 90)
-    for horizon, (hln_df, p_holm_df) in sorted(array11_matrices.items()):
-        print(f"\n--- array11, h={horizon} : HLN statistics ---")
-        print(hln_df.round(3).to_string())
-        print(f"\n--- array11, h={horizon} : Holm-adjusted p-values ---")
-        print(p_holm_df.round(4).to_string())
+    if array11_matrices:
+        print(f"\n{'=' * 90}")
+        print("array11 DM matrices (HLN statistic; row = model_1, column = model_2 in dm_test's sign")
+        print("convention - hln_df.loc[a, b] < 0 means a has lower loss than b)")
+        print("(cells skipped this run as already-done are not reprinted here)")
+        print("=" * 90)
+        for horizon, (hln_df, p_holm_df) in sorted(array11_matrices.items()):
+            print(f"\n--- array11, h={horizon} : HLN statistics ---")
+            print(hln_df.round(3).to_string())
+            print(f"\n--- array11, h={horizon} : Holm-adjusted p-values ---")
+            print(p_holm_df.round(4).to_string())
 
 
 if __name__ == "__main__":
