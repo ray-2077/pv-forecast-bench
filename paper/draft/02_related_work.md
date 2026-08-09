@@ -43,8 +43,9 @@ forecast.
 *No run-to-run variance.* All 27 papers report point estimates without
 any measure of variance across random seeds or repeated runs. Recurrent
 models are stochastic in training, and the seed spread we measure in
-Section [VERIFY] reaches 0.009 in skill score - larger than many of the
-improvements claimed in this literature. Every reported figure in the
+Section [VERIFY] reaches 0.017 in skill score - larger than the
+difference between any two architectures we test, and larger than many
+of the improvements claimed in this literature. Every reported figure in the
 surveyed sample therefore carries an unstated error bar of unknown size.
 
 *No stated split protocol.* Twenty-two of 27 papers do not state whether
@@ -65,9 +66,9 @@ over all hours, as we quantify in Section [VERIFY].
 Three further observations. Only one paper in the sample makes code
 available. Three papers describe procedures in their own text that
 constitute leakage under the taxonomy of Kapoor and Narayanan (2023):
-two apply signal decomposition or feature selection to the full series
-before splitting [L1.2], and one uses features that are deterministic
-functions of the target as model inputs [L2]. We identify these from the
+one applies signal decomposition to the full series before splitting
+[L1.2], and two use features that are deterministic functions of the
+target as model inputs [L2]. We identify these from the
 papers' own descriptions and do not infer leakage where a paper is
 silent; the twenty-two papers that do not state their split protocol may
 or may not be affected.
