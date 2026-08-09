@@ -185,3 +185,52 @@ correctly-pooled multi-cell version (summing daylight hours over the
 3 horizons within one array, per Finding 12 Part B's 2026-08-08
 addendum - arrays are redundant, horizons are not) is still an unbuilt
 need, tracked in paper/WRITING_BRIEF.md Section 7's T7 row.
+
+---
+
+## T8 - literature survey evaluation practice (Section 2, Related Work)
+
+Files: paper/tables/T8_survey.csv, paper/tables/T8_survey.tex
+Generating script: scripts/build_table8_survey.py
+Source: results/literature_survey.csv (27 rows, one per surveyed
+paper). Added 2026-08-09: the survey coding previously had no assigned
+table number (paper/WRITING_BRIEF.md's original T2 proposal - a
+literature-survey summary - was reassigned to the feature-list table
+during construction, see T2's own entry above), despite being the
+evidence base for four claims in Section 2 (C22, C27-C33 in
+paper/WRITING_BRIEF.md Section 2's claims table).
+
+SCOPE, DELIBERATE: a SUMMARY, not a per-paper listing. One row per
+coded value per dimension (count and percentage of n=27), for the
+eight dimensions the paper's prose claims are built on:
+night_hours_excluded, baseline_used, skill_score_reported,
+weather_source, split_type, variance_reported, code_available,
+leakage_flag. A full 27-row-by-17-column transcription would consume
+most of a column and is not what any claim in the paper needs. The
+script asserts every dimension's counts sum to 27 and raises if not.
+
+Caption:
+Table 8. Literature survey evaluation practice, $n=27$ papers on
+hybrid convolutional-recurrent PV power forecasting, coded on eight
+dimensions of evaluation protocol (Related Work, Section 2-B).
+Twenty-six of 27 report no skill score against any reference forecast
+and all 27 report no run-to-run variance across seeds; 22 of 27 do not
+state whether their train-test split preserves temporal order; 17 of
+27 do not state whether night hours are excluded from evaluation; and
+3 of 27 describe, in their own text, a procedure that constitutes
+documented leakage under the taxonomy of Kapoor and Narayanan (2023).
+Coding was conservative: a field was recorded as not stated unless the
+paper explicitly stated it. The full per-paper coding, with a
+verbatim-quoted supporting audit file for 25 of the 27 papers
+(evidence\_level=quoted; the remaining 2 are evidence\_level=
+summary\_only, coded from pre-existing notes with no locatable source
+PDF), is in results/literature\_survey.csv and evidence/*.md, not
+reproduced here.
+
+Must convey: this is a summary of coded evaluation PRACTICE, not an
+architecture comparison and not a per-paper leaderboard - no numeric
+result from any surveyed paper appears in this table, deliberately,
+per paper/WRITING_BRIEF.md Section 9's citation-plan note not to treat
+those numbers as comparable across studies. The "not stated" values
+are themselves a coded, conservative judgement (silence, not inferred
+absence), not missing data.
