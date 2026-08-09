@@ -6,7 +6,7 @@ Experiments use measurements from the Desert Knowledge Australia Solar
 Centre (DKASC) at Alice Springs, Northern Territory (23.767 deg S,
 133.867 deg E, 558 m), an open dataset of ground-mounted photovoltaic
 installations with per-array power measurement and a co-located weather
-station. [CITE DKASC]
+station (DKA Solar Centre).
 
 Three fixed-mount arrays were used, selected for differing module
 technology at comparable scale: site 11 (BP Solar, polycrystalline
@@ -74,7 +74,7 @@ measured power.
 
 Clear-sky global horizontal irradiance was computed with the
 Ineichen-Perez model as implemented in pvlib, using the Linke turbidity
-climatology. [CITE Ineichen] [CITE pvlib]
+climatology (Ineichen and Perez, 2002; Holmgren et al., 2018).
 
 Clear-sky irradiance is computed at five-minute resolution and then
 averaged to hourly using the same convention as the measurements. This

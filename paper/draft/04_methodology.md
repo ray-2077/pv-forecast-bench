@@ -230,10 +230,10 @@ we endorse.
 ## G. Significance Testing
 
 Model comparisons use the Diebold-Mariano test on paired squared-error
-series [CITE Diebold Mariano]. Because h-step-ahead forecast errors are
+series (Diebold and Mariano, 1995). Because h-step-ahead forecast errors are
 autocorrelated by construction, the long-run variance is estimated with
 a Bartlett kernel truncated at lag h-1. The small-sample correction of
-Harvey, Leybourne and Newbold [CITE] is applied and the statistic
+Harvey, Leybourne and Newbold (1997) is applied and the statistic
 compared against Student's t with n-1 degrees of freedom. Within each
 array-horizon cell, twenty-one pairwise comparisons are made across the
 five models and two of the reference forecasts, and p-values are
