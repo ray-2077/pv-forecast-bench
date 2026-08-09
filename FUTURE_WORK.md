@@ -11,6 +11,12 @@ a single command that reproduces every table and figure.
 
 ## Multi-location generalisation
 Add Yulara as a genuinely separate site. Different schema, second pipeline.
+NOTE, 2026-08-09: this site's operator affiliation (e.g. whether it is a
+DKASC-operated location like Alice Springs, or a separate operator) is
+not documented anywhere in this repository - confirmed while drafting
+paper/draft/07_limitations.md, where a "second DKASC location" claim
+had to be softened to "a second location" for exactly this reason. Must
+be confirmed from source before any paper text states an affiliation.
 
 ## Low-elevation clear-sky bias
 Twilight diffuse and pyranometer thermal offset inflate k_ghi below 20 deg

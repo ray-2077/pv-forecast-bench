@@ -112,7 +112,7 @@ the architecture results. The protocol effects reported in Section
 [VERIFY] are an order of magnitude larger than the architecture
 differences and are unlikely to be affected.
 
-*Deferred work.* A second DKASC location and a probabilistic evaluation
+*Deferred work.* A second location and a probabilistic evaluation
 were both scoped and deferred; the low-elevation clear-sky bias
 documented in Section [VERIFY] is a candidate protocol axis not varied
 here. These are recorded in the repository rather than claimed as future
