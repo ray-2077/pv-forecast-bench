@@ -59,7 +59,9 @@ minute.
 
 Values outside physically plausible ranges were set to missing, and
 negative power and irradiance were clipped to zero. No interpolation or
-gap filling was performed. Data were then resampled to hourly means
+gap filling was performed at this stage; forward-filling of the
+clear-sky index within the feature layer is described in Section IV.
+Data were then resampled to hourly means
 using hour-beginning labels, so that the row labelled 12:00 is the mean
 over 12:00 to 12:55.
 
