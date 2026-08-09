@@ -640,6 +640,25 @@ invented for this brief.
 | Mayer (2022), Renewable and Sustainable Energy Reviews 168:112772 (`literature_notes.md` entry 9) | Introduction and Related Work (the ONE paper in the 27-paper survey meeting the evaluation standard - existence proof, prevents the survey reading as a strawman); Methodology 4.1 (his exact convex-combination reference and zenith<90-degree daylight filter, cite as the one instance of this literature using the same construction this project uses); Limitations (his Section 2.6 consistency-principle result - different error metrics minimized by different functionals, changes conclusions when the whole study is rerun under a different loss - cite as a protocol axis this project did NOT vary, since it trains on MSE and reports RMSE-based skill); Discussion (his modest, honestly-reported 5.2%/10.4% MAE reductions against a real baseline, contrasted with the 30-60% improvements the surveyed hybrid papers report against their own components) | The paper's single positive existence-proof citation; also the source of the NWP-forecast "middle regime" framing (his weather inputs are neither this project's lagged nor oracle regime - state this explicitly, wording constraint in Section 4) |
 | Nguyen & Musgens (2021), "What drives the accuracy of PV output forecasts?", arXiv 2111.02092 (`literature_notes.md` entry 10 - NOT the same paper as entry 2 above) | Introduction (their "cherry picking" finding - test-set length negatively correlated with reported accuracy - and the one-year test-set justification, this project's test set is exactly one calendar year); Related Work (scale of the literature - 180 papers meta-analyzed, 13 prior narrative surveys with no statistical analysis; and the notable absence that "skill score" does not appear anywhere in a 180-paper PV-forecast-error meta-analysis, stated neutrally, one sentence); Methodology (test-set-length justification, cite their explicit "has not been addressed in any previous work" statement) | Independent literature-level support for both the one-year test-set choice and the paper's central "evaluation practice varies enough to swamp real differences" argument; their headline ("hybrid models... will most likely be the future") should be contrasted carefully against the fact that it aggregates reported errors from the same 27-paper-type literature this project's own survey found reports no reference forecast in 26/27 cases |
 
+**RESOLUTION NOTE (2026-08-09), Related Work / Section 2 specifically:**
+both `[CITE Nguyen Musgens]` brackets that appear in `paper/draft/
+02_related_work.md` (the "180 studies published since 2007... likely to
+be the future of PV output forecasting" sentence, and the "test-set
+length negatively correlated with reported accuracy" / cherry-picking
+sentence) must resolve to entry 10, arXiv 2111.02092 ("What drives the
+accuracy of PV output forecasts?", 2021) - NOT to entry 2, arXiv
+2208.10536. Both draft sentences describe entry 10's own content
+(180-paper scale, cherry-picking finding) verbatim per
+`literature_notes.md`; entry 2 is a different paper by the same first
+two authors, cited instead in Methodology (`04_methodology.md`, the
+"horizon dominates every other factor" sentence). `literature_notes.md`
+entry 10 itself flags this exact pair as easy to conflate ("Correction
+to earlier notes: This is NOT arXiv 2208.10536, entry 2 above... The
+claim in entry 2 that forecast skill improves with training length...
+is NOT in this paper and must not be cited from it"). Both `02_
+related_work.md` brackets were resolved to `(Nguyen and Musgens, 2021)`
+on this date.
+
 ### Tier 2 (the 27 surveyed hybrid/architecture papers, `results/literature_survey.csv` + `evidence/*.md`)
 
 Not cited individually by name in most of the paper - they are the
