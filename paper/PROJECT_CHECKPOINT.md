@@ -477,6 +477,47 @@ without array17 named as the exception - see
 paper/WRITING_BRIEF.md Section 4 (wording constraints) and Section 5
 item 4.
 
+OVERWRITE-RISK AUDIT, 2026-08-09 (prompted by Finding 7's correction,
+same section, below): results/reference_comparison.csv and
+results/reference_mbe_by_hour.csv - this finding's own two source
+files - were BOTH also touched by commit 91fa468, the same commit that
+silently overwrote Finding 7's source run JSON. Checked all 9 table
+cells above against the current file (git show 91fa468~1:... recovers
+the pre-change 2009-2013 state for cross-reference, except array17,
+which did not exist before this commit - it replaced array07):
+  - 7 of 9 cells (array11 h3/h6, array12 h1/h6, array17 h1/h3/h6) match
+    the CURRENT file exactly to 3 decimals. The headline claims (the
+    h=6 magnitude swing, the monotonic-vs-non-monotonic shape change,
+    the array17 w exception) all rest on cells in this matching set and
+    are unaffected.
+  - 2 of 9 cells do NOT cleanly match either the current file or the
+    recoverable pre-91fa468 state:
+      * array11 h=1: skill_vs_persistence stated here as 0.253; current
+        file gives 0.252; the pre-91fa468 file gives 0.253 (matches)
+        but its skill_vs_convex is 0.203, not this finding's stated
+        0.200 (which matches the CURRENT file instead). This cell is
+        internally split across the two states, not cleanly explained
+        by the overwrite alone.
+      * array12 h=3: skill_vs_persistence stated here as 0.515; current
+        file gives 0.510; pre-91fa468 file gives 0.512. Matches
+        NEITHER committed state. w (0.29) and skill_vs_convex (0.275)
+        for this cell both match the current file cleanly - only the
+        persistence figure is unexplained.
+  Both discrepancies are in skill_vs_persistence, both are small
+  (0.001 and 0.005), and neither affects the headline skill_vs_convex
+  argument this finding and Table 4 build on - but they are FLAGGED,
+  not silently fixed: the 0.515 array12 h=3 figure in particular does
+  not correspond to any state of the file that has ever been committed,
+  so its origin is unknown (most likely a transcription slip when this
+  finding was first written, not a second overwrite - only one commit,
+  91fa468, has ever modified either source file). Use the CURRENT file's
+  values (0.510 for array12 h=3 persistence, 0.252 for array11 h=1
+  persistence) if this table is retyped for the paper, not the figures
+  printed above. No other results/*.json in the entire git history has
+  ever been modified in place outside of Finding 7's single file (see
+  Finding 7's correction) - this two-file, two-cell issue is the only
+  other artifact this audit found.
+
 PAPER: this is Table 4 and probably a figure. It is the paper's single
 strongest evidence.
 
@@ -548,7 +589,7 @@ run against the original 2009-2013 window),
 scripts/audit_dead_periods.py, scripts/diagnose_array17_events.py
 Data: results/dead_period_audit.csv
 
-### Finding 7: training length barely matters at this site
+### Finding 7: training length has a modest, measurable effect at this site (CORRECTED 2026-08-09)
 The training window was narrowed from 2009-2013 (1826 days) to 2011-2013
 (1096 days) for array17 compatibility. array11 h=3 XGBoost skill_vs_convex
 moved from +0.276 to +0.276; skill_vs_persistence from +0.530 to +0.526.
@@ -560,6 +601,41 @@ entirely.
 
 A proper training-length ablation is cheap and already possible: only
 arrays 11 and 12 have clean data back to 2009, TRAIN_YEARS is a parameter.
+
+CORRECTION, 2026-08-09 (verification query): the "+0.276 to +0.276"
+skill_vs_convex figures above are WRONG. results/xgboost_array11_h3_
+lagged_seed0.json was overwritten in place when commit 91fa468 ("Drop
+array07, add array17, narrow training to 2011-2013, add outage
+exclusions") regenerated it under the new window - make_run_id does not
+encode TRAIN_YEARS, so the pre-change file simply no longer exists under
+this run_id; the "before" value is recoverable only from git history
+(git show 91fa468~1:results/xgboost_array11_h3_lagged_seed0.json). The
+actual values, daylight block: skill_vs_convex moved from +0.28934
+(2009-2013) to +0.27601 (2011-2013) - a change of -0.0133, not
+unchanged. skill_vs_persistence's figures (0.530 -> 0.526) were and
+remain correct; only the skill_vs_convex figures were wrong. The error
+survived unnoticed from this finding's original writing until a
+verification query caught it on 2026-08-09 - see Section 8, Record of
+Wrong Predictions, #13.
+
+REVISED INTERPRETATION: -0.0133 is a small change, but this finding
+cannot claim training length "barely matters" and call itself "evidence
+AGAINST" the meta-analytic training-length claim while Finding 8, three
+sections later, treats a comparable magnitude (the LSTM's h=6 advantage
+over XGBoost at array11, +0.0157) as a real, if only array17-significant,
+effect. 0.0133 is in fact somewhat SMALLER than 0.0157, not larger - but
+the two are the same order of magnitude, which is the point: a paper
+cannot report one 0.01-scale effect as "no effect, de-risks the decision
+entirely" and a same-scale effect elsewhere as "the paper's genuine,
+if modest, architectural finding." The honest reading is that training
+length produced a measurable, non-zero, small effect at this one cell -
+neither "no effect" (the old claim) nor a confirmed real effect in its
+own right: this comparison was never seed-swept and never run through
+Diebold-Mariano, so its significance is untested, exactly like the
+single-seed, single-cell caveats already attached to Findings 10 and 11
+elsewhere in this document. Do not cite "+0.276 to +0.276" or "barely
+matters" in the paper; cite "+0.28934 to +0.27601, a change of -0.0133,
+untested for significance" instead.
 
 ### Finding 8: a suggestive, not established, architecture edge at long horizons (RQ2)
 90-run seed sweep: 2 models x 3 arrays x 3 horizons x lagged x 5 seeds.
@@ -1388,6 +1464,11 @@ trusting a plausible explanation is what caught the real bugs.
     two-sample t of ~6, within the same finding that warns seed spread
     must not substitute for DM. The actual DM statistic is 2.56 and only
     one of three arrays is Holm-significant.
+
+13. Finding 7 recorded no change in skill_vs_convex under the
+    training-window narrowing when the actual change was -0.0133. The
+    error survived into a paper draft before being caught by a
+    verification query on 2026-08-09.
 
 ---
 
