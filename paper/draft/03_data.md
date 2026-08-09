@@ -1,0 +1,147 @@
+# III. DATA AND PREPROCESSING
+
+## A. Site and Arrays
+
+Experiments use measurements from the Desert Knowledge Australia Solar
+Centre (DKASC) at Alice Springs, Northern Territory (23.767 deg S,
+133.867 deg E, 558 m), an open dataset of ground-mounted photovoltaic
+installations with per-array power measurement and a co-located weather
+station. [CITE DKASC]
+
+Three fixed-mount arrays were used, selected for differing module
+technology at comparable scale: site 11 (BP Solar, polycrystalline
+silicon, 5.0 kW), site 12 (BP Solar, monocrystalline silicon, 5.1 kW),
+and site 17 (Sanyo, heterojunction, 6.3 kW). All three are mounted at 20
+deg tilt facing solar north. Full metadata and per-split sample counts
+appear in Table I.
+
+An important limitation follows from this choice and is stated here
+because it constrains interpretation throughout: these are three
+co-located arrays, not three sites. They share a single weather station
+and experience the same sky. Their forecast errors are therefore
+correlated, and results across them do not constitute three independent
+replications. Where consistency across arrays is reported, it should be
+read as consistency across module technology under common meteorology,
+not as geographic generalisation.
+
+## B. Excluded Array
+
+A fourth array, site 7 (First Solar, cadmium telluride, 7.0 kW), was
+initially included and subsequently excluded. Its exclusion is reported
+rather than omitted, because the mechanism by which it was nearly
+retained is itself a finding.
+
+A conventional completeness audit passed site 7 for 2014 with 99.99
+percent coverage and 0.00 percent missing values in the power channel.
+The array had in fact produced no power from March to September 2014:
+48.41 percent of that year's daylight hours record exactly zero output,
+confirmed in the raw five-minute files, where between 48 and 97 percent
+of clearly daylit records (GHI above 200 W m-2) are exactly zero. A
+further 48-day near-zero period occurs in November-December 2015, inside
+the test year.
+
+The audit did not detect this because the logger continued to record
+faithfully, and what it recorded was zero. Zero is not missing. A
+completeness-based data quality check is structurally blind to a healthy
+sensor reporting a dead array. A second audit, testing for output below
+1 percent of nameplate rather than exactly zero, was required to detect
+an analogous standby-power condition on site 17. Both audits are
+included in the repository.
+
+## C. Preprocessing
+
+Raw measurements are recorded at five-minute resolution with naive
+timestamps. Timestamps were localised to Australia/Darwin (UTC+9:30, no
+daylight saving); this was verified empirically rather than assumed, by
+confirming that mean global horizontal irradiance peaks in hour 12 with
+a slight afternoon skew consistent with solar noon at approximately
+12:35 local time.
+
+Values outside physically plausible ranges were set to missing, and
+negative power and irradiance were clipped to zero. No interpolation or
+gap filling was performed. Data were then resampled to hourly means
+using hour-beginning labels, so that the row labelled 12:00 is the mean
+over 12:00 to 12:55.
+
+Three recorded channels were discarded as target-derived and therefore
+inadmissible as features: cumulative delivered energy, performance
+ratio, and average phase current. Each is a deterministic function of
+measured power.
+
+## D. Clear-Sky Reference
+
+Clear-sky global horizontal irradiance was computed with the
+Ineichen-Perez model as implemented in pvlib, using the Linke turbidity
+climatology. [CITE Ineichen] [CITE pvlib]
+
+Clear-sky irradiance is computed at five-minute resolution and then
+averaged to hourly using the same convention as the measurements. This
+matters: measured irradiance is an hourly mean of twelve samples,
+whereas an instantaneous clear-sky value evaluated at the hour midpoint
+is not the same quantity. Near sunrise and sunset, where irradiance
+changes steeply within the hour, the two differ systematically and with
+opposite sign at the two ends of the day. Solar position, by contrast,
+is evaluated at the hour midpoint, since it is a feature describing the
+hour rather than a quantity being compared against an hourly average.
+The two are treated differently by design.
+
+Clear-sky power is modelled through a physical chain - solar position,
+clear-sky irradiance, Hay-Davies transposition to the tilted plane, cell
+temperature from a training-period temperature climatology, and PVWatts
+DC conversion - followed by a single scalar gain per array. The gain is
+fitted on training years only, as the median ratio of measured to
+modelled power over clear high-elevation hours. Fitted gains are 0.914,
+0.907 and 1.004 for sites 11, 12 and 17 respectively. The gain above
+unity for site 17 indicates that the physical chain under-predicts
+heterojunction output, consistent with the datasheet temperature
+coefficient assumed for that technology being conservative; since the
+gain is a scalar fitted on training data and cancels in the
+clear-sky-index formulation, this affects interpretation of the modelled
+power rather than any reported metric.
+
+The temperature climatology is used in place of measured temperature
+deliberately. Clear-sky power appears in the reference forecasts, which
+predict power at a future time; using measured weather at that time
+would leak future information into a forecast defined as using none.
+
+## E. Splits and Evaluation Window
+
+Data span 2009 to 2015 at hourly resolution, 61,344 rows per array.
+Splits are chronological and never shuffled: training 2011-2013,
+validation 2014, test 2015. Each split comprises whole calendar years,
+so that no split is seasonally biased; a partial-year test set would
+confound test error with season.
+
+Training begins in 2011 rather than 2009 because site 17 was
+commissioned on 11 March 2010. All arrays share an identical training
+window, so that comparisons across arrays are not confounded by
+differing training length. The cost of this choice was measured on the
+two arrays with clean data back to 2009: narrowing training from
+2009-2013 to 2011-2013 reduced validation skill against the convex
+reference by 0.013 at a three-hour horizon on site 11, a modest cost
+accepted in exchange for an identical training window across all three
+arrays.
+
+The test split was held out entirely and evaluated once, after all
+modelling and evaluation choices were frozen.
+
+## F. Daylight Filter and Documented Exclusions
+
+Evaluation is restricted to hours with solar elevation above 10 deg,
+equivalent to a solar zenith angle below 80 deg. This is stricter than
+the 85 deg zenith filter described as typical practice by Yang et al.
+[CITE Yang 2020], and is applied for the reason they give: at low solar
+elevation the clear-sky index becomes unstable, as both measurement
+uncertainty and clear-sky model error grow relative to a small
+denominator. The filter is a protocol choice, not a data-cleaning step,
+and is treated as such - its effect on reported accuracy is measured in
+Section [VERIFY section number].
+
+One further exclusion is applied. DKASC's published maintenance records
+report that site 17, among others, was switched off between 5 and 9 June
+2015 and the outage was not discovered until staff returned. These hours
+are excluded from evaluation for that array. The exclusion derives from
+external documentation rather than from model performance, is applied
+identically to every model, and is recorded in every run record. Its
+effect is visible in Table I: site 17 has 3,757 evaluable test hours
+against 3,802 for the other two arrays.
