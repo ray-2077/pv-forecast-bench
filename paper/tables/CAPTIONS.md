@@ -24,32 +24,68 @@ ASCII only, per CLAUDE.md.
 
 Files: paper/tables/T1_dataset.csv, paper/tables/T1_dataset.tex
 Generating script: scripts/build_table1_dataset.py
-Sources: results/data_audit.csv, results/dead_period_audit.csv,
-scripts/build_processed.py (nameplate kW only - manufacturer/
-technology/site number are not in any script, see the script's own
-docstring for where they are sourced from instead), src/data/
-clearsky_power.py (tilt/azimuth), row/daylight counts computed directly
-via src.data.splits.split_chronological on each processed parquet
+Sources: results/data_audit.csv, results/dead_period_audit.csv (array07
+exclusion reason only), scripts/build_processed.py (nameplate kW only -
+manufacturer/technology/site number are not in any script, see the
+script's own docstring for where they are sourced from instead),
+src/data/clearsky_power.py (tilt/azimuth); row counts, geometric
+daylight-hour counts, and outage-adjusted evaluable counts all computed
+live via src.data.pipeline.load_and_prepare + src.data.splits.
+split_chronological + src.eval.exclusions.exclusion_mask on each
+processed parquet - not read from a side CSV.
+
+CORRECTED 2026-08-09 (three issues caught before this table could be
+cited): (1) the original daylight-hour columns were purely geometric
+(solar_elevation > 10 deg, identical across every array by
+construction, since it depends only on the shared weather station) and
+were named plainly "n_daylight_*", which could be misread as the count
+that matters for evaluation. Renamed to n_daylight_geometric_* and
+added n_evaluable_val/n_evaluable_test, which subtract documented
+equipment outages (src.eval.exclusions.exclusion_mask) - array17's
+n_evaluable_test (3757) is now visibly smaller than its
+n_daylight_geometric_test (3802) because of the 2015-06-05..09 outage,
+while array11/array12 are unaffected (3802 for both). (2) array07's
+row/daylight/evaluable columns previously showed real-looking numbers
+computed from a leftover, no-longer-pipeline-registered parquet file -
+identical to the other three arrays' numbers by construction (shared
+calendar), which implied array07 was measured on the same footing.
+Replaced with "n/a (excluded)" throughout. (3) array07's tilt/azimuth
+were "not recorded" out of excess caution; DKASC's fixed-mount
+convention documents ALL arrays at this site, including array07, at
+tilt 20 deg / azimuth 0 deg, same source already cited for
+array11/12/17 - filled in, with the source noted in the script's
+module docstring.
 
 Caption:
 Table 1. Dataset summary: the three co-located DKASC arrays used in
 evaluation (array11 poly-Si, array12 mono-Si, array17 HIT - one shared
 weather station, not three independent sites) plus array07 (CdTe),
-excluded. Row and daylight-hour counts by chronological split (train
-2011-2013, validation 2014, test 2015 - touched once, at the end).
-array07 is retained as an excluded row, not deleted: a completeness
-audit (results/data_audit.csv) passed its 2014 data at 99.99% coverage
-and 0.00% NaN in Active_Power, while a dead-period audit (results/
-dead_period_audit.csv) found 48.41% of that same year's daylight hours
-at exactly zero power (status FAIL), plus a 48-day near-zero run
-inside the test year - a completeness-only audit is structurally blind
-to a healthy sensor reporting a dead array (Finding 6).
+excluded. Row counts and geometric daylight-hour counts (solar
+elevation $>10^\circ$, identical across arrays by construction) by
+chronological split (train 2011-2013, validation 2014, test 2015 -
+touched once, at the end), plus outage-adjusted evaluable hour counts
+for validation and test: array17's documented 2015-06-05 to 2015-06-09
+outage reduces its evaluable test count to 3757 daylight hours, versus
+3802 for array11 and array12, which are unaffected. array07 is
+retained as an excluded row, not deleted, with its row/daylight/
+evaluable columns reported as not applicable rather than measured (no
+run in this project fits or scores a model against array07's data): a
+completeness audit (results/data_audit.csv) passed its 2014 data at
+99.99% coverage and 0.00% NaN in Active_Power, while a dead-period
+audit (results/dead_period_audit.csv) found 48.41% of that same year's
+daylight hours at exactly zero power (status FAIL), plus a 48-day
+near-zero run inside the test year - a completeness-only audit is
+structurally blind to a healthy sensor reporting a dead array
+(Finding 6).
 
 Must convey: array11/array12/array17 are co-located, sharing one
 weather station, not three independent sites (CLAUDE.md wording
-constraint) - and array07's exclusion must be visible as a real,
-numbered audit finding in this same table, not an assertion made only
-in prose elsewhere.
+constraint); array17's smaller evaluable test sample must be visible as
+a real, numbered consequence of the documented outage, not folded into
+an undifferentiated "daylight hours" count that looks identical across
+arrays; and array07's exclusion must read as a real, numbered audit
+finding with columns that honestly say "not applicable," never as
+plausible-looking numbers that imply it was evaluated.
 
 ---
 

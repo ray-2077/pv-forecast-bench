@@ -7,7 +7,13 @@ SOURCES, per array-metadata column:
     constants (build_processed.py does NOT have these - the user-given
     source list for this table named build_processed.py, but tilt/azimuth
     live in clearsky_power.py; noting the discrepancy here rather than
-    silently citing the wrong file).
+    silently citing the wrong file). array07's tilt/azimuth are the same
+    20 deg / 0 deg - DKASC documents ALL fixed-mount arrays at this site,
+    including array07, at this tilt/azimuth (CORRECTED 2026-08-09: this
+    file previously left them as "not recorded" out of excess caution
+    about an array-specific citation that does not exist; the site-wide
+    fixed-mount convention DOES apply to array07, per the same DKASC
+    technology-page source already cited for array11/12/17).
   - DKASC site number, manufacturer, technology, DKASC slug: NOT in any
     script or committed CSV. Hardcoded below from
     PROJECT_CHECKPOINT.md Section 2's array table, itself sourced "per
@@ -20,37 +26,65 @@ SOURCES, per array-metadata column:
     with no install-event marker) - reported as "not recorded" rather
     than guessed.
 
-SOURCES, per data-volume column:
+SOURCES, per data-volume column (array11/array12/array17 ONLY - see
+ARRAY07 below for why its row/daylight/evaluable columns are not
+measured the same way):
   - n_rows_total/train/val/test: computed directly here via
-    src.data.splits.split_chronological on each array's processed
-    hourly parquet (data/processed/*.parquet) - not from a committed
-    CSV, since none has exactly this number. Cheap (no model fitting,
-    no clear-sky columns needed for a row count) and this is the same
+    src.data.pipeline.load_and_prepare + src.data.splits.split_chronological
+    on each array's processed hourly parquet - not from a committed CSV,
+    since none has exactly this number. This is the same
     61,344/26,304/8,760/8,760 pattern already stated in CLAUDE.md's
     "Data window" section and PROJECT_CHECKPOINT.md claim C36 - this
     script verifies it directly rather than re-typing it.
-  - n_daylight_{train,val,test}: summed from results/dead_period_audit.csv's
-    n_daylight_hours column over the relevant split years (TRAIN
-    2011-2013, VAL 2014, TEST 2015) - a committed audit artifact a
-    reader can check without rerunning anything. Cross-checked once
-    during development against a live split_chronological +
-    is_daylight computation for all three used arrays: exact match
-    (11414/3799/3802 for every array, since daylight hours depend only
-    on the shared weather-station solar geometry, not per-array data -
-    see CLAUDE.md's "co-located arrays, not sites" framing).
+  - n_daylight_geometric_{train,val,test}: is_daylight (src.data.clearsky.
+    add_daylight_mask, solar_elevation > 10 deg) summed per split,
+    computed live from the same load_and_prepare call above, not read
+    from results/dead_period_audit.csv - CORRECTED 2026-08-09: this file
+    previously named "n_daylight_train/val/test" and summed
+    dead_period_audit.csv's n_daylight_hours column instead. Same
+    number, but the OLD name implied it was already the count that
+    matters for evaluation. It is not: it depends only on shared
+    solar geometry (identical across all three arrays, and even
+    array07, which shares the same weather station - CLAUDE.md
+    "co-located arrays, not sites") and says nothing about documented
+    equipment outages. Renamed "geometric" to make that explicit, and
+    see n_evaluable_val/test below for the number that actually differs
+    per array.
+  - n_evaluable_val/n_evaluable_test: n_daylight_geometric minus hours
+    excluded by src.eval.exclusions.exclusion_mask (documented
+    equipment outages) for that array - ADDED 2026-08-09. This is the
+    column that actually varies per array: array17's 2015-06-05 to
+    2015-06-09 outage falls inside daylight hours of the TEST split, so
+    array17's n_evaluable_test (3757) is measurably smaller than its
+    n_daylight_geometric_test (3802) and smaller than array11/array12's
+    n_evaluable_test (3802, unaffected - no documented outage touches
+    either array in this window). n_evaluable_val is included for
+    symmetry even though no array in this project has a documented
+    outage inside VAL (2014), so n_evaluable_val currently equals
+    n_daylight_geometric_val for all three arrays - kept as a real,
+    computed column rather than assumed equal, so a future outage
+    addition to KNOWN_OUTAGES would be reflected here automatically.
+    train is deliberately not given an n_evaluable_train: models are
+    FIT on train, not evaluated against it, so an outage-adjusted count
+    is not a meaningful quantity there the way it is for val/test.
 
-ARRAY07 FOOTNOTE ROW: array07 was dropped from the current pipeline (not
-in build_processed.py's ARRAYS dict, no longer in src/data/pipeline.py's
-ARRAYS), but data/processed/array07_CdTe_hourly.parquet still exists on
-disk (kept as evidence, per CLAUDE.md) so its row/daylight counts are
-computed and reported the same way as the three used arrays - this
-table is the exclusion's evidence, not just an assertion of it. The
-reason column pairs results/data_audit.csv's array07/2014 row (99.99%
-coverage, 0.00% NaN - a completeness audit finds nothing wrong) against
-results/dead_period_audit.csv's array07/2014 row (48.41% of daylight
-hours exactly zero power, status FAIL) - Finding 6's exact point: a
-completeness-based audit is structurally blind to a healthy sensor
-reporting a dead array.
+ARRAY07: NOT measured, NOT inferred, reported as "n/a (excluded)" for
+every row/daylight/evaluable column - CORRECTED 2026-08-09. This file
+previously computed real numbers for array07 by reading the leftover
+data/processed/array07_CdTe_hourly.parquet directly (bypassing
+src.data.pipeline.load_and_prepare, since array07 is not in that
+module's ARRAYS registry - array07 is not part of the CURRENT
+pipeline). Every number that came out of that (rows, daylight hours)
+was identical to array11/array12/array17's, because it depends only on
+the shared calendar index every array shares, structurally, regardless
+of whether that array's own data was ever touched - it was not
+measuring anything about array07 specifically, and presenting it as a
+table cell alongside three arrays that WERE genuinely evaluated implied
+array07 was audited on the same footing. It was not: no run in this
+project ever fits or scores a model against array07. The exclusion
+reason (still populated, see array07_exclusion_reason()) is unaffected
+by this correction - it was already sourced from results/data_audit.csv
+and results/dead_period_audit.csv, not from the processed parquet.
 
 Writes:
   paper/tables/T1_dataset.csv
@@ -64,27 +98,24 @@ import csv
 import sys
 from pathlib import Path
 
-import pandas as pd
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from src.data.pipeline import load_and_prepare
 from src.data.splits import split_chronological
+from src.eval.exclusions import exclusion_mask
 
 PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 RESULTS_DIR = REPO_ROOT / "results"
 TABLES_DIR = REPO_ROOT / "paper" / "tables"
 
-# (parquet filename, dkasc_site, manufacturer, technology, nameplate_kw,
-#  tilt_deg, azimuth_deg, install_date, dkasc_slug, used_in_evaluation)
+NA = "n/a (excluded)"
+
 # tilt/azimuth from src/data/clearsky_power.py (SURFACE_TILT=20.0,
-# SURFACE_AZIMUTH=0.0) - stated there as shared across all fixed-mount
-# arrays; not independently confirmed for array07 specifically (it was
-# dropped before that generalisation was written), so array07's
-# tilt/azimuth are left as "not recorded" rather than assumed equal.
+# SURFACE_AZIMUTH=0.0) - DKASC documents ALL fixed-mount arrays at this
+# site at this tilt/azimuth, including array07 (see module docstring).
 ARRAY_METADATA = {
     "array11": {
-        "parquet": "array11_polySi_hourly.parquet",
         "site": "11",
         "manufacturer": "BP Solar",
         "technology": "poly-Si",
@@ -96,7 +127,6 @@ ARRAY_METADATA = {
         "used": True,
     },
     "array12": {
-        "parquet": "array12_monoSi_hourly.parquet",
         "site": "12",
         "manufacturer": "BP Solar",
         "technology": "mono-Si",
@@ -108,7 +138,6 @@ ARRAY_METADATA = {
         "used": True,
     },
     "array17": {
-        "parquet": "array17_HIT_hourly.parquet",
         "site": "17",
         "manufacturer": "Sanyo",
         "technology": "HIT",
@@ -120,63 +149,82 @@ ARRAY_METADATA = {
         "used": True,
     },
     "array07": {
-        "parquet": "array07_CdTe_hourly.parquet",
         "site": "07",
         "manufacturer": "First Solar",
         "technology": "CdTe",
         "nameplate_kw": 7.0,
-        "tilt_deg": None,
-        "azimuth_deg": None,
+        # DKASC's site-wide fixed-mount convention applies to array07 too
+        # (see module docstring) - this is a documented site fact, not an
+        # array-specific measurement, so it is filled rather than left
+        # "not recorded" the way install_date (a genuinely per-array,
+        # genuinely undocumented-in-this-project fact) is below.
+        "tilt_deg": 20.0,
+        "azimuth_deg": 0.0,
         "install_date": "not recorded",
         "slug": "dka-m6-a-phase",
         "used": False,
     },
 }
 
-SPLIT_YEAR_GROUPS = {
-    "train": (2011, 2012, 2013),
-    "val": (2014,),
-    "test": (2015,),
-}
 
-
-def row_counts(parquet_filename):
-    df = pd.read_parquet(PROCESSED_DIR / parquet_filename)
-    train, val, test = split_chronological(df)
-    return len(df), len(train), len(val), len(test)
-
-
-def daylight_hour_sums():
-    """n_daylight_hours per (array, split) from results/dead_period_audit.csv,
-    summed over each split's years. Returns {array: {split: n}}.
+def measured_counts(array_key):
+    """Row counts, geometric daylight-hour counts, and outage-adjusted
+    evaluable counts for one array, computed live from the pipeline -
+    see module docstring for exactly what each means and why. Only
+    called for array11/array12/array17 - array07 is not in
+    src.data.pipeline.ARRAYS (this call would KeyError for it), which
+    is itself evidence for why array07's columns are "n/a (excluded)"
+    rather than measured.
     """
-    with open(RESULTS_DIR / "dead_period_audit.csv") as fh:
-        rows = list(csv.DictReader(fh))
+    df, nameplate_kw, gamma_pdc = load_and_prepare(array_key, PROCESSED_DIR)
+    train, val, test = split_chronological(df)
 
-    by_array_year = {}
-    for row in rows:
-        by_array_year[(row["array"], int(row["year"]))] = int(row["n_daylight_hours"])
+    n_daylight_train = int(train["is_daylight"].sum())
+    n_daylight_val = int(val["is_daylight"].sum())
+    n_daylight_test = int(test["is_daylight"].sum())
 
-    out = {}
-    for array in ARRAY_METADATA:
-        out[array] = {}
-        for split, years in SPLIT_YEAR_GROUPS.items():
-            out[array][split] = sum(by_array_year[(array, y)] for y in years)
-    return out
+    daylight_val_idx = val.index[val["is_daylight"]]
+    daylight_test_idx = test.index[test["is_daylight"]]
+    n_evaluable_val = int((~exclusion_mask(array_key, daylight_val_idx)).sum())
+    n_evaluable_test = int((~exclusion_mask(array_key, daylight_test_idx)).sum())
+
+    return {
+        "n_rows_total": len(df),
+        "n_rows_train": len(train),
+        "n_rows_val": len(val),
+        "n_rows_test": len(test),
+        "n_daylight_geometric_train": n_daylight_train,
+        "n_daylight_geometric_val": n_daylight_val,
+        "n_daylight_geometric_test": n_daylight_test,
+        "n_evaluable_val": n_evaluable_val,
+        "n_evaluable_test": n_evaluable_test,
+    }
+
+
+NA_COUNTS = {
+    "n_rows_total": NA,
+    "n_rows_train": NA,
+    "n_rows_val": NA,
+    "n_rows_test": NA,
+    "n_daylight_geometric_train": NA,
+    "n_daylight_geometric_val": NA,
+    "n_daylight_geometric_test": NA,
+    "n_evaluable_val": NA,
+    "n_evaluable_test": NA,
+}
 
 
 def array07_exclusion_reason():
     """Pairs the completeness-audit numbers against the dead-period
     numbers for array07/2014, per Finding 6 - see module docstring.
+    Unaffected by the array07 n/a correction: always sourced from
+    results/data_audit.csv and results/dead_period_audit.csv, never
+    from the processed parquet.
     """
     with open(RESULTS_DIR / "data_audit.csv") as fh:
-        audit_rows = {
-            (r["array"], int(r["year"])): r for r in csv.DictReader(fh)
-        }
+        audit_rows = {(r["array"], int(r["year"])): r for r in csv.DictReader(fh)}
     with open(RESULTS_DIR / "dead_period_audit.csv") as fh:
-        dead_rows = {
-            (r["array"], int(r["year"])): r for r in csv.DictReader(fh)
-        }
+        dead_rows = {(r["array"], int(r["year"])): r for r in csv.DictReader(fh)}
 
     coverage = audit_rows[("array07_CdTe", 2014)]
     dead = dead_rows[("array07", 2014)]
@@ -194,11 +242,9 @@ def array07_exclusion_reason():
 
 
 def build_rows():
-    daylight = daylight_hour_sums()
     rows = []
     for array_key, meta in ARRAY_METADATA.items():
-        n_total, n_train, n_val, n_test = row_counts(meta["parquet"])
-        d = daylight[array_key]
+        counts = measured_counts(array_key) if meta["used"] else dict(NA_COUNTS)
         rows.append(
             {
                 "array": array_key,
@@ -210,17 +256,9 @@ def build_rows():
                 "tilt_deg": meta["tilt_deg"],
                 "azimuth_deg": meta["azimuth_deg"],
                 "install_date": meta["install_date"],
-                "n_rows_total": n_total,
-                "n_rows_train": n_train,
-                "n_rows_val": n_val,
-                "n_rows_test": n_test,
-                "n_daylight_train": d["train"],
-                "n_daylight_val": d["val"],
-                "n_daylight_test": d["test"],
+                **counts,
                 "used_in_evaluation": meta["used"],
-                "exclusion_reason": (
-                    "" if meta["used"] else array07_exclusion_reason()
-                ),
+                "exclusion_reason": "" if meta["used"] else array07_exclusion_reason(),
             }
         )
     return rows
@@ -239,6 +277,10 @@ def tex_escape(value):
     return s.replace("_", "\\_").replace("%", "\\%")
 
 
+def fmt_count(value):
+    return f"{value:,}" if isinstance(value, int) else tex_escape(value)
+
+
 def write_latex(rows, path):
     used_rows = [r for r in rows if r["used_in_evaluation"]]
     excluded_rows = [r for r in rows if not r["used_in_evaluation"]]
@@ -248,74 +290,57 @@ def write_latex(rows, path):
     lines.append("% NOT compile-tested (no LaTeX toolchain in this dev")
     lines.append("% environment) - verify before camera-ready, same caveat")
     lines.append("% as paper/figures/F7_pipeline.tex. Needs \\usepackage{booktabs}.")
-    lines.append("% Wide (13 data columns): written as table* to span both")
-    lines.append("% IEEE columns; \\small or \\scriptsize will likely still")
-    lines.append("% be needed to fit - not tuned here without a real render.")
+    lines.append("% Wide (15 data columns): written as table* to span both")
+    lines.append("% IEEE columns; \\scriptsize likely still needed to fit -")
+    lines.append("% not tuned here without a real render.")
     lines.append("\\begin{table*}[t]")
     lines.append("  \\centering")
-    lines.append("  \\small")
+    lines.append("  \\scriptsize")
     lines.append("  \\caption{Dataset summary. See paper/tables/CAPTIONS.md for the full caption.}")
     lines.append("  \\label{tab:dataset}")
-    lines.append("  \\begin{tabular}{lllrrrl rrrr rrr}")
+    lines.append("  \\begin{tabular}{lllrrrl rrrr rrr rr}")
     lines.append("    \\toprule")
     lines.append(
         "    & \\multicolumn{6}{c}{Array identity} & "
         "\\multicolumn{4}{c}{Rows (total / train / val / test)} & "
-        "\\multicolumn{3}{c}{Daylight hours (train / val / test)} \\\\"
+        "\\multicolumn{3}{c}{Daylight, geometric (train / val / test)} & "
+        "\\multicolumn{2}{c}{Evaluable (val / test)} \\\\"
     )
-    lines.append("    \\cmidrule(lr){2-7} \\cmidrule(lr){8-11} \\cmidrule(lr){12-14}")
+    lines.append(
+        "    \\cmidrule(lr){2-7} \\cmidrule(lr){8-11} \\cmidrule(lr){12-14} \\cmidrule(lr){15-16}"
+    )
     lines.append(
         "    Array & Site & Manuf. & Tech. & kW & Tilt/Azim. & Installed & "
-        "Total & Train & Val & Test & Train & Val & Test \\\\"
+        "Total & Train & Val & Test & Train & Val & Test & Val & Test \\\\"
     )
     lines.append("    \\midrule")
+
+    def row_cells(r, dagger):
+        return [
+            tex_escape(r["array"]) + dagger,
+            tex_escape(r["dkasc_site"]),
+            tex_escape(r["manufacturer"]),
+            tex_escape(r["technology"]),
+            f"{r['nameplate_kw']:.1f}",
+            f"{r['tilt_deg']:.0f}$^\\circ$/{r['azimuth_deg']:.0f}$^\\circ$",
+            tex_escape(r["install_date"]),
+            fmt_count(r["n_rows_total"]),
+            fmt_count(r["n_rows_train"]),
+            fmt_count(r["n_rows_val"]),
+            fmt_count(r["n_rows_test"]),
+            fmt_count(r["n_daylight_geometric_train"]),
+            fmt_count(r["n_daylight_geometric_val"]),
+            fmt_count(r["n_daylight_geometric_test"]),
+            fmt_count(r["n_evaluable_val"]),
+            fmt_count(r["n_evaluable_test"]),
+        ]
+
     for r in used_rows:
-        lines.append(
-            "    "
-            + " & ".join(
-                [
-                    tex_escape(r["array"]),
-                    tex_escape(r["dkasc_site"]),
-                    tex_escape(r["manufacturer"]),
-                    tex_escape(r["technology"]),
-                    f"{r['nameplate_kw']:.1f}",
-                    f"{r['tilt_deg']:.0f}$^\\circ$/{r['azimuth_deg']:.0f}$^\\circ$",
-                    tex_escape(r["install_date"]),
-                    f"{r['n_rows_total']:,}",
-                    f"{r['n_rows_train']:,}",
-                    f"{r['n_rows_val']:,}",
-                    f"{r['n_rows_test']:,}",
-                    f"{r['n_daylight_train']:,}",
-                    f"{r['n_daylight_val']:,}",
-                    f"{r['n_daylight_test']:,}",
-                ]
-            )
-            + " \\\\"
-        )
+        lines.append("    " + " & ".join(row_cells(r, "")) + " \\\\")
     lines.append("    \\midrule")
     for r in excluded_rows:
-        lines.append(
-            "    "
-            + " & ".join(
-                [
-                    tex_escape(r["array"]) + "$^{\\dagger}$",
-                    tex_escape(r["dkasc_site"]),
-                    tex_escape(r["manufacturer"]),
-                    tex_escape(r["technology"]),
-                    f"{r['nameplate_kw']:.1f}",
-                    "not recorded",
-                    tex_escape(r["install_date"]),
-                    f"{r['n_rows_total']:,}",
-                    f"{r['n_rows_train']:,}",
-                    f"{r['n_rows_val']:,}",
-                    f"{r['n_rows_test']:,}",
-                    f"{r['n_daylight_train']:,}",
-                    f"{r['n_daylight_val']:,}",
-                    f"{r['n_daylight_test']:,}",
-                ]
-            )
-            + " \\\\"
-        )
+        lines.append("    " + " & ".join(row_cells(r, "$^{\\dagger}$")) + " \\\\")
+
     lines.append("    \\bottomrule")
     lines.append("  \\end{tabular}")
     lines.append("")
@@ -338,10 +363,12 @@ def main():
         print(
             f"{r['array']:10s} site={r['dkasc_site']:>3s} {r['manufacturer']:12s} "
             f"{r['technology']:8s} {r['nameplate_kw']:.1f}kW  "
+            f"tilt/azim={r['tilt_deg']}/{r['azimuth_deg']}  "
             f"rows total/train/val/test="
             f"{r['n_rows_total']}/{r['n_rows_train']}/{r['n_rows_val']}/{r['n_rows_test']}  "
-            f"daylight train/val/test="
-            f"{r['n_daylight_train']}/{r['n_daylight_val']}/{r['n_daylight_test']}  [{status}]"
+            f"daylight(geom) train/val/test="
+            f"{r['n_daylight_geometric_train']}/{r['n_daylight_geometric_val']}/{r['n_daylight_geometric_test']}  "
+            f"evaluable val/test={r['n_evaluable_val']}/{r['n_evaluable_test']}  [{status}]"
         )
 
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
