@@ -85,10 +85,15 @@ every modelling and evaluation choice was frozen.
 
 1. An open, leakage-controlled benchmark harness for short-term
    photovoltaic power forecasting, with explicit alignment assertions,
-   documented data exclusions, and 900 machine-readable run records from
-   which every table and figure in this paper is regenerated. All
-   generated outputs were verified to reproduce byte-identically from a
-   clean state.
+   documented data exclusions, and 900 machine-readable run records.
+   Most tables and figures are generated directly from these records;
+   the protocol-sensitivity and significance-testing tables refit models
+   from source data, because paired significance testing requires the
+   full error series, which the run records do not store. On a
+   verification performed on 2026-08-08, all generated outputs were
+   deleted and regenerated from a clean state: table files and figure
+   previews reproduced byte-identically, and vector figures differed only
+   in an embedded creation timestamp.
 
 2. A quantification of four protocol effects - reference forecast,
    night-hour inclusion, residual-stage construction, and weather
