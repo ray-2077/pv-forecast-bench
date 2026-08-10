@@ -22,8 +22,8 @@ measure between any two architectures, under identical conditions, is
 The architectural findings are correspondingly modest. Gradient boosting
 and a recurrent network are statistically indistinguishable at one- and
 three-hour horizons. A convolutional front end shows no detectable
-benefit in any of the eighteen cells tested and a consistent tendency
-toward harm. A gradient-boosted residual correction stage reduces skill
+benefit in any of the nine array-horizon cells tested and a consistent
+tendency toward harm. A gradient-boosted residual correction stage reduces skill
 in all eighteen configurations, and we identify the mechanism: the
 correction is applied at between 1.2 and 4.7 times the magnitude its
 out-of-sample correlation with the true residual justifies. Its measured
