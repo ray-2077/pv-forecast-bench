@@ -621,6 +621,17 @@ counts of 37 lagged and 42 oracle.
 This is the evidence for contribution 1 (a reproducible benchmark
 harness) and should be cited in Experimental Setup.
 
+STALE AS OF 2026-08-10: the 2026-08-08 verification above predates two
+things now in the repo - the T8 survey table
+(`scripts/build_table8_survey.py`, `paper/tables/T8_survey.csv`/`.tex`,
+added 2026-08-09) and the test-split DM outputs
+(`results/table6_dm_lagged_test.csv`, added 2026-08-09/10, plus the
+`--eval-split test` machinery in `scripts/build_table6_dm.py`). Neither
+was regenerated-from-clean-state tested by the pass recorded above. Run
+a second reproducibility verification covering everything currently in
+the repo before submission, not just the 21 outputs the 2026-08-08 pass
+checked.
+
 ---
 
 ## 9. CITATION PLAN
