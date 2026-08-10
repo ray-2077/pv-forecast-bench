@@ -1,0 +1,210 @@
+% paper/references.bib
+%
+% Single source of truth for the bibliography. Every entry here is cited
+% at least once in paper/draft/*.md as of 2026-08-09. ASCII only, per
+% CLAUDE.md.
+%
+% PROVENANCE, per entry: see the comment above each one.
+% paper/literature_notes.md itself gives surnames only for Yang et al.,
+% Kapoor and Narayanan, Hewamalage/Ackermann/Bergmeir, and both Nguyen
+% and Musgens papers; first initials for all of those were supplied by
+% the user directly on 2026-08-09 (not derived from memory) and are
+% flagged per-entry as either independently verified against a repo
+% source (Yang et al., against Mayer 2022's own reference list) or
+% taken on the user's word because no verifying source exists in this
+% repo (Kapoor and Narayanan; Hewamalage, Ackermann and Bergmeir; both
+% Nguyen and Musgens entries - see each entry's note for what was
+% checked and where).
+%
+% NOT compile-tested: no LaTeX toolchain in this dev environment, same
+% caveat as every other paper/*.tex fragment in this repo.
+
+% Cited in 03_data.md ("an open dataset... with per-array power
+% measurement and a co-located weather station"). User-supplied
+% 2026-08-09, not independently verifiable against a PDF (it is the
+% dataset's own download page, not a paper) - transcribed as given.
+% No publication year exists for a live download page; none invented.
+@misc{dkasolarcentre,
+  author       = {{DKA Solar Centre}},
+  title        = {Download Data},
+  howpublished = {Desert Knowledge Australia Solar Centre, Alice Springs, NT, Australia},
+  url          = {https://dkasolarcentre.com.au/download},
+  note         = {Online; no publication year stated on the source page}
+}
+
+% Cited in 03_data.md (Ineichen-Perez clear-sky model). User-supplied
+% 2026-08-09; volume 73, pages 151-157, year 2002 independently verified
+% 2026-08-09 against Mayer (2022)'s own reference list (data/papers/
+% 1-s2.0-S1364032122006566-main.pdf, ref [47]), which also gave the DOI
+% below. Issue number (no. 3) was NOT present in Mayer's short-form
+% reference and so is taken on the user's word, not independently
+% checked.
+@article{ineichen2002linke,
+  author  = {Ineichen, Pierre and Perez, Richard},
+  title   = {A new airmass independent formulation for the {L}inke turbidity coefficient},
+  journal = {Solar Energy},
+  volume  = {73},
+  number  = {3},
+  pages   = {151--157},
+  year    = {2002},
+  doi     = {10.1016/S0038-092X(02)00045-2}
+}
+
+% Cited in 03_data.md (clear-sky computation "as implemented in pvlib").
+% User-supplied 2026-08-09; volume 3, page 884, year 2018 independently
+% verified 2026-08-09 against Mayer (2022)'s own reference list
+% (data/papers/1-s2.0-S1364032122006566-main.pdf, ref [48]), which also
+% gave the DOI below. Issue number (no. 29) was NOT present in Mayer's
+% short-form reference and so is taken on the user's word, not
+% independently checked.
+@article{holmgren2018pvlib,
+  author  = {Holmgren, William F. and Hansen, Clifford W. and Mikofski, Mark A.},
+  title   = {pvlib python: a python package for modeling solar energy systems},
+  journal = {Journal of Open Source Software},
+  volume  = {3},
+  number  = {29},
+  pages   = {884},
+  year    = {2018},
+  doi     = {10.21105/joss.00884}
+}
+
+% Cited in 04_methodology.md (Diebold-Mariano test). User-supplied
+% 2026-08-09, not independently verified against a source PDF in this
+% repo (not one of the survey/framework papers with a local copy).
+@article{diebold1995comparing,
+  author  = {Diebold, Francis X. and Mariano, Roberto S.},
+  title   = {Comparing predictive accuracy},
+  journal = {Journal of Business and Economic Statistics},
+  volume  = {13},
+  number  = {3},
+  pages   = {253--263},
+  year    = {1995}
+}
+
+% Cited in 04_methodology.md (small-sample DM correction). User-supplied
+% 2026-08-09, not independently verified against a source PDF in this
+% repo.
+@article{harvey1997testing,
+  author  = {Harvey, David and Leybourne, Stephen and Newbold, Paul},
+  title   = {Testing the equality of prediction mean squared errors},
+  journal = {International Journal of Forecasting},
+  volume  = {13},
+  number  = {2},
+  pages   = {281--291},
+  year    = {1997}
+}
+
+% Cited in 02_related_work.md, 03_data.md, 04_methodology.md,
+% 07_limitations.md. Author list CORRECTED 2026-08-09 to the first six
+% names (of ~33) as user-supplied, then INDEPENDENTLY VERIFIED 2026-08-09
+% against Mayer (2022)'s own reference list (data/papers/
+% 1-s2.0-S1364032122006566-main.pdf, ref [91]): "Yang D, Alessandrini S,
+% Antonanzas J, Antonanzas-Torres F, Badescu V, Beyer HG, et al.
+% Verification of deterministic solar forecasts. Sol Energy
+% 2020;210:20-37." - matches exactly, and also supplied the DOI below
+% (not previously in this file). Only initials are given by that source
+% (e.g. "Yang D", not a spelled-out first name) - "Dazhi" from the
+% previous version of this entry was NOT sourced from any repo file and
+% has been removed; do not reintroduce a spelled-out first name without
+% a source.
+@article{yang2020verification,
+  author  = {Yang, D. and Alessandrini, S. and Antonanzas, J. and Antonanzas-Torres, F. and Badescu, V. and Beyer, H. G. and others},
+  title   = {Verification of deterministic solar forecasts},
+  journal = {Solar Energy},
+  volume  = {210},
+  pages   = {20--37},
+  year    = {2020},
+  doi     = {10.1016/j.solener.2020.04.019}
+}
+
+% Cited in 02_related_work.md, 04_methodology.md.
+% paper/literature_notes.md entry 3: "Kapoor and Narayanan (2023),
+% 'Leakage and the reproducibility crisis in machine-learning-based
+% science', Patterns 4:100804." No issue number given in that source;
+% none invented here. Initials CORRECTED 2026-08-09 to user-supplied
+% "S. Kapoor and A. Narayanan" - NOT independently verifiable: this
+% paper has no PDF anywhere in the repo (checked data/papers/ and the
+% whole tree), and it is not among Mayer (2022)'s cited references
+% either (checked). Taken on the user's word only.
+@article{kapoor2023leakage,
+  author  = {Kapoor, Sayash and Narayanan, Arvind},
+  title   = {Leakage and the reproducibility crisis in machine-learning-based science},
+  journal = {Patterns},
+  volume  = {4},
+  pages   = {100804},
+  year    = {2023}
+}
+
+% Cited in 02_related_work.md. paper/literature_notes.md entry 4:
+% "Hewamalage, Ackermann & Bergmeir, 'Forecast Evaluation for Data
+% Scientists: Common Pitfalls and Best Practices', arXiv 2203.10716."
+% CHANGED 2026-08-09 from the arXiv preprint (@misc, year inferred from
+% the arXiv ID's YYMM encoding) to the published journal version per
+% user instruction: authors H. Hewamalage, K. Ackermann, C. Bergmeir;
+% Data Mining and Knowledge Discovery, vol. 37, pp. 788-832, 2023 - all
+% user-supplied. NOT independently verifiable: no PDF for this paper
+% (preprint or published) exists anywhere in the repo, and it is not
+% among Mayer (2022)'s cited references (checked). Taken on the user's
+% word only; the arXiv ID is kept in a note for cross-reference, not as
+% the citation target.
+@article{hewamalage2023pitfalls,
+  author  = {Hewamalage, Hansika and Ackermann, Klaus and Bergmeir, Christoph},
+  title   = {Forecast Evaluation for Data Scientists: Common Pitfalls and Best Practices},
+  journal = {Data Mining and Knowledge Discovery},
+  volume  = {37},
+  pages   = {788--832},
+  year    = {2023},
+  note    = {Preprint: arXiv:2203.10716}
+}
+
+% Cited in 04_methodology.md (the "horizon dominates every other
+% factor" claim). paper/literature_notes.md entry 2: "Nguyen & Musgens,
+% 'A Meta-Analysis of Solar Forecasting Based on Skill Score' arXiv
+% 2208.10536." NO YEAR IS STATED in literature_notes.md or the citation
+% plan for this entry. The year below (2022) is INFERRED from the arXiv
+% identifier's YYMM encoding (2208 = August 2022) - confirm before
+% submission. NOT THE SAME PAPER as nguyenmusgens2021drives below -
+% same first two authors, different work; see WRITING_BRIEF.md
+% Section 9's 2026-08-09 resolution note and literature_notes.md entry
+% 10's own correction for why these are easy to conflate.
+@misc{nguyenmusgens2022meta,
+  author        = {Nguyen, T. N. and M{\"u}sgens, F.},
+  title         = {A Meta-Analysis of Solar Forecasting Based on Skill Score},
+  howpublished  = {arXiv:2208.10536},
+  archivePrefix = {arXiv},
+  eprint        = {2208.10536},
+  year          = {2022},
+  note          = {Year inferred from the arXiv identifier's YYMM encoding, not stated in the source notes - confirm before submission. Initials CORRECTED 2026-08-09 to user-supplied "T. N. Nguyen and F. M{\"u}sgens" (umlaut) - NOT independently verifiable: arXiv 2111.02092's PDF, which the user expected in data/papers/, does not exist anywhere in this repo (checked the full tree) - see nguyenmusgens2021drives below, which shares this same caveat}
+}
+
+% Cited in 02_related_work.md (the "180 studies since 2007" / cherry-
+% picking / test-set-length claims). paper/literature_notes.md entry
+% 10: "Nguyen & Musgens (2021), 'What drives the accuracy of PV output
+% forecasts?' arXiv 2111.02092." NOT THE SAME PAPER as
+% nguyenmusgens2022meta above - see that entry's note.
+@misc{nguyenmusgens2021drives,
+  author        = {Nguyen, T. N. and M{\"u}sgens, F.},
+  title         = {What drives the accuracy of {PV} output forecasts?},
+  howpublished  = {arXiv:2111.02092},
+  archivePrefix = {arXiv},
+  eprint        = {2111.02092},
+  year          = {2021},
+  note          = {Initials CORRECTED 2026-08-09 to user-supplied "T. N. Nguyen and F. M{\"u}sgens" (umlaut), said to appear on this paper's own title page - but arXiv 2111.02092's PDF does NOT exist anywhere in this repo (checked data/papers/ and the full tree via filename and by opening every PDF present), so this could NOT be independently verified against a repo source and is taken on the user's word only. If a copy of this PDF is added to data/papers/, re-check against its title page directly}
+}
+
+% Cited in 02_related_work.md, 07_limitations.md. Citation key matches
+% results/literature_survey.csv's citation_key for this row
+% (mayer2022physmlhybrid), so the two files stay cross-referenceable.
+% Author initials "M.J." independently confirmed 2026-08-09 against
+% evidence/mayer2022physmlhybrid_audit.md's own transcription of the
+% paper's title page ("Mayer, M.J. (2022)"). DOI from the same audit
+% file.
+@article{mayer2022physmlhybrid,
+  author  = {Mayer, M. J.},
+  title   = {Benefits of physical and machine learning hybridization for photovoltaic power forecasting},
+  journal = {Renewable and Sustainable Energy Reviews},
+  volume  = {168},
+  pages   = {112772},
+  year    = {2022},
+  doi     = {10.1016/j.rser.2022.112772}
+}

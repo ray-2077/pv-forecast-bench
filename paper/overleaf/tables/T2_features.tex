@@ -1,0 +1,80 @@
+% T2_features.tex - feature list by regime, booktabs fragment.
+% NOT compile-tested (no LaTeX toolchain in this dev
+% environment) - same caveat as paper/figures/F7_pipeline.tex
+% and paper/tables/T1_dataset.tex. Needs \usepackage{booktabs}.
+% Long (42 rows): written as a single longtable-style table*
+% assuming \usepackage{longtable} or that the paper accepts
+% it spanning onto a following page - a plain tabular in a
+% table* environment will NOT paginate on its own. Swap the
+% table*/tabular pair below for longtable if the compiled
+% length overflows a page - not decided here without a real
+% render.
+\begin{table*}[t]
+  \centering
+  \scriptsize
+  \caption{Feature list by regime: all 37 lagged-regime features, plus
+  the 5 additional oracle-only features (42 total), grouped into four
+  categories (deterministic at target time, lagged observations, rolling
+  statistics, oracle weather), with the shift applied to each relative
+  to target time $t$ and issue time $t-h$. Every lagged-regime feature's
+  shift is at or after the issue time ($\geq h$); oracle features are
+  prefixed oracle\_ and use measured weather AT TARGET TIME $t$ (shift
+  0) - a perfect-forecast upper bound, never achievable, and never mixed
+  with the lagged regime in one feature matrix (CLAUDE.md rule 5).}
+  \label{tab:T2}
+  \begin{tabular}{llll p{6.5cm}}
+    \toprule
+    Feature & Category & Regime & Shift & Description \\
+    \midrule
+    \multicolumn{5}{l}{\textit{deterministic at target time (9 features)}} \\
+    \texttt{p\_cs} &  & lagged + oracle & 0 (at t; deterministic, computable in advance) & Clear-sky power model (temperature climatology + gain, TRAIN-only fit) \\
+    \texttt{ghi\_cs} &  & lagged + oracle & 0 (at t; deterministic, computable in advance) & Clear-sky GHI (Ineichen model, 5-min resolution averaged to hourly - Finding 1) \\
+    \texttt{solar\_zenith} &  & lagged + oracle & 0 (at t; deterministic, computable in advance) & Solar zenith angle at the hour midpoint \\
+    \texttt{solar\_azimuth} &  & lagged + oracle & 0 (at t; deterministic, computable in advance) & Solar azimuth angle at the hour midpoint \\
+    \texttt{solar\_elevation} &  & lagged + oracle & 0 (at t; deterministic, computable in advance) & Solar elevation angle at the hour midpoint (90 minus zenith) \\
+    \texttt{hour\_sin} &  & lagged + oracle & 0 (at t; deterministic, computable in advance) & Sine encoding of hour-of-day \\
+    \texttt{hour\_cos} &  & lagged + oracle & 0 (at t; deterministic, computable in advance) & Cosine encoding of hour-of-day \\
+    \texttt{doy\_sin} &  & lagged + oracle & 0 (at t; deterministic, computable in advance) & Sine encoding of day-of-year \\
+    \texttt{doy\_cos} &  & lagged + oracle & 0 (at t; deterministic, computable in advance) & Cosine encoding of day-of-year \\
+    \addlinespace
+    \multicolumn{5}{l}{\textit{lagged observations (19 features)}} \\
+    \texttt{Active\_Power\_issue} &  & lagged + oracle & h & Active power at issue time t-h \\
+    \texttt{Active\_Power\_issue\_m1} &  & lagged + oracle & h+1 & Active power at t-h-1 \\
+    \texttt{Active\_Power\_issue\_m2} &  & lagged + oracle & h+2 & Active power at t-h-2 \\
+    \texttt{Active\_Power\_daily} &  & lagged + oracle & 24 (fixed) & Active power 24h before target time (same hour, previous day) \\
+    \texttt{k\_p\_issue} &  & lagged + oracle & h & Clear-sky power index k\_p = Active\_Power / p\_cs (forward-filled up to 24h before shifting) at issue time t-h \\
+    \texttt{k\_p\_issue\_m1} &  & lagged + oracle & h+1 & Clear-sky power index k\_p = Active\_Power / p\_cs (forward-filled up to 24h before shifting) at t-h-1 \\
+    \texttt{k\_p\_issue\_m2} &  & lagged + oracle & h+2 & Clear-sky power index k\_p = Active\_Power / p\_cs (forward-filled up to 24h before shifting) at t-h-2 \\
+    \texttt{k\_p\_daily} &  & lagged + oracle & 24 (fixed) & Clear-sky power index k\_p = Active\_Power / p\_cs (forward-filled up to 24h before shifting) 24h before target time (same hour, previous day) \\
+    \texttt{k\_ghi\_issue} &  & lagged + oracle & h & Clear-sky index of GHI (forward-filled up to 24h before shifting) at issue time t-h \\
+    \texttt{k\_ghi\_issue\_m1} &  & lagged + oracle & h+1 & Clear-sky index of GHI (forward-filled up to 24h before shifting) at t-h-1 \\
+    \texttt{k\_ghi\_issue\_m2} &  & lagged + oracle & h+2 & Clear-sky index of GHI (forward-filled up to 24h before shifting) at t-h-2 \\
+    \texttt{k\_ghi\_daily} &  & lagged + oracle & 24 (fixed) & Clear-sky index of GHI (forward-filled up to 24h before shifting) 24h before target time (same hour, previous day) \\
+    \texttt{k\_p\_hours\_stale} &  & lagged + oracle & h & Hours since the last genuinely observed k\_p, as of issue time (0 if observed exactly at issue time) \\
+    \texttt{k\_p\_is\_stale} &  & lagged + oracle & h & 1 if k\_p\_hours\_stale > 0 (forward-filled, not directly observed), else 0 \\
+    \texttt{Weather\_Temperature\_Celsius\_issue} &  & lagged + oracle & h & Air temperature at issue time t-h \\
+    \texttt{Weather\_Relative\_Humidity\_issue} &  & lagged + oracle & h & Relative humidity at issue time t-h \\
+    \texttt{Wind\_Speed\_issue} &  & lagged + oracle & h & Wind speed at issue time t-h \\
+    \texttt{Global\_Horizontal\_Radiation\_issue} &  & lagged + oracle & h & Global horizontal irradiance (GHI) at issue time t-h \\
+    \texttt{Diffuse\_Horizontal\_Radiation\_issue} &  & lagged + oracle & h & Diffuse horizontal irradiance (DHI) at issue time t-h \\
+    \addlinespace
+    \multicolumn{5}{l}{\textit{rolling statistics (9 features)}} \\
+    \texttt{Active\_Power\_roll3\_mean} &  & lagged + oracle & h (window ends at issue time t-h) & Mean of Active\_Power over the trailing 3 wall-clock hours ending at issue time \\
+    \texttt{Active\_Power\_roll3\_std} &  & lagged + oracle & h (window ends at issue time t-h) & Std of Active\_Power over the trailing 3 wall-clock hours ending at issue time \\
+    \texttt{Active\_Power\_roll24\_mean} &  & lagged + oracle & h (window ends at issue time t-h) & Mean of Active\_Power over the trailing 24 wall-clock hours ending at issue time \\
+    \texttt{Active\_Power\_roll24\_std} &  & lagged + oracle & h (window ends at issue time t-h) & Std of Active\_Power over the trailing 24 wall-clock hours ending at issue time \\
+    \texttt{k\_p\_last3obs\_mean} &  & lagged + oracle & h (last N valid obs at or before issue time) & Mean of k\_p over the last 3 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k\_p is undefined at night (see build.py's OBS\_ROLLING\_SPECS comment) \\
+    \texttt{k\_p\_last3obs\_std} &  & lagged + oracle & h (last N valid obs at or before issue time) & Std of k\_p over the last 3 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k\_p is undefined at night (see build.py's OBS\_ROLLING\_SPECS comment) \\
+    \texttt{k\_p\_last24obs\_mean} &  & lagged + oracle & h (last N valid obs at or before issue time) & Mean of k\_p over the last 24 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k\_p is undefined at night (see build.py's OBS\_ROLLING\_SPECS comment) \\
+    \texttt{k\_p\_last24obs\_std} &  & lagged + oracle & h (last N valid obs at or before issue time) & Std of k\_p over the last 24 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k\_p is undefined at night (see build.py's OBS\_ROLLING\_SPECS comment) \\
+    \texttt{k\_ghi\_last3obs\_std} &  & lagged + oracle & h (last N valid obs at or before issue time) & Std of k\_ghi over the last 3 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k\_ghi is undefined at night (see build.py's OBS\_ROLLING\_SPECS comment) \\
+    \addlinespace
+    \multicolumn{5}{l}{\textit{oracle weather (5 features)}} \\
+    \texttt{oracle\_Weather\_Temperature\_Celsius} &  & oracle only & 0 (AT TARGET TIME t - upper bound only) & Measured air temperature AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable \\
+    \texttt{oracle\_Weather\_Relative\_Humidity} &  & oracle only & 0 (AT TARGET TIME t - upper bound only) & Measured relative humidity AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable \\
+    \texttt{oracle\_Wind\_Speed} &  & oracle only & 0 (AT TARGET TIME t - upper bound only) & Measured wind speed AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable \\
+    \texttt{oracle\_Global\_Horizontal\_Radiation} &  & oracle only & 0 (AT TARGET TIME t - upper bound only) & Measured global horizontal irradiance (GHI) AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable \\
+    \texttt{oracle\_Diffuse\_Horizontal\_Radiation} &  & oracle only & 0 (AT TARGET TIME t - upper bound only) & Measured diffuse horizontal irradiance (DHI) AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable \\
+    \bottomrule
+  \end{tabular}
+\end{table*}

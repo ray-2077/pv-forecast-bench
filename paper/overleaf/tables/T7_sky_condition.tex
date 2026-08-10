@@ -1,0 +1,38 @@
+% T7_sky_condition.tex - RQ3 sky-condition results, booktabs fragment.
+% NOT compile-tested (no LaTeX toolchain in this dev
+% environment) - same caveat as the other paper/tables/*.tex
+% files and paper/figures/F7_pipeline.tex. Needs
+% \usepackage{booktabs}.
+% array11, h=3 only - see this script's module docstring
+% for why the full 9-cell version is a separate, unbuilt need.
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Sky-condition results (RQ3), array11, $h=3$: nRMSE and
+  skill\_vs\_convex by sky class (clear / partly cloudy / overcast) for
+  XGBoost, LSTM, and LSTM+residual, with class counts ($n$). nRMSE and
+  skill rank the classes differently: overcast has the worst nRMSE of
+  the three classes (15.4-16.2\%) but the second-highest skill (+0.38 to
+  +0.42, comparable to clear sky); partly cloudy has middling nRMSE
+  (11.7-11.8\%) but the lowest skill by a wide margin (+0.04 to +0.06).
+  array11, $h=3$ only; the same ranking holds in all 9 array x horizon
+  cells with zero exceptions (PROJECT\_CHECKPOINT.md Finding 12 Part B).}
+  \label{tab:T7}
+  \begin{tabular}{llrrr}
+    \toprule
+    Sky class & Model & $n$ & nRMSE (\%) & skill vs convex \\
+    \midrule
+    clear & XGBoost & 2225 & 5.44 & +0.431 \\
+     & LSTM &  & 5.48 & +0.428 \\
+     & LSTM+res &  & 5.97 & +0.376 \\
+    \addlinespace
+    partly cloudy & XGBoost & 1221 & 11.66 & +0.056 \\
+     & LSTM &  & 11.68 & +0.055 \\
+     & LSTM+res &  & 11.83 & +0.043 \\
+    \addlinespace
+    overcast & XGBoost & 239 & 16.18 & +0.388 \\
+     & LSTM &  & 15.40 & +0.417 \\
+     & LSTM+res &  & 15.85 & +0.400 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
