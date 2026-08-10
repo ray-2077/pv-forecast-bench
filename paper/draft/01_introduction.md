@@ -1,0 +1,133 @@
+# I. INTRODUCTION
+
+Short-term photovoltaic power forecasting is a productive research area.
+Hybrid architectures combining convolutional and recurrent layers, often
+with a further decomposition or gradient-boosted stage, appear regularly
+in the literature, and reported accuracy improvements are substantial.
+A statistical meta-analysis of 180 studies concludes that hybrid models
+consistently outperform alternatives and are likely to be the future of
+the field [CITE Nguyen Musgens 2021].
+
+We coded 27 papers on hybrid deep learning for photovoltaic power
+forecasting, published between 2022 and 2026, on eight dimensions of
+evaluation protocol. Coding was conservative: a field was recorded as
+not stated unless the paper explicitly stated it, and every judgement is
+supported by a verbatim quotation from the source.
+
+Twenty-six of the 27 report no skill score against any reference
+forecast. Seventeen compare only against the components of their own
+architecture. All 27 report point estimates with no measure of
+run-to-run variance. Twenty-two do not state whether their train-test
+split preserves temporal order. Seventeen do not state whether night
+hours, when power is near zero and trivially predicted, are included in
+the reported error.
+
+These are not incidental omissions. Each is a choice that changes the
+number a paper reports, and this paper measures by how much.
+
+## A. What This Paper Does
+
+We fix a leakage-controlled evaluation protocol, hold it constant, and
+vary individual evaluation choices while keeping the model, the data,
+and the training procedure identical. Five architectures are evaluated -
+gradient boosting, a recurrent network, a convolutional-recurrent
+network, and both recurrent variants with a gradient-boosted residual
+correction stage - across three module technologies, three forecast
+horizons, two feature regimes and five random seeds, on 900 recorded
+runs. The models are instruments for measuring protocol sensitivity
+rather than contributions in themselves.
+
+Four results follow.
+
+*The reference forecast changes both the size and the shape of reported
+skill.* On one array at a six-hour horizon, the same forecasts score
+0.652 against smart persistence and 0.194 against the optimal convex
+combination of climatology and persistence recommended by Yang et al.
+[CITE Yang 2020] - 70 percent of the apparent skill is attributable to
+the reference. More consequentially, skill against persistence rises
+monotonically with horizon, the pattern commonly reported as evidence
+that a method's advantage grows at longer lead times, while skill
+against the proper reference is non-monotonic and peaks at three hours.
+The trend is a property of the reference, not the model.
+
+*Night-hour inclusion deflates reported error by a predictable factor.*
+Including all 24 hours rather than daylight hours reduces normalised
+root-mean-square error by approximately 34 percent at this site, and
+the reduction is closed-form: if night errors are near zero, error
+scales as the square root of the daylight fraction. Observed and
+predicted ratios agree to within 0.3 percent at every array and horizon.
+The deflation is a property of latitude and season, not of the
+forecasting method. A skill score is nearly invariant to the same
+choice.
+
+*How residual training data are constructed can reverse a component's
+apparent sign.* Fitting a residual correction stage on validation
+residuals and evaluating on validation is in-sample evaluation of that
+stage. Doing so turns a component that costs 0.034 in skill into one
+that appears to contribute 0.334 - a reversal of sign and an order of
+magnitude in size, from a single choice that is not obviously wrong when
+described in a methods section.
+
+*Architecture contributes little relative to any of these.* Under a
+controlled protocol, gradient boosting and a recurrent network are
+statistically indistinguishable at one- and three-hour horizons; the
+convolutional front end shows no detectable benefit; and the residual
+correction stage reduces skill in all eighteen configurations tested.
+The largest difference we measure between any two architectures is 0.024
+in skill score. The gap between forecasting with lagged observations and
+forecasting with perfect knowledge of future weather is between 0.51 and
+0.72 - roughly twenty-five times larger.
+
+All findings hold in direction on a held-out year evaluated once, after
+every modelling and evaluation choice was frozen.
+
+## B. Contributions
+
+1. An open, leakage-controlled benchmark harness for short-term
+   photovoltaic power forecasting, with explicit alignment assertions,
+   documented data exclusions, and 900 machine-readable run records from
+   which every table and figure in this paper is regenerated. All
+   generated outputs were verified to reproduce byte-identically from a
+   clean state.
+
+2. A quantification of four protocol effects - reference forecast,
+   night-hour inclusion, residual-stage construction, and weather
+   information regime - measured with the model and data held constant,
+   and shown to exceed architectural differences by one to two orders of
+   magnitude.
+
+3. A component-wise decomposition of the convolutional-recurrent hybrid
+   with residual correction, with paired significance testing and seed
+   variance, finding no component that justifies its cost on this data.
+
+4. A coded survey of evaluation practice across 27 papers, with verbatim
+   supporting evidence, establishing that the choices measured here are
+   predominantly unreported in the literature they affect.
+
+## C. What This Paper Does Not Claim
+
+The evidence base is three co-located arrays at a single site, sharing
+one weather station and therefore not independent, evaluated over one
+held-out year at horizons of one to six hours with deterministic
+forecasts. We do not claim that any architecture is generally inferior,
+that the protocol effects measured here transfer unchanged to other
+sites or climates, or that the surveyed papers are incorrect - only that
+their reported numbers cannot be compared with one another, or with
+ours, without the protocol information most of them do not provide.
+
+Rigorous evaluation practice exists in solar forecasting and is
+documented in detail [CITE Yang 2020], [CITE Yang 2019 ROPES]. One paper
+in our sample of 27 follows it [CITE Mayer 2022]. The gap this paper
+addresses is not the absence of standards but their non-adoption in a
+specific and active subfield.
+
+## D. Paper Organisation
+
+Section II surveys evaluation practice in the hybrid forecasting
+literature and situates this work against the solar forecast
+verification and machine-learning leakage literatures. Section III
+describes the data and preprocessing. Section IV specifies the
+evaluation protocol before the models, in that order, because the
+protocol is the contribution. Section V gives experimental setup.
+Section VI reports results by research question. Sections VII and VIII
+give limitations and conclusions.
