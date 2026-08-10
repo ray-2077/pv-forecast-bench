@@ -46,7 +46,7 @@ and six hours. Against the convex combination of climatology and
 persistence, over the same rows and the same forecasts, it is 0.200,
 0.276 and 0.194.
 
-At six hours, two thirds of the apparent skill is attributable to the
+At six hours, 70 percent of the apparent skill is attributable to the
 reference. The pattern holds on all three arrays: 0.244 to 0.190, 0.510
 to 0.275 and 0.639 to 0.201 on site 12, and 0.166 to 0.122, 0.341 to
 0.183 and 0.386 to 0.132 on site 17.
@@ -95,7 +95,7 @@ about how much.
 
 Substituting measured weather at the target time for observations
 available at issue time raises skill against the convex reference from
-0.276 to 0.785 on site 11 at three hours. Across all arrays and
+0.276 to 0.783 on site 11 at three hours. Across all arrays and
 horizons the gap ranges from 0.51 to 0.72.
 
 This is not an achievable result and is not reported as one; it bounds
@@ -133,8 +133,10 @@ Diebold-Mariano test in the lagged regime; the largest statistic is
 are not independent, a sign test across cells is not admissible either.
 
 The claim supported is that the convolutional layer shows no detectable
-benefit and a consistent tendency toward harm, at approximately 20 to 30
-percent additional training time.
+benefit and a consistent tendency toward harm, at approximately 21
+percent additional mean training time, though the per-cell ratio varies
+widely, from 24 percent faster to 50 percent slower across the nine
+array-horizon cells.
 
 ### 3) Residual correction
 
@@ -153,12 +155,12 @@ and smallest at six.
 
 A diagnostic on the correction stage itself explains the residual
 penalty at long horizons. The correlation between the predicted and
-actual residual is 0.77 out of fold but 0.10 on validation at three
+actual residual is 0.76 out of fold but 0.10 on validation at three
 hours, and 0.79 against 0.04 at six. The corrector is not learning
 nothing; it is miscalibrated. Adding a correction p to a base with
 residual r changes mean squared error by -2 rho sigma_r sigma_p +
 sigma_p^2, so it helps only when sigma_p < 2 rho sigma_r. The observed
-ratio sigma_p / sigma_r is 0.34 to 0.38 across configurations against a
+ratio sigma_p / sigma_r is 0.33 to 0.38 across configurations against a
 break-even of 0.07 to 0.26 - the correction is applied at between 1.2
 and 4.7 times the magnitude its out-of-sample correlation justifies. The
 overconfidence is worst at six hours, which is where the penalty
@@ -169,8 +171,8 @@ survives fold correction.
 The complete proposed hybrid - convolutional front end, recurrent layer,
 and gradient-boosted residual correction - is worse than gradient
 boosting alone in all nine array-horizon cells on validation, by 0.027
-to 0.044 in skill against the convex reference, at approximately forty
-times the training cost.
+to 0.044 in skill against the convex reference, at approximately
+forty-six times the training cost.
 
 ## C. RQ3: Conditional Performance
 
@@ -240,7 +242,7 @@ horizon shape remains non-monotonic against the convex reference (0.210,
 persistence (0.266, 0.574, 0.701); residual correction reduces skill in
 all eighteen cells; the convolutional front end is worse than the plain
 recurrent model in all nine; and the oracle-to-lagged gap remains
-between 0.52 and 0.67.
+between 0.52 and 0.75.
 
 Two results change in magnitude and are reported as such.
 
@@ -252,11 +254,25 @@ disappears entirely. Combined with the marginal significance on the
 other two arrays, we do not consider a six-hour architectural advantage
 established by this study.
 
+Paired Diebold-Mariano tests on the test split support this. Across all
+nine array-horizon cells, no comparison between gradient boosting and
+either recurrent model reaches significance after Holm correction; at
+site 11 and six hours the statistic favours gradient boosting
+(HLN = +2.24, p = 0.127). The convolutional front end is likewise never
+significantly better or worse than the plain recurrent model. Two
+results do reach significance throughout: every model beats both
+reference forecasts in every cell, and the convex reference beats smart
+persistence in every cell, with the loss differential reaching 2.30 at
+site 11 and six hours. Residual correction is significantly worse than
+its base model in 16 of the 18 base-versus-residual comparisons.
+
 Second, absolute skill shifts by array in opposite directions: upward by
-0.013 to 0.039 on sites 11 and 12, and downward by 0.011 to 0.076 on
-site 17, consistently across every model and horizon. Because the
-direction is uniform across architectures, this is not an architectural
-effect.
+0.013 to 0.039 on sites 11 and 12, and downward by 0.011 to 0.076 in 14
+of the 15 model-horizon cells on site 17. The single exception is
+gradient boosting at six hours, which rises by 0.013. Because the
+direction is shared by four of the five architectures, including both
+recurrent bases and both residual variants, an architectural explanation
+is implausible, though not excluded by this evidence alone.
 
 We traced it. It is not the documented June 2015 outage, whose exclusion
 window is correctly sized - the one adjacent depressed day is shared
