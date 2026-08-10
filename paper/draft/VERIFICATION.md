@@ -32,13 +32,40 @@ Five discrepancies found across ~230 checked instances. None are large;
 all are reported because the task was to check every one, not to judge
 materiality in advance.
 
-| # | File | Claim | Stated | Actual | Severity |
-|---|---|---|---|---|---|
-| 1 | 03_data.md | Timestamp check, mean hour of max measured GHI | 11.98 | 11.97 | Trivial (0.01h) |
-| 2 | 03_data.md | Raw-CSV zero-output range | 48 to 97 percent | 48.88 to 96.71 percent (rounds to 49 to 97) | Trivial (rounding direction) |
-| 3 | 05_experimental_setup.md, 06_results.md | "roughly 13,000 usable training samples" | ~13,000 | ~25,830 (all hours) or ~11,210 (daylight only) - neither is close to 13,000 | Moderate - unsourced figure, wrong by a large margin either way |
-| 4 | 06_results.md (Section E) | Persistence weight range, sites 11+12 | "0.04 to 0.29" | 0.04 to 0.77 (both arrays' h=1 weight is 0.77, excluded from the stated range) | Moderate - range statement omits the largest values in its own set |
-| 5 | 06_results.md (Section E) | Oracle-to-lagged gap, test split | "between 0.52 and 0.75" | 0.522 to 0.7448, rounds to 0.52 to 0.74 | Trivial (0.01) - already corrected once from 0.67; the correction itself was one hundredth short |
+**RESOLVED 2026-08-10.** All five corrected in the draft files and
+re-checked against source below; all five now PASS. See the
+"RE-CHECK, 2026-08-10" row added to each affected table entry.
+
+| # | File | Claim | Stated | Actual | Severity | Status |
+|---|---|---|---|---|---|---|
+| 1 | 03_data.md | Timestamp check, mean hour of max measured GHI | 11.98 | 11.97 | Trivial (0.01h) | RESOLVED - now reads 11.97 |
+| 2 | 03_data.md | Raw-CSV zero-output range | 48 to 97 percent | 48.88 to 96.71 percent (rounds to 49 to 97) | Trivial (rounding direction) | RESOLVED - now reads 49 to 97 |
+| 3 | 05_experimental_setup.md, 06_results.md | "roughly 13,000 usable training samples" | ~13,000 | ~25,830 (all hours) or ~11,210 (daylight only) - neither is close to 13,000 | Moderate - unsourced figure, wrong by a large margin either way | RESOLVED - see note below on which of two legitimate figures was chosen and why |
+| 4 | 06_results.md (Section E) | Persistence weight range, sites 11+12 | "0.04 to 0.29" | 0.04 to 0.77 (both arrays' h=1 weight is 0.77, excluded from the stated range) | Moderate - range statement omits the largest values in its own set | RESOLVED - now reads "0.04 to 0.77," with the h=6 values (0.04, 0.05, vs site 17's 0.31) spelled out |
+| 5 | 06_results.md (Section E) | Oracle-to-lagged gap, test split | "between 0.52 and 0.75" | 0.522 to 0.7448, rounds to 0.52 to 0.74 | Trivial (0.01) - already corrected once from 0.67; the correction itself was one hundredth short | RESOLVED - now reads 0.74 |
+
+**Note on #3, for the record, so this is not "corrected" back later:**
+`paper/tables/T1_dataset.csv` reports `n_daylight_geometric_train` =
+11,414 for all three arrays (identical across arrays because it is
+derived purely from the shared weather station's solar elevation, not
+from any array-specific data - the same pattern as every other
+geometric daylight count in this project). That is a real, sourced
+number, and it rounds to "approximately 11,400" - NOT the same as the
+figure now in the draft.
+
+The draft deliberately uses a DIFFERENT, smaller number instead:
+11,209-11,218 (varies by horizon), the count of rows that actually
+survive `src.features.build.build_features()` on the training split -
+i.e. what a model trains on after NaN-dropping from lag/rolling feature
+construction, not the geometric upper bound before it. This was a
+considered choice, not an oversight: the sentence in both files exists
+to justify keeping the networks small ("the training set is small by
+deep-learning standards"), which is a claim about actual model input
+size, not about how many daylight hours exist geometrically before
+feature construction discards some of them. Do not "fix" this back to
+11,400 to match T1_dataset.csv - the two numbers measure different
+things, T1's is not wrong, and the smaller figure is the one this
+sentence needs.
 
 ---
 
@@ -125,10 +152,10 @@ materiality in advance.
 | 6 | "site 7 (First Solar, cadmium telluride, 7.0 kW)" | Same | First Solar, CdTe, 7.0 | PASS |
 | 7 | "99.99 percent coverage and 0.00 percent missing values" (array07, 2014) | `results/data_audit.csv`, array07_CdTe 2014 | coverage_pct=99.99, nan_pct_Active_Power=0.0 | PASS |
 | 8 | "48.41 percent of that year's daylight hours record exactly zero output" | `results/dead_period_audit.csv`, array07 2014 | pct_zero_power_daylight=48.41 | PASS |
-| 9 | "between 48 and 97 percent of clearly daylit records (GHI above 200 W/m2) are exactly zero" | `scripts/audit_dead_periods.py` PART 1, live rerun, array07 raw CSV monthly, Feb-Oct 2014 | Range 48.88% (Feb) to 96.71% (June) | **FAIL** - rounds to 49 to 97, not 48 to 97. Minor (0.88 off the floor). See failure #2. |
+| 9 | "between 49 and 97 percent of clearly daylit records (GHI above 200 W/m2) are exactly zero" | `scripts/audit_dead_periods.py` PART 1, live rerun, array07 raw CSV monthly, Feb-Oct 2014 | Range 48.88% (Feb) to 96.71% (June) | PASS - RE-CHECK 2026-08-10, corrected from "48 to 97"; 48.88 rounds to 49 |
 | 10 | "A further 48-day near-zero period occurs in November-December 2015" | `results/dead_period_audit.csv`, array07 2015 | longest_below_1pct_run_days=48, 2015-11-14 to 2015-12-31 | PASS |
 | 11 | "A second audit, testing for output below 1 percent of nameplate" | `results/dead_period_audit.csv`, column `pct_below_1pct_nameplate` | Confirmed column exists and is applied | PASS |
-| 12 | "mean hour of maximum measured global horizontal irradiance is 11.98, against 12.00" | `scripts/diagnose_clearsky_bias.py`, live rerun (array11, 86 clear days) | mean_ghi_hour=11.97, mean_cs_hour=12.00 | **FAIL** - 11.97, not 11.98. Trivial (0.01h = ~0.6 min). See failure #1. Also note: stated difference "agreeing to within one minute" is 0.03h=1.8min on rerun (1.2min on the stated 11.98 figure) - neither is strictly within 1 minute, though both are close. |
+| 12 | "mean hour of maximum measured global horizontal irradiance is 11.97, against 12.00" | `scripts/diagnose_clearsky_bias.py`, live rerun (array11, 86 clear days) | mean_ghi_hour=11.97, mean_cs_hour=12.00 | PASS - RE-CHECK 2026-08-10, corrected from "11.98". Note still open: "agreeing to within one minute" is 0.03h=1.8min on this figure - the qualitative claim is not strictly precise either way, not part of this round's correction request |
 | 13 | "Fitted gains are 0.914, 0.907 and 1.004 for sites 11, 12 and 17" | Live rerun via `scripts/diagnose_array17_test_shift.py`-equivalent gain fit (this session), train-only fit | 0.9139, 0.9074, 1.0042 | PASS |
 | 14 | "Data span 2009 to 2015... 61,344 rows per array" | `data/processed/array11_polySi_hourly.parquet`, row count | 61,344 (confirmed in prior session per `paper/WRITING_BRIEF.md` Section 5 item 1; consistent with 7 years x 365 days x 24h + 1 leap day) | PASS |
 | 15 | "training 2011-2013, validation 2014, test 2015" | `src/data/splits.py`, TRAIN_YEARS/VAL_YEARS/TEST_YEARS | Confirmed | PASS |
@@ -165,7 +192,7 @@ materiality in advance.
 |---|---|---|---|---|
 | 1 | "NVIDIA GeForce RTX 3070 Ti Laptop GPU (8 GB)" | Live `nvidia-smi` this session | "NVIDIA GeForce RTX 3070...", 8192 MiB | PASS |
 | 2 | "Python 3.12.13, numpy 2.5.1, pandas 3.0.5, scikit-learn 1.9.0, xgboost 3.3.0, PyTorch 2.11.0+cu128, pvlib 0.15.2, statsmodels 0.14.6" | Live `python -c "import ...; print(__version__)"` in the pvfc env, this session | All eight versions match exactly | PASS |
-| 3 | "roughly 13,000 usable training samples with 37 features" | Live: `build_features(train, horizon, 'lagged')` shape, all 3 arrays x 3 horizons | Total rows: 25,826-25,831. Daylight-only rows within that set: 11,209-11,218. Feature count 37 confirmed. | **FAIL** - neither the full training set (~25,830, roughly 2x the stated figure) nor the daylight-only subset (~11,210, about 14% under) is "roughly 13,000." No occurrence of "13,000" found anywhere else in the repo to trace the figure's origin. See failure #3. |
+| 3 | "roughly 11,200 daylight training rows per array after feature construction (11,209 to 11,218 depending on horizon) with 37 features" | Live: `build_features(train, horizon, 'lagged')` shape, all 3 arrays x 3 horizons | Daylight rows within the constructed feature matrix: 11,209 (h1), 11,210 (h3), 11,218 (h6) | PASS - RE-CHECK 2026-08-10, corrected from "roughly 13,000 usable training samples". Deliberately NOT `paper/tables/T1_dataset.csv`'s geometric daylight count (11,414, "~11,400") - see the SUMMARY note above for why the smaller, post-feature-construction figure is the correct one for this sentence's purpose. |
 | 4 | "500 estimators, maximum depth 6, learning rate 0.05, subsample 0.8, column subsample 0.8, early stopping after 50 rounds" (XGBoost) | Live: `XGBForecaster(seed=0)` attribute values | 500, 6, 0.05, 0.8, 0.8, 50 | PASS |
 | 5 | "single layer of 64 hidden units, sequence length 24, batch size 256, learning rate 10-3... maximum of 100 epochs... patience 10" (LSTM/CNN-LSTM) | Live: `LSTMForecaster(seed=0)` attributes | 64, 1, 24, 256, 0.001, 100, 10 | PASS |
 | 6 | "1-D convolutional front end with 32 filters and kernel size 3" | Live: `CNNLSTMForecaster(seed=0)` attributes | n_filters=32, kernel_size=3 | PASS |
@@ -222,10 +249,10 @@ with a pointer. New, results-specific figures are derived fresh.
 | 35 | "0.55 s... 10.11 s... 12.23 s... 22.7 s... 25.0 s" | Live: mean fit_seconds per model, all 45 runs each | 0.5451, 10.1076, 12.2290, 22.7336, 25.0209 | PASS |
 | 36 | "approximately one eighteenth of the training cost" | lstm/xgboost ratio | 18.54 | PASS |
 | 37 | "one fortieth to one forty-fifth of the cost" | lstm_residual/xgboost=41.71; cnn_lstm_residual/xgboost=45.90 | 41.71, 45.90 | PASS (close approximation of 41.7-45.9) |
-| 38 | "approximately 13,000 training samples" (D, repeat) | Same as 05_experimental_setup item 3 | ~25,830 or ~11,210, neither ~13,000 | **FAIL** - same unsourced figure as 05_experimental_setup.md; both files are internally consistent with each other but both diverge from the underlying data. See failure #3. |
+| 38 | "approximately 11,200 daylight training rows per array after feature construction (11,209 to 11,218 depending on horizon)" (D, repeat) | Same as 05_experimental_setup item 3 | 11,209-11,218 | PASS - RE-CHECK 2026-08-10, corrected from "approximately 13,000 training samples"; now matches 05_experimental_setup.md's corrected wording exactly |
 | 39 | "450 runs comprising five models, two regimes, three arrays, three horizons and five seeds" | File count, `results/test/*.json` | 450; 5x2x3x3x5=450 | PASS |
 | 40 | "0.210, 0.316, 0.232... 0.266, 0.574, 0.701" (test, site 11) | `results/seed_sweep_summary_lagged_test.csv`, xgboost/array11 | Exact match | PASS |
-| 41 | "oracle-to-lagged gap remains between 0.52 and 0.75" | `seed_sweep_summary_oracle_test.csv` vs `seed_sweep_summary_lagged_test.csv`, all 45 cells | min 0.5217, max 0.7448 | **FAIL** - rounds to 0.52 to 0.74, not 0.75. See failure #5. |
+| 41 | "oracle-to-lagged gap remains between 0.52 and 0.74" | `seed_sweep_summary_oracle_test.csv` vs `seed_sweep_summary_lagged_test.csv`, all 45 cells | min 0.5217, max 0.7448 | PASS - RE-CHECK 2026-08-10, corrected from "0.75" (itself a correction from an original "0.67") |
 | 42 | "0.016, 0.015 and 0.024... 0.007, 0.009 and -0.000" (val vs test, h=6 lead) | `seed_sweep_summary_lagged.csv` and `_test.csv`, lstm-xgboost h=6 | val 0.0157/0.0149/0.0239; test 0.0070/0.0091/-0.0004 | PASS |
 | 43 | "18 of 18 non-significant... HLN = 2.24, p = 0.127" | `results/table6_dm_lagged_test.csv`, xgboost vs lstm/cnn_lstm, all 9 cells; array11 h6 xgboost-lstm | 18/18 ns; hln=2.2372→2.24 favoring lstm, p_holm=0.1267→0.127 | PASS (already corrected this session - direction) |
 | 44 | "convolutional front end... never significantly different... in any cell" | Same file, lstm vs cnn_lstm, 9 cells | 9/9 ns | PASS |
@@ -236,7 +263,7 @@ with a pointer. New, results-specific figures are derived fresh.
 | 49 | "upward by 0.013 to 0.039 on sites 11 and 12" | `seed_sweep_summary_lagged.csv` vs `_test.csv`, all 5 models x 3 horizons x 2 arrays (30 cells) | min 0.0128 (xgboost array12 h1), max 0.0394 (xgboost array11 h3) | PASS |
 | 50 | "downward by 0.011 to 0.076 in 14 of the 15... single exception... gradient boosting at six hours, which rises by 0.013" | Same, array17, 15 cells | 14/15 negative, range 0.0109-0.0763; exception xgboost h6 = +0.0134 | PASS |
 | 51 | "convex reference... error fell by 0.042 to 0.062 on site 17 against 0.010 to 0.022 on the other two arrays" | `scripts/diagnose_array17_reference_denominator.py`, live rerun this session (prior session) | array17: 0.0418-0.0619; array11+array12: 0.0098-0.0220 | PASS |
-| 52 | "Site 17's convex reference weights persistence far more heavily (0.31 to 0.83, against 0.04 to 0.29)" | `results/reference_comparison.csv`, convex_weight, all 3 horizons, all 3 arrays | Site17: 0.31-0.83 (matches). Sites 11+12 combined across all 3 horizons: 0.04-0.77, not 0.04-0.29 | **FAIL** - the stated "0.04 to 0.29" excludes both arrays' h=1 weight (0.77 each), the largest values in the set it purports to range over. See failure #4. |
+| 52 | "Site 17's convex reference weights persistence far more heavily (0.31 to 0.83, against 0.04 to 0.77, with sites 11 and 12 falling to 0.04 and 0.05 at six hours where site 17 remains at 0.31)" | `results/reference_comparison.csv`, convex_weight, all 3 horizons, all 3 arrays | Site17: 0.31/0.50/0.83 (h6/h3/h1). Array11 h6=0.04, array12 h6=0.05. Sites 11+12 combined range across all 3 horizons: 0.04-0.77 | PASS - RE-CHECK 2026-08-10, corrected from "0.04 to 0.29"; range now correctly spans both arrays' h=1 weight (0.77), and the h=6 values that motivate the sentence are stated explicitly rather than left inside an incomplete range |
 
 ## 07_limitations.md
 
@@ -275,11 +302,13 @@ Every number checked in more than one file was found to agree across
 occurrences, with two exceptions - both already noted above, both
 consistent WITH EACH OTHER but wrong relative to source:
 
-- **"roughly 13,000 usable training samples"** appears in
+- **"roughly 13,000 usable training samples"** appeared in
   05_experimental_setup.md and 06_results.md, worded identically in
-  substance in both places. Internally consistent; both diverge from
-  the actual training-set sizes (~25,830 all-hours or ~11,210
-  daylight-only).
+  substance in both places. Internally consistent; both diverged from
+  the actual training-set sizes. RESOLVED 2026-08-10: both now read
+  "approximately 11,200 daylight training rows per array after feature
+  construction (11,209 to 11,218 depending on horizon)," worded
+  identically in both files again.
 - **"0.024"** (largest architecture difference), **"0.51 to 0.72"**
   (val oracle gap), **"70 percent"**, **"0.034 in skill... 0.334"**,
   **"900 recorded/run records"**, **"27 papers"** and its four
@@ -295,8 +324,11 @@ consistent WITH EACH OTHER but wrong relative to source:
   and is confirmed correct in the current file.
 - **The two test-split "corrected" figures re-verified in this pass**
   (0.783 for the oracle example in 06_results.md Section A.4, and 0.76
-  for the out-of-fold correlation in Section B.3) both check out exactly
-  against source. **The oracle-to-lagged test-split gap ("0.52 and
-  0.75")** does not - see failure #5. This was corrected once already
-  (from 0.67) in a prior turn; the correction itself was one hundredth
-  short of the true value (0.7448, which rounds to 0.74).
+  for the out-of-fold correlation in Section B.3) both checked out
+  exactly against source. **The oracle-to-lagged test-split gap** did
+  not - it had already been corrected once (from 0.67 to 0.75) in a
+  prior turn, and that correction itself was one hundredth short of the
+  true value (0.7448, which rounds to 0.74). RESOLVED 2026-08-10: now
+  reads 0.74, re-checked directly against
+  `results/seed_sweep_summary_oracle_test.csv` and
+  `results/seed_sweep_summary_lagged_test.csv`.
