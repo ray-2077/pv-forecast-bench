@@ -34,8 +34,8 @@ knowledge of future weather. All findings hold in direction on a
 held-out year evaluated once. The harness, all run records, and the
 coded survey are released.
 
-[VERIFY: IEEE abstracts are typically 150-250 words. This is
-approximately 290. Trim at assembly if the venue requires it, but do not
+[VERIFY: IEEE abstracts are typically 150-250 words. This is 304 words.
+Trim at assembly if the venue requires it, but do not
 trim the survey counts or the three protocol effects - those are the
 paper.]
 
