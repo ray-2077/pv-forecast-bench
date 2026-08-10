@@ -256,15 +256,20 @@ established by this study.
 
 Paired Diebold-Mariano tests on the test split support this. Across all
 nine array-horizon cells, no comparison between gradient boosting and
-either recurrent model reaches significance after Holm correction; at
-site 11 and six hours the statistic favours gradient boosting
-(HLN = +2.24, p = 0.127). The convolutional front end is likewise never
-significantly better or worse than the plain recurrent model. Two
-results do reach significance throughout: every model beats both
-reference forecasts in every cell, and the convex reference beats smart
-persistence in every cell, with the loss differential reaching 2.30 at
-site 11 and six hours. Residual correction is significantly worse than
-its base model in 16 of the 18 base-versus-residual comparisons.
+either recurrent model reaches significance after Holm correction (18 of
+18 non-significant); at site 11 and six hours the statistic marginally
+favours the recurrent model (HLN = 2.24, p = 0.127). The convolutional
+front end is likewise never significantly different from the plain
+recurrent model in any cell. Two results hold throughout: every model
+beats smart persistence in every cell, and beats the convex reference in
+88 of 90 comparisons, the two exceptions being the residual-corrected
+variants at site 17 and one hour, which remain directionally better but
+do not reach significance. The convex reference beats smart persistence
+in all nine cells, with a loss differential reaching 2.30 kW-squared at
+site 11 and six hours (HLN = 22.58). Residual correction is
+significantly worse than its base model in 12 of the 18 base-versus-
+residual comparisons: 4 of 9 with a recurrent base and 8 of 9 with a
+convolutional-recurrent base.
 
 Second, absolute skill shifts by array in opposite directions: upward by
 0.013 to 0.039 on sites 11 and 12, and downward by 0.011 to 0.076 in 14
