@@ -26,9 +26,9 @@ against smart persistence over the same rows moves from 0.252 to 0.261,
 The magnitude of the error reduction is not an empirical accident. If
 night-time errors are approximately zero, then
 
-  RMSE\_all = RMSE\_daylight x sqrt(N\_daylight / N\_all)
+  $RMSE_{all} = RMSE_{daylight} \times \sqrt{N_{daylight} / N_{all}}$
 
-At six hours, N\_daylight = 3756 and N\_all = 8694, giving a predicted
+At six hours, $N_{daylight} = 3756$ and $N_{all} = 8694$, giving a predicted
 ratio of 0.657 against an observed 0.658. Agreement is within 0.3
 percent at every array and horizon.
 
@@ -71,7 +71,7 @@ not of the model. Fig. \ref{fig:F1} shows this for all three arrays.
   and peaks at 3 h. The apparent horizon trend is a property of the
   reference, not the model. Error bars show one standard deviation across
   five seeds and are smaller than the markers. Only XGBoost is shown; the
-  other four models follow the same pattern (Table 3).}
+  other four models follow the same pattern (Table \ref{tab:T3}).}
   \label{fig:F1}
 \end{figure*}
 
@@ -127,12 +127,12 @@ between any two architectures under identical conditions.
   weather AT TARGET TIME, a perfect-forecast UPPER BOUND, never an
   achievable result), array11, three horizons. Within either regime,
   skill varies by at most 0.03-0.05 across the five models at a given
-  horizon (Table 3). Switching from lagged to oracle features moves
+  horizon (Table \ref{tab:T3}). Switching from lagged to oracle features moves
   skill by 0.51-0.63 for every model and horizon shown here, and by
   0.51-0.72 across all three arrays and 45 model x array x horizon cells
-  (Table 4 row 5). Perfect weather knowledge is worth roughly an order of
+  (Table \ref{tab:T4} row 5). Perfect weather knowledge is worth roughly an order of
   magnitude more than any architecture choice tested here. array11 only;
-  the same lagged-vs-oracle gap holds on array12 and array17 (Table 3).}
+  the same lagged-vs-oracle gap holds on array12 and array17 (Table \ref{tab:T3}).}
   \label{fig:F2}
 \end{figure*}
 
@@ -213,10 +213,10 @@ A diagnostic on the correction stage itself explains the residual
 penalty at long horizons. The correlation between the predicted and
 actual residual is 0.76 out of fold but 0.10 on validation at three
 hours, and 0.79 against 0.04 at six. The corrector is not learning
-nothing; it is miscalibrated. Adding a correction p to a base with
-residual r changes mean squared error by -2 rho sigma\_r sigma\_p +
-sigma\_p^2, so it helps only when sigma\_p < 2 rho sigma\_r. The observed
-ratio sigma\_p / sigma\_r is 0.33 to 0.38 across configurations against a
+nothing; it is miscalibrated. Adding a correction $p$ to a base with
+residual $r$ changes mean squared error by $-2\rho\sigma_r\sigma_p +
+\sigma_p^2$, so it helps only when $\sigma_p < 2\rho\sigma_r$. The observed
+ratio $\sigma_p / \sigma_r$ is 0.33 to 0.38 across configurations against a
 break-even of 0.07 to 0.26 - the correction is applied at between 1.2
 and 4.7 times the magnitude its out-of-sample correlation justifies. The
 overconfidence is worst at six hours, which is where the penalty
@@ -233,8 +233,8 @@ survives fold correction.
   (corrected), and its standard deviation widens from 0.516 kW to 0.538
   kW. This matches the overconfidence mechanism identified in Finding 11:
   at h=6, the residual corrector's predicted-to-actual correlation on
-  validation is only rho\_val=+0.036 (versus +0.79 out-of-fold, the split
-  it was fit on), and its correction is sized sigma\_p/sigma\_r = 0.34,
+  validation is only $\rho_{val}=+0.036$ (versus +0.79 out-of-fold, the split
+  it was fit on), and its correction is sized $\sigma_p/\sigma_r = 0.34$,
   roughly 4.7x the break-even ratio of 0.072 a correction needs to help.
   It is not a well-calibrated correction lightly attenuated - it is a
   correction sized for a relationship that does not transfer to
@@ -280,7 +280,7 @@ cloudy error is 11.7 percent with skill 0.035.
   hour, so the convex reference already tracks them well; partly-cloudy
   skies produce irradiance ramps that lagged features cannot anticipate.
   array11, h=3 only; the same ranking holds in all 9 array x horizon
-  cells with zero exceptions (Table 7).}
+  cells with zero exceptions (Table \ref{tab:T7}).}
   \label{fig:F3}
 \end{figure*}
 
@@ -329,13 +329,13 @@ the cost. Fig. \ref{fig:F6} plots skill against fitting time.
   array/horizon cell, 5 seeds. XGBoost reaches skill 0.195 in 0.55 s;
   LSTM reaches a higher 0.210 in 10.11 s, roughly 18x the compute for a
   gain of +0.015 that is not Diebold-Mariano significant on this array
-  (Table 6: array11 h=6, p\_holm=0.073). The two residual variants cost
+  (Table \ref{tab:T6}: array11 h=6, p\_holm=0.073). The two residual variants cost
   more compute still (22.7 s, 25.0 s) for lower skill than their own base
   models. array11, h=6, lagged only. Mean fit\_seconds is a global
   average, so the compute gap is the same at every array and horizon;
   the skill gap it buys is largest here (h=6) and smaller still at h=1
   and h=3, where XGBoost and LSTM are statistically indistinguishable
-  everywhere (Table 6).}
+  everywhere (Table \ref{tab:T6}).}
   \label{fig:F6}
 \end{figure}
 

@@ -104,11 +104,11 @@ def write_latex(rows, path):
         "This is a reproducibility statistic, not a significance test - "
         "seed spread measures whether a result recurs on retraining, not "
         "whether one model forecasts better than another on this "
-        "evaluation sample (Table 6). The largest seed spread observed is "
+        "evaluation sample (Table \\ref{tab:T6}). The largest seed spread observed is "
         "0.017 (CNN-LSTM+res, array17, $h=6$), of the same order as the "
         "largest architecture-to-architecture difference measured "
         "anywhere in this study (0.024, LSTM vs. XGBoost, array17, "
-        "$h=6$, Table 6).}"
+        "$h=6$, Table \\ref{tab:T6}).}"
     )
     lines.append("  \\label{tab:T3}")
     lines.append("  \\begin{tabular}{ll rrrrr}")
