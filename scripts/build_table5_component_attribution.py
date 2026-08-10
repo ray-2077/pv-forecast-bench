@@ -146,6 +146,30 @@ def format_dm_cell(dm_row):
     return f"{better} better, hln={hln_stat:+.2f}, p_holm={p_holm:.4f} ({sig})"
 
 
+# Short tokens for the LaTeX table's DM columns - the full "X better,
+# hln=+1.23, p_holm=0.0456 (sig)" string used in the console printout and
+# CSV is too wide for a two-column IEEE page across 3 columns x 9 rows.
+# The full HLN/p_holm numbers are not lost - Table 6 carries all of them
+# (plus a 4th comparison this table omits) - so the compact cell here is
+# just the winner with a significance marker, not a second source of the
+# same numbers.
+SHORT_LABELS = {
+    "xgboost": "XGB",
+    "lstm": "LSTM",
+    "cnn_lstm": "CNN",
+    "lstm_residual": "L+res",
+    "cnn_lstm_residual": "CL+res",
+}
+
+
+def format_dm_cell_compact(dm_row):
+    if dm_row is None:
+        return "n/a"
+    p_holm = float(dm_row["p_holm"])
+    better = SHORT_LABELS.get(dm_row["better_model"], dm_row["better_model"])
+    return f"{better}*" if p_holm < ALPHA else better
+
+
 def build_rows(suffix):
     skill = load_skill_summary(suffix)
     dm = load_dm_table(suffix)
@@ -195,31 +219,47 @@ def write_latex(rows, dm, path):
     lines.append("% environment) - same caveat as paper/tables/T1_dataset.tex,")
     lines.append("% T2_features.tex, and paper/figures/F7_pipeline.tex. Needs")
     lines.append("% \\usepackage{booktabs}.")
-    lines.append("% Wide (5 models x mean+-std, plus 3 DM annotation columns):")
-    lines.append("% written as table* (spans both IEEE columns); \\scriptsize")
-    lines.append("% used throughout and the DM columns still may need")
-    lines.append("% shortened annotation text to fit - not tuned without a")
-    lines.append("% real render.")
+    lines.append("% Wide (5 models x mean+-std, plus 3 DM columns): written as")
+    lines.append("% table* (spans both IEEE columns), \\scriptsize. DM columns")
+    lines.append("% carry only a winner + significance marker (full HLN/p_holm")
+    lines.append("% is Table 6) - compacted from the full annotation string,")
+    lines.append("% which was this table's page-width overflow source.")
     lines.append("\\begin{table*}[t]")
     lines.append("  \\centering")
     lines.append("  \\scriptsize")
     lines.append(
         "  \\caption{Component attribution (RQ2): skill\\_vs\\_convex by "
-        "model, array, and horizon (mean $\\pm$ 1 seed std, 5 seeds), with "
-        "Diebold-Mariano significance for the three comparisons that "
-        "matter. See paper/tables/CAPTIONS.md for the full caption.}"
+        "model (XGBoost, LSTM, CNN-LSTM, LSTM+residual, "
+        "CNN-LSTM+residual), array, and horizon - mean $\\pm$ 1 seed "
+        "standard deviation across 5 seeds - with a Diebold-Mariano "
+        "significance marker for the three comparisons RQ2's Results "
+        "turns on: LSTM vs. XGBoost, CNN-LSTM vs. LSTM, and "
+        "LSTM+residual vs. LSTM. Each DM column names the winning model; "
+        "an asterisk marks Holm-Bonferroni significance at $\\alpha=0.05$ "
+        "(HAC variance, HLN small-sample correction, single seed=0). "
+        "Full HLN statistics and Holm-adjusted p-values for these three "
+        "comparisons, plus a fourth (CNN-LSTM+residual vs. CNN-LSTM) "
+        "this table omits, are in Table \\ref{tab:T6}. At $h=1$ and "
+        "$h=3$, XGBoost and LSTM are statistically indistinguishable on "
+        "every array ($p_{holm}=1.0$ throughout); at $h=6$, LSTM's edge "
+        "over XGBoost is significant on only one of three co-located "
+        "arrays (array17). The residual stage is significant in the "
+        "direction of the plain base model in 5 of 9 lstm\\_residual "
+        "cells, with no clean horizon-based split - array12 $h=1$ is "
+        "significant, array12 $h=6$ is not, despite being the longer "
+        "horizon.}"
     )
-    lines.append("  \\label{tab:component-attribution}")
+    lines.append("  \\label{tab:T5}")
     lines.append("  \\begin{tabular}{ll rrrrr lll}")
     lines.append("    \\toprule")
     lines.append(
         "    & & \\multicolumn{5}{c}{skill\\_vs\\_convex, mean $\\pm$ std (5 seeds)} & "
-        "\\multicolumn{3}{c}{Diebold-Mariano (p\\_holm $<$ 0.05 = sig)} \\\\"
+        "\\multicolumn{3}{c}{Better (DM sig., Table \\ref{tab:T6})} \\\\"
     )
     lines.append("    \\cmidrule(lr){3-7} \\cmidrule(lr){8-10}")
     lines.append(
         "    Array & $h$ & XGBoost & LSTM & CNN-LSTM & LSTM+res & CNN-LSTM+res & "
-        "LSTM vs XGB & CNN-LSTM vs LSTM & LSTM+res vs LSTM \\\\"
+        "vs XGB & vs LSTM & +res vs LSTM \\\\"
     )
     lines.append("    \\midrule")
 
@@ -231,7 +271,7 @@ def write_latex(rows, dm, path):
             cells.append(f"{mean:+.3f}$\\pm${std:.3f}")
         for label, m1, m2 in DM_COMPARISONS:
             dm_row = dm.get((row["array"], row["horizon"], m1, m2))
-            cells.append(tex_escape(format_dm_cell(dm_row)))
+            cells.append(tex_escape(format_dm_cell_compact(dm_row)))
         lines.append("    " + " & ".join(cells) + " \\\\")
 
     lines.append("    \\bottomrule")

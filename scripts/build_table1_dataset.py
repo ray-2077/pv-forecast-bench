@@ -290,47 +290,71 @@ def write_latex(rows, path):
     lines.append("% NOT compile-tested (no LaTeX toolchain in this dev")
     lines.append("% environment) - verify before camera-ready, same caveat")
     lines.append("% as paper/figures/F7_pipeline.tex. Needs \\usepackage{booktabs}.")
-    lines.append("% Wide (15 data columns): written as table* to span both")
-    lines.append("% IEEE columns; \\scriptsize likely still needed to fit -")
-    lines.append("% not tuned here without a real render.")
+    lines.append("% Columns reduced from 16 to 10 to fit IEEE two-column width")
+    lines.append("% (paper/overleaf compile-fix pass): dropped Site (identical to")
+    lines.append("% the Array column - array11/site 11 etc.), Tilt/Azim and")
+    lines.append("% Installed (both constant or near-constant across arrays,")
+    lines.append("% moved to the caption), and the three Daylight-geometric")
+    lines.append("% columns (identical across all arrays by construction, since")
+    lines.append("% they depend only on shared solar geometry - moved to the")
+    lines.append("% caption as fixed numbers). The Evaluable columns are kept in")
+    lines.append("% full: they are the one count that varies by array")
+    lines.append("% (array17's documented outage).")
     lines.append("\\begin{table*}[t]")
     lines.append("  \\centering")
     lines.append("  \\scriptsize")
-    lines.append("  \\caption{Dataset summary. See paper/tables/CAPTIONS.md for the full caption.}")
-    lines.append("  \\label{tab:dataset}")
-    lines.append("  \\begin{tabular}{lllrrrl rrrr rrr rr}")
+    lines.append(
+        "  \\caption{Dataset summary: the three co-located DKASC arrays used "
+        "in evaluation (array11 poly-Si, array12 mono-Si, array17 HIT - one "
+        "shared weather station, not three independent sites) plus array07 "
+        "(CdTe), excluded. All arrays are fixed-mount at 20$^\\circ$ tilt / "
+        "0$^\\circ$ azimuth; only array17's install date is documented "
+        "(2010-03-11), which is why the training window in this paper "
+        "starts at 2011. Row counts by chronological split (train "
+        "2011-2013, validation 2014, test 2015 - touched once, at the "
+        "end), plus outage-adjusted evaluable hour counts for validation "
+        "and test: array17's documented 2015-06-05 to 2015-06-09 outage "
+        "reduces its evaluable test count to 3757 daylight hours, versus "
+        "3802 for array11 and array12, which are unaffected. Geometric "
+        "daylight-hour counts (solar elevation $>10^\\circ$) are identical "
+        "across all arrays by construction - 11,414 (train), 3,799 (val), "
+        "3,802 (test) - and are omitted from the table on that basis. "
+        "array07 is retained as an excluded row, not deleted, with its "
+        "row/evaluable columns reported as not applicable rather than "
+        "measured (no run in this project fits or scores a model against "
+        "array07's data): a completeness audit "
+        "(results/data\\_audit.csv) passed its 2014 data at 99.99\\% "
+        "coverage and 0.00\\% NaN in Active\\_Power, while a dead-period "
+        "audit (results/dead\\_period\\_audit.csv) found 48.41\\% of that "
+        "same year's daylight hours at exactly zero power (status FAIL), "
+        "plus a 48-day near-zero run inside the test year - a "
+        "completeness-only audit is structurally blind to a healthy "
+        "sensor reporting a dead array (Finding 6).}"
+    )
+    lines.append("  \\label{tab:T1}")
+    lines.append("  \\begin{tabular}{llll rrrr rr}")
     lines.append("    \\toprule")
     lines.append(
-        "    & \\multicolumn{6}{c}{Array identity} & "
-        "\\multicolumn{4}{c}{Rows (total / train / val / test)} & "
-        "\\multicolumn{3}{c}{Daylight, geometric (train / val / test)} & "
+        "    & & & & \\multicolumn{4}{c}{Rows (total / train / val / test)} & "
         "\\multicolumn{2}{c}{Evaluable (val / test)} \\\\"
     )
+    lines.append("    \\cmidrule(lr){5-8} \\cmidrule(lr){9-10}")
     lines.append(
-        "    \\cmidrule(lr){2-7} \\cmidrule(lr){8-11} \\cmidrule(lr){12-14} \\cmidrule(lr){15-16}"
-    )
-    lines.append(
-        "    Array & Site & Manuf. & Tech. & kW & Tilt/Azim. & Installed & "
-        "Total & Train & Val & Test & Train & Val & Test & Val & Test \\\\"
+        "    Array & Manuf. & Tech. & kW & "
+        "Total & Train & Val & Test & Val & Test \\\\"
     )
     lines.append("    \\midrule")
 
     def row_cells(r, dagger):
         return [
             tex_escape(r["array"]) + dagger,
-            tex_escape(r["dkasc_site"]),
             tex_escape(r["manufacturer"]),
             tex_escape(r["technology"]),
             f"{r['nameplate_kw']:.1f}",
-            f"{r['tilt_deg']:.0f}$^\\circ$/{r['azimuth_deg']:.0f}$^\\circ$",
-            tex_escape(r["install_date"]),
             fmt_count(r["n_rows_total"]),
             fmt_count(r["n_rows_train"]),
             fmt_count(r["n_rows_val"]),
             fmt_count(r["n_rows_test"]),
-            fmt_count(r["n_daylight_geometric_train"]),
-            fmt_count(r["n_daylight_geometric_val"]),
-            fmt_count(r["n_daylight_geometric_test"]),
             fmt_count(r["n_evaluable_val"]),
             fmt_count(r["n_evaluable_test"]),
         ]
@@ -343,13 +367,6 @@ def write_latex(rows, path):
 
     lines.append("    \\bottomrule")
     lines.append("  \\end{tabular}")
-    lines.append("")
-    for r in excluded_rows:
-        lines.append(
-            f"  \\vspace{{2pt}}\\par\\noindent\\footnotesize"
-            f"$^{{\\dagger}}$ {tex_escape(r['array'])} EXCLUDED from evaluation. "
-            f"{tex_escape(r['exclusion_reason'])}"
-        )
     lines.append("\\end{table*}")
 
     with open(path, "w", encoding="utf-8") as fh:

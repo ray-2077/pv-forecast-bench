@@ -57,6 +57,20 @@ COMPARISONS = [
     ("CNN-LSTM+res vs CNN-LSTM", "cnn_lstm", "cnn_lstm_residual"),
 ]
 
+# Display labels for the "Better" column - the raw CSV values (xgboost,
+# cnn_lstm, lstm_residual, cnn_lstm_residual) contain underscores that
+# break LaTeX compilation if inserted unescaped. Every model key that can
+# appear in better_model must be mapped here, not just the ones currently
+# observed in results/table6_dm_lagged.csv, since which model "wins" a
+# given cell is data-dependent.
+MODEL_LABELS = {
+    "xgboost": "XGBoost",
+    "lstm": "LSTM",
+    "cnn_lstm": "CNN-LSTM",
+    "lstm_residual": "LSTM+residual",
+    "cnn_lstm_residual": "CNN-LSTM+residual",
+}
+
 
 def load_dm_table():
     """{(array, horizon, model_1, model_2): row_dict}"""
@@ -140,7 +154,7 @@ def write_latex(rows, path):
                 str(r["horizon"]),
                 f"{r['hln_stat']:+.2f}",
                 f"{r['p_holm']:.4f} ({sig})",
-                r["better_model"],
+                MODEL_LABELS.get(r["better_model"], r["better_model"]),
             ]
             lines.append("    " + " & ".join(cells) + " \\\\")
         if i != len(COMPARISONS) - 1:

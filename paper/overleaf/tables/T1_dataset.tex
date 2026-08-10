@@ -2,46 +2,32 @@
 % NOT compile-tested (no LaTeX toolchain in this dev
 % environment) - verify before camera-ready, same caveat
 % as paper/figures/F7_pipeline.tex. Needs \usepackage{booktabs}.
-% Wide (15 data columns): written as table* to span both
-% IEEE columns; \scriptsize likely still needed to fit -
-% not tuned here without a real render.
+% Columns reduced from 16 to 10 to fit IEEE two-column width
+% (paper/overleaf compile-fix pass): dropped Site (identical to
+% the Array column - array11/site 11 etc.), Tilt/Azim and
+% Installed (both constant or near-constant across arrays,
+% moved to the caption), and the three Daylight-geometric
+% columns (identical across all arrays by construction, since
+% they depend only on shared solar geometry - moved to the
+% caption as fixed numbers). The Evaluable columns are kept in
+% full: they are the one count that varies by array
+% (array17's documented outage).
 \begin{table*}[t]
   \centering
   \scriptsize
-  \caption{Dataset summary: the three co-located DKASC arrays used in
-  evaluation (array11 poly-Si, array12 mono-Si, array17 HIT - one shared
-  weather station, not three independent sites) plus array07 (CdTe),
-  excluded. Row counts and geometric daylight-hour counts (solar
-  elevation $>10^\circ$, identical across arrays by construction) by
-  chronological split (train 2011-2013, validation 2014, test 2015 -
-  touched once, at the end), plus outage-adjusted evaluable hour counts
-  for validation and test: array17's documented 2015-06-05 to 2015-06-09
-  outage reduces its evaluable test count to 3757 daylight hours, versus
-  3802 for array11 and array12, which are unaffected. array07 is
-  retained as an excluded row, not deleted, with its row/daylight/
-  evaluable columns reported as not applicable rather than measured (no
-  run in this project fits or scores a model against array07's data): a
-  completeness audit (results/data\_audit.csv) passed its 2014 data at
-  99.99\% coverage and 0.00\% NaN in Active\_Power, while a dead-period
-  audit (results/dead\_period\_audit.csv) found 48.41\% of that same
-  year's daylight hours at exactly zero power (status FAIL), plus a
-  48-day near-zero run inside the test year - a completeness-only audit
-  is structurally blind to a healthy sensor reporting a dead array
-  (Finding 6).}
+  \caption{Dataset summary: the three co-located DKASC arrays used in evaluation (array11 poly-Si, array12 mono-Si, array17 HIT - one shared weather station, not three independent sites) plus array07 (CdTe), excluded. All arrays are fixed-mount at 20$^\circ$ tilt / 0$^\circ$ azimuth; only array17's install date is documented (2010-03-11), which is why the training window in this paper starts at 2011. Row counts by chronological split (train 2011-2013, validation 2014, test 2015 - touched once, at the end), plus outage-adjusted evaluable hour counts for validation and test: array17's documented 2015-06-05 to 2015-06-09 outage reduces its evaluable test count to 3757 daylight hours, versus 3802 for array11 and array12, which are unaffected. Geometric daylight-hour counts (solar elevation $>10^\circ$) are identical across all arrays by construction - 11,414 (train), 3,799 (val), 3,802 (test) - and are omitted from the table on that basis. array07 is retained as an excluded row, not deleted, with its row/evaluable columns reported as not applicable rather than measured (no run in this project fits or scores a model against array07's data): a completeness audit (results/data\_audit.csv) passed its 2014 data at 99.99\% coverage and 0.00\% NaN in Active\_Power, while a dead-period audit (results/dead\_period\_audit.csv) found 48.41\% of that same year's daylight hours at exactly zero power (status FAIL), plus a 48-day near-zero run inside the test year - a completeness-only audit is structurally blind to a healthy sensor reporting a dead array (Finding 6).}
   \label{tab:T1}
-  \begin{tabular}{lllrrrl rrrr rrr rr}
+  \begin{tabular}{llll rrrr rr}
     \toprule
-    & \multicolumn{6}{c}{Array identity} & \multicolumn{4}{c}{Rows (total / train / val / test)} & \multicolumn{3}{c}{Daylight, geometric (train / val / test)} & \multicolumn{2}{c}{Evaluable (val / test)} \\
-    \cmidrule(lr){2-7} \cmidrule(lr){8-11} \cmidrule(lr){12-14} \cmidrule(lr){15-16}
-    Array & Site & Manuf. & Tech. & kW & Tilt/Azim. & Installed & Total & Train & Val & Test & Train & Val & Test & Val & Test \\
+    & & & & \multicolumn{4}{c}{Rows (total / train / val / test)} & \multicolumn{2}{c}{Evaluable (val / test)} \\
+    \cmidrule(lr){5-8} \cmidrule(lr){9-10}
+    Array & Manuf. & Tech. & kW & Total & Train & Val & Test & Val & Test \\
     \midrule
-    array11 & 11 & BP Solar & poly-Si & 5.0 & 20$^\circ$/0$^\circ$ & not recorded & 61,344 & 26,304 & 8,760 & 8,760 & 11,414 & 3,799 & 3,802 & 3,799 & 3,802 \\
-    array12 & 12 & BP Solar & mono-Si & 5.1 & 20$^\circ$/0$^\circ$ & not recorded & 61,344 & 26,304 & 8,760 & 8,760 & 11,414 & 3,799 & 3,802 & 3,799 & 3,802 \\
-    array17 & 17 & Sanyo & HIT & 6.3 & 20$^\circ$/0$^\circ$ & 2010-03-11 & 61,344 & 26,304 & 8,760 & 8,760 & 11,414 & 3,799 & 3,802 & 3,799 & 3,757 \\
+    array11 & BP Solar & poly-Si & 5.0 & 61,344 & 26,304 & 8,760 & 8,760 & 3,799 & 3,802 \\
+    array12 & BP Solar & mono-Si & 5.1 & 61,344 & 26,304 & 8,760 & 8,760 & 3,799 & 3,802 \\
+    array17 & Sanyo & HIT & 6.3 & 61,344 & 26,304 & 8,760 & 8,760 & 3,799 & 3,757 \\
     \midrule
-    array07$^{\dagger}$ & 07 & First Solar & CdTe & 7.0 & 20$^\circ$/0$^\circ$ & not recorded & n/a (excluded) & n/a (excluded) & n/a (excluded) & n/a (excluded) & n/a (excluded) & n/a (excluded) & n/a (excluded) & n/a (excluded) & n/a (excluded) \\
+    array07$^{\dagger}$ & First Solar & CdTe & 7.0 & n/a (excluded) & n/a (excluded) & n/a (excluded) & n/a (excluded) & n/a (excluded) & n/a (excluded) \\
     \bottomrule
   \end{tabular}
-
-  \vspace{2pt}\par\noindent\footnotesize$^{\dagger}$ array07 EXCLUDED from evaluation. Completeness audit (results/data\_audit.csv) passed array07 2014 at 99.99\% coverage, 0.00\% NaN in Active\_Power. Dead-period audit (results/dead\_period\_audit.csv) found 48.41\% of 2014 daylight hours at exactly zero power (status=FAIL), plus a 48-day near-zero run in Nov-Dec 2015 (inside the test year). A completeness-only audit is structurally blind to a healthy sensor reporting a dead array (Finding 6).
 \end{table*}

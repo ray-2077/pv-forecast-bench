@@ -103,14 +103,27 @@ WEATHER_DESCRIPTIONS_MIDSENTENCE = {
     "Diffuse_Horizontal_Radiation": "diffuse horizontal irradiance (DHI)",
 }
 
-# (suffix, shift text, description-suffix) for the three issue-relative
+# (suffix, shift code, description-suffix) for the three issue-relative
 # lags plus the fixed daily lag - mirrors LAG_ISSUE_SUFFIXES + the daily
-# shift in src/features/build.py exactly.
+# shift in src/features/build.py exactly. Shift codes are the compact
+# form explained once in the table caption (h/h+1/h+2/24/h(w)/h(o)/0),
+# not the verbose per-row text this table used before the compile-fix
+# pass that shortened it to fit IEEE page width.
 LAG_SHIFT_TEXT = {
     "_issue": ("h", "at issue time t-h"),
     "_issue_m1": ("h+1", "at t-h-1"),
     "_issue_m2": ("h+2", "at t-h-2"),
-    LAG_DAILY_SUFFIX: ("24 (fixed)", "24h before target time (same hour, previous day)"),
+    LAG_DAILY_SUFFIX: ("24", "24h before target (same hour, previous day)"),
+}
+
+# Short prose labels for the lag-base descriptions, used only in the
+# per-row Description cell - the formal k_p/k_ghi ratio definitions and
+# the forward-fill convention are stated once in the table caption
+# instead of being repeated in every one of the ~11 rows that use them.
+LAG_BASE_SHORT_LABELS = {
+    "Active_Power": "Active power",
+    "k_p": "k_p",
+    "k_ghi": "k_ghi",
 }
 
 
@@ -124,7 +137,7 @@ def build_rows():
                 "feature": name,
                 "category": "deterministic at target time",
                 "regime": "lagged + oracle",
-                "shift": "0 (at t; deterministic, computable in advance)",
+                "shift": "0",
                 "description": DETERMINISTIC_DESCRIPTIONS[name],
             }
         )
@@ -139,7 +152,7 @@ def build_rows():
                     "category": "lagged observations",
                     "regime": "lagged + oracle",
                     "shift": shift_text,
-                    "description": f"{LAG_BASE_DESCRIPTIONS[base]} {desc_suffix}",
+                    "description": f"{LAG_BASE_SHORT_LABELS[base]} {desc_suffix}",
                 }
             )
         shift_text, desc_suffix = LAG_SHIFT_TEXT[LAG_DAILY_SUFFIX]
@@ -149,7 +162,7 @@ def build_rows():
                 "category": "lagged observations",
                 "regime": "lagged + oracle",
                 "shift": shift_text,
-                "description": f"{LAG_BASE_DESCRIPTIONS[base]} {desc_suffix}",
+                "description": f"{LAG_BASE_SHORT_LABELS[base]} {desc_suffix}",
             }
         )
 
@@ -192,9 +205,8 @@ def build_rows():
                 "feature": f"{base}_roll{window}_{stat}",
                 "category": "rolling statistics",
                 "regime": "lagged + oracle",
-                "shift": "h (window ends at issue time t-h)",
-                "description": f"{stat.capitalize()} of {base} over the "
-                f"trailing {window} wall-clock hours ending at issue time",
+                "shift": "h(w)",
+                "description": f"{stat.capitalize()} of {base}, trailing {window}h",
             }
         )
     for base, window, stat in OBS_ROLLING_SPECS:
@@ -203,13 +215,8 @@ def build_rows():
                 "feature": f"{base}_last{window}obs_{stat}",
                 "category": "rolling statistics",
                 "regime": "lagged + oracle",
-                "shift": "h (last N valid obs at or before issue time)",
-                "description": (
-                    f"{stat.capitalize()} of {base} over the last {window} "
-                    f"VALID (non-NaN) observations at or before issue time "
-                    f"- NOT a wall-clock window, since {base} is undefined "
-                    "at night (see build.py's OBS_ROLLING_SPECS comment)"
-                ),
+                "shift": "h(o)",
+                "description": f"{stat.capitalize()} of {base}, last {window} valid obs",
             }
         )
 
@@ -220,9 +227,8 @@ def build_rows():
                 "feature": f"{ORACLE_PREFIX}{col}",
                 "category": "oracle weather",
                 "regime": "oracle only",
-                "shift": "0 (AT TARGET TIME t - upper bound only)",
-                "description": f"Measured {WEATHER_DESCRIPTIONS_MIDSENTENCE[col]} "
-                "AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable",
+                "shift": "0",
+                "description": f"Measured {WEATHER_DESCRIPTIONS_MIDSENTENCE[col]} at target time t",
             }
         )
 
@@ -290,14 +296,45 @@ def write_latex(rows, path):
     lines.append("% table*/tabular pair below for longtable if the compiled")
     lines.append("% length overflows a page - not decided here without a real")
     lines.append("% render.")
+    lines.append("% Columns reduced from 5 to 3 to fit IEEE two-column width")
+    lines.append("% and height (paper/overleaf compile-fix pass): dropped")
+    lines.append("% Category (was always emitted as an empty string - the")
+    lines.append("% category is shown by the multicolumn group header instead,")
+    lines.append("% this column had never carried content) and Regime (lagged")
+    lines.append("% + oracle for every row except the oracle-weather group,")
+    lines.append("% which is oracle-only - stated once in the caption instead")
+    lines.append("% of repeated 42 times). Shift codes are compacted")
+    lines.append("% (0/h/h+1/h+2/24/h(w)/h(o)) with a legend in the caption,")
+    lines.append("% and the k_p/k_ghi ratio + forward-fill definitions and the")
+    lines.append("% wall-clock-vs-valid-observation rolling-window distinction")
+    lines.append("% are stated once in the caption instead of per row.")
     lines.append("\\begin{table*}[t]")
     lines.append("  \\centering")
     lines.append("  \\scriptsize")
-    lines.append("  \\caption{Feature list by regime. See paper/tables/CAPTIONS.md for the full caption.}")
-    lines.append("  \\label{tab:features}")
-    lines.append("  \\begin{tabular}{llll p{6.5cm}}")
+    lines.append(
+        "  \\caption{Feature list by regime: all 37 lagged-regime features, "
+        "plus the 5 additional oracle-only features (42 total), grouped "
+        "into four categories (deterministic at target time, lagged "
+        "observations, rolling statistics, oracle weather). All features "
+        "in the first three groups belong to both regimes; the oracle "
+        "weather group belongs to the oracle regime only, is measured AT "
+        "TARGET TIME $t$, and is a perfect-forecast upper bound, never "
+        "achievable and never mixed with the lagged regime in one feature "
+        "matrix (CLAUDE.md rule 5). Shift, relative to issue time $t-h$ "
+        "or target time $t$: 0 = deterministic at $t$ (first group) or "
+        "measured at $t$ (oracle group); h/h+1/h+2 = issue time and the "
+        "two preceding hours; 24 = fixed 24-hour lag (same hour, previous "
+        "day); h(w) = wall-clock window ending at issue time; h(o) = "
+        "window of the last $N$ valid (non-NaN) observations at or before "
+        "issue time, used instead of a wall-clock window for $k_p$ and "
+        "$k_{ghi}$-based statistics because both are undefined at night. "
+        "$k_p$ = Active\\_Power / p\\_cs and $k_{ghi}$ = the clear-sky "
+        "index of GHI, both forward-filled up to 24h before shifting.}"
+    )
+    lines.append("  \\label{tab:T2}")
+    lines.append("  \\begin{tabular}{ll p{4.5cm}}")
     lines.append("    \\toprule")
-    lines.append("    Feature & Category & Regime & Shift & Description \\\\")
+    lines.append("    Feature & Shift & Description \\\\")
     lines.append("    \\midrule")
 
     by_category = {cat: [] for cat in CATEGORY_ORDER}
@@ -307,7 +344,7 @@ def write_latex(rows, path):
     for cat_idx, cat in enumerate(CATEGORY_ORDER):
         cat_rows = by_category[cat]
         lines.append(
-            f"    \\multicolumn{{5}}{{l}}{{\\textit{{{tex_escape(cat)} "
+            f"    \\multicolumn{{3}}{{l}}{{\\textit{{{tex_escape(cat)} "
             f"({len(cat_rows)} features)}}}} \\\\"
         )
         for r in cat_rows:
@@ -316,8 +353,6 @@ def write_latex(rows, path):
                 + " & ".join(
                     [
                         f"\\texttt{{{tex_escape(r['feature'])}}}",
-                        "",  # category already shown as a group header above
-                        tex_escape(r["regime"]),
                         tex_escape(r["shift"]),
                         tex_escape(r["description"]),
                     ]

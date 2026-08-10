@@ -14,48 +14,48 @@
     Array & $h$ & HLN & $p_{holm}$ & Better \\
     \midrule
     \multicolumn{5}{l}{\textit{LSTM vs XGBoost}} \\
-    array11 & 1 & -0.66 & 1.0000 (ns) & xgboost \\
-    array11 & 3 & +0.67 & 1.0000 (ns) & lstm \\
-    array11 & 6 & +2.56 & 0.0728 (ns) & lstm \\
-    array12 & 1 & -0.09 & 1.0000 (ns) & xgboost \\
-    array12 & 3 & +0.54 & 1.0000 (ns) & lstm \\
-    array12 & 6 & +2.64 & 0.0585 (ns) & lstm \\
-    array17 & 1 & -0.45 & 1.0000 (ns) & xgboost \\
-    array17 & 3 & +0.05 & 1.0000 (ns) & lstm \\
-    array17 & 6 & +3.26 & 0.0114 (sig) & lstm \\
+    array11 & 1 & -0.66 & 1.0000 (ns) & XGBoost \\
+    array11 & 3 & +0.67 & 1.0000 (ns) & LSTM \\
+    array11 & 6 & +2.56 & 0.0728 (ns) & LSTM \\
+    array12 & 1 & -0.09 & 1.0000 (ns) & XGBoost \\
+    array12 & 3 & +0.54 & 1.0000 (ns) & LSTM \\
+    array12 & 6 & +2.64 & 0.0585 (ns) & LSTM \\
+    array17 & 1 & -0.45 & 1.0000 (ns) & XGBoost \\
+    array17 & 3 & +0.05 & 1.0000 (ns) & LSTM \\
+    array17 & 6 & +3.26 & 0.0114 (sig) & LSTM \\
     \addlinespace
     \multicolumn{5}{l}{\textit{CNN-LSTM vs LSTM}} \\
-    array11 & 1 & +1.64 & 0.4078 (ns) & cnn_lstm \\
-    array11 & 3 & -1.69 & 0.3612 (ns) & lstm \\
-    array11 & 6 & -0.67 & 1.0000 (ns) & lstm \\
-    array12 & 1 & +0.91 & 1.0000 (ns) & cnn_lstm \\
-    array12 & 3 & -0.66 & 1.0000 (ns) & lstm \\
-    array12 & 6 & -2.30 & 0.1300 (ns) & lstm \\
-    array17 & 1 & +0.61 & 1.0000 (ns) & cnn_lstm \\
-    array17 & 3 & -1.54 & 0.7359 (ns) & lstm \\
-    array17 & 6 & -0.69 & 1.0000 (ns) & lstm \\
+    array11 & 1 & +1.64 & 0.4078 (ns) & CNN-LSTM \\
+    array11 & 3 & -1.69 & 0.3612 (ns) & LSTM \\
+    array11 & 6 & -0.67 & 1.0000 (ns) & LSTM \\
+    array12 & 1 & +0.91 & 1.0000 (ns) & CNN-LSTM \\
+    array12 & 3 & -0.66 & 1.0000 (ns) & LSTM \\
+    array12 & 6 & -2.30 & 0.1300 (ns) & LSTM \\
+    array17 & 1 & +0.61 & 1.0000 (ns) & CNN-LSTM \\
+    array17 & 3 & -1.54 & 0.7359 (ns) & LSTM \\
+    array17 & 6 & -0.69 & 1.0000 (ns) & LSTM \\
     \addlinespace
     \multicolumn{5}{l}{\textit{LSTM+res vs LSTM}} \\
-    array11 & 1 & -2.46 & 0.0689 (ns) & lstm \\
-    array11 & 3 & -3.45 & 0.0040 (sig) & lstm \\
-    array11 & 6 & -3.45 & 0.0056 (sig) & lstm \\
-    array12 & 1 & -2.89 & 0.0271 (sig) & lstm \\
-    array12 & 3 & -6.24 & 0.0000 (sig) & lstm \\
-    array12 & 6 & -2.09 & 0.1849 (ns) & lstm \\
-    array17 & 1 & -2.90 & 0.0228 (sig) & lstm \\
-    array17 & 3 & -1.54 & 0.7359 (ns) & lstm \\
-    array17 & 6 & -1.86 & 0.3159 (ns) & lstm \\
+    array11 & 1 & -2.46 & 0.0689 (ns) & LSTM \\
+    array11 & 3 & -3.45 & 0.0040 (sig) & LSTM \\
+    array11 & 6 & -3.45 & 0.0056 (sig) & LSTM \\
+    array12 & 1 & -2.89 & 0.0271 (sig) & LSTM \\
+    array12 & 3 & -6.24 & 0.0000 (sig) & LSTM \\
+    array12 & 6 & -2.09 & 0.1849 (ns) & LSTM \\
+    array17 & 1 & -2.90 & 0.0228 (sig) & LSTM \\
+    array17 & 3 & -1.54 & 0.7359 (ns) & LSTM \\
+    array17 & 6 & -1.86 & 0.3159 (ns) & LSTM \\
     \addlinespace
     \multicolumn{5}{l}{\textit{CNN-LSTM+res vs CNN-LSTM}} \\
-    array11 & 1 & -4.34 & 0.0001 (sig) & cnn_lstm \\
-    array11 & 3 & -4.50 & 0.0001 (sig) & cnn_lstm \\
-    array11 & 6 & -3.03 & 0.0199 (sig) & cnn_lstm \\
-    array12 & 1 & -3.02 & 0.0225 (sig) & cnn_lstm \\
-    array12 & 3 & -4.27 & 0.0001 (sig) & cnn_lstm \\
-    array12 & 6 & -3.45 & 0.0052 (sig) & cnn_lstm \\
-    array17 & 1 & -3.88 & 0.0011 (sig) & cnn_lstm \\
-    array17 & 3 & -3.76 & 0.0015 (sig) & cnn_lstm \\
-    array17 & 6 & -2.89 & 0.0350 (sig) & cnn_lstm \\
+    array11 & 1 & -4.34 & 0.0001 (sig) & CNN-LSTM \\
+    array11 & 3 & -4.50 & 0.0001 (sig) & CNN-LSTM \\
+    array11 & 6 & -3.03 & 0.0199 (sig) & CNN-LSTM \\
+    array12 & 1 & -3.02 & 0.0225 (sig) & CNN-LSTM \\
+    array12 & 3 & -4.27 & 0.0001 (sig) & CNN-LSTM \\
+    array12 & 6 & -3.45 & 0.0052 (sig) & CNN-LSTM \\
+    array17 & 1 & -3.88 & 0.0011 (sig) & CNN-LSTM \\
+    array17 & 3 & -3.76 & 0.0015 (sig) & CNN-LSTM \\
+    array17 & 6 & -2.89 & 0.0350 (sig) & CNN-LSTM \\
     \bottomrule
   \end{tabular}
 \end{table*}

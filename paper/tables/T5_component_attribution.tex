@@ -3,31 +3,31 @@
 % environment) - same caveat as paper/tables/T1_dataset.tex,
 % T2_features.tex, and paper/figures/F7_pipeline.tex. Needs
 % \usepackage{booktabs}.
-% Wide (5 models x mean+-std, plus 3 DM annotation columns):
-% written as table* (spans both IEEE columns); \scriptsize
-% used throughout and the DM columns still may need
-% shortened annotation text to fit - not tuned without a
-% real render.
+% Wide (5 models x mean+-std, plus 3 DM columns): written as
+% table* (spans both IEEE columns), \scriptsize. DM columns
+% carry only a winner + significance marker (full HLN/p_holm
+% is Table 6) - compacted from the full annotation string,
+% which was this table's page-width overflow source.
 \begin{table*}[t]
   \centering
   \scriptsize
-  \caption{Component attribution (RQ2): skill\_vs\_convex by model, array, and horizon (mean $\pm$ 1 seed std, 5 seeds), with Diebold-Mariano significance for the three comparisons that matter. See paper/tables/CAPTIONS.md for the full caption.}
-  \label{tab:component-attribution}
+  \caption{Component attribution (RQ2): skill\_vs\_convex by model (XGBoost, LSTM, CNN-LSTM, LSTM+residual, CNN-LSTM+residual), array, and horizon - mean $\pm$ 1 seed standard deviation across 5 seeds - with a Diebold-Mariano significance marker for the three comparisons RQ2's Results turns on: LSTM vs. XGBoost, CNN-LSTM vs. LSTM, and LSTM+residual vs. LSTM. Each DM column names the winning model; an asterisk marks Holm-Bonferroni significance at $\alpha=0.05$ (HAC variance, HLN small-sample correction, single seed=0). Full HLN statistics and Holm-adjusted p-values for these three comparisons, plus a fourth (CNN-LSTM+residual vs. CNN-LSTM) this table omits, are in Table \ref{tab:T6}. At $h=1$ and $h=3$, XGBoost and LSTM are statistically indistinguishable on every array ($p_{holm}=1.0$ throughout); at $h=6$, LSTM's edge over XGBoost is significant on only one of three co-located arrays (array17). The residual stage is significant in the direction of the plain base model in 5 of 9 lstm\_residual cells, with no clean horizon-based split - array12 $h=1$ is significant, array12 $h=6$ is not, despite being the longer horizon.}
+  \label{tab:T5}
   \begin{tabular}{ll rrrrr lll}
     \toprule
-    & & \multicolumn{5}{c}{skill\_vs\_convex, mean $\pm$ std (5 seeds)} & \multicolumn{3}{c}{Diebold-Mariano (p\_holm $<$ 0.05 = sig)} \\
+    & & \multicolumn{5}{c}{skill\_vs\_convex, mean $\pm$ std (5 seeds)} & \multicolumn{3}{c}{Better (DM sig., Table \ref{tab:T6})} \\
     \cmidrule(lr){3-7} \cmidrule(lr){8-10}
-    Array & $h$ & XGBoost & LSTM & CNN-LSTM & LSTM+res & CNN-LSTM+res & LSTM vs XGB & CNN-LSTM vs LSTM & LSTM+res vs LSTM \\
+    Array & $h$ & XGBoost & LSTM & CNN-LSTM & LSTM+res & CNN-LSTM+res & vs XGB & vs LSTM & +res vs LSTM \\
     \midrule
-    array11 & 1 & +0.197$\pm$0.002 & +0.194$\pm$0.002 & +0.194$\pm$0.006 & +0.168$\pm$0.006 & +0.164$\pm$0.006 & XGBoost better, hln=-0.66, p\_holm=1.0000 (ns) & CNN-LSTM better, hln=+1.64, p\_holm=0.4078 (ns) & LSTM better, hln=-2.46, p\_holm=0.0689 (ns) \\
-    array11 & 3 & +0.276$\pm$0.003 & +0.272$\pm$0.004 & +0.265$\pm$0.003 & +0.246$\pm$0.007 & +0.234$\pm$0.003 & LSTM better, hln=+0.67, p\_holm=1.0000 (ns) & LSTM better, hln=-1.69, p\_holm=0.3612 (ns) & LSTM better, hln=-3.45, p\_holm=0.0040 (sig) \\
-    array11 & 6 & +0.195$\pm$0.002 & +0.210$\pm$0.006 & +0.202$\pm$0.005 & +0.177$\pm$0.009 & +0.158$\pm$0.010 & LSTM better, hln=+2.56, p\_holm=0.0728 (ns) & LSTM better, hln=-0.67, p\_holm=1.0000 (ns) & LSTM better, hln=-3.45, p\_holm=0.0056 (sig) \\
-    array12 & 1 & +0.189$\pm$0.002 & +0.190$\pm$0.002 & +0.189$\pm$0.004 & +0.163$\pm$0.007 & +0.162$\pm$0.005 & XGBoost better, hln=-0.09, p\_holm=1.0000 (ns) & CNN-LSTM better, hln=+0.91, p\_holm=1.0000 (ns) & LSTM better, hln=-2.89, p\_holm=0.0271 (sig) \\
-    array12 & 3 & +0.275$\pm$0.001 & +0.275$\pm$0.005 & +0.267$\pm$0.006 & +0.234$\pm$0.009 & +0.240$\pm$0.003 & LSTM better, hln=+0.54, p\_holm=1.0000 (ns) & LSTM better, hln=-0.66, p\_holm=1.0000 (ns) & LSTM better, hln=-6.24, p\_holm=0.0000 (sig) \\
-    array12 & 6 & +0.200$\pm$0.003 & +0.215$\pm$0.004 & +0.201$\pm$0.006 & +0.188$\pm$0.007 & +0.173$\pm$0.002 & LSTM better, hln=+2.64, p\_holm=0.0585 (ns) & LSTM better, hln=-2.30, p\_holm=0.1300 (ns) & LSTM better, hln=-2.09, p\_holm=0.1849 (ns) \\
-    array17 & 1 & +0.119$\pm$0.002 & +0.119$\pm$0.002 & +0.117$\pm$0.005 & +0.090$\pm$0.003 & +0.085$\pm$0.005 & XGBoost better, hln=-0.45, p\_holm=1.0000 (ns) & CNN-LSTM better, hln=+0.61, p\_holm=1.0000 (ns) & LSTM better, hln=-2.90, p\_holm=0.0228 (sig) \\
-    array17 & 3 & +0.183$\pm$0.001 & +0.181$\pm$0.005 & +0.176$\pm$0.005 & +0.156$\pm$0.008 & +0.139$\pm$0.008 & LSTM better, hln=+0.05, p\_holm=1.0000 (ns) & LSTM better, hln=-1.54, p\_holm=0.7359 (ns) & LSTM better, hln=-1.54, p\_holm=0.7359 (ns) \\
-    array17 & 6 & +0.130$\pm$0.003 & +0.154$\pm$0.006 & +0.149$\pm$0.009 & +0.125$\pm$0.012 & +0.103$\pm$0.017 & LSTM better, hln=+3.26, p\_holm=0.0114 (sig) & LSTM better, hln=-0.69, p\_holm=1.0000 (ns) & LSTM better, hln=-1.86, p\_holm=0.3159 (ns) \\
+    array11 & 1 & +0.197$\pm$0.002 & +0.194$\pm$0.002 & +0.194$\pm$0.006 & +0.168$\pm$0.006 & +0.164$\pm$0.006 & XGB & CNN & LSTM \\
+    array11 & 3 & +0.276$\pm$0.003 & +0.272$\pm$0.004 & +0.265$\pm$0.003 & +0.246$\pm$0.007 & +0.234$\pm$0.003 & LSTM & LSTM & LSTM* \\
+    array11 & 6 & +0.195$\pm$0.002 & +0.210$\pm$0.006 & +0.202$\pm$0.005 & +0.177$\pm$0.009 & +0.158$\pm$0.010 & LSTM & LSTM & LSTM* \\
+    array12 & 1 & +0.189$\pm$0.002 & +0.190$\pm$0.002 & +0.189$\pm$0.004 & +0.163$\pm$0.007 & +0.162$\pm$0.005 & XGB & CNN & LSTM* \\
+    array12 & 3 & +0.275$\pm$0.001 & +0.275$\pm$0.005 & +0.267$\pm$0.006 & +0.234$\pm$0.009 & +0.240$\pm$0.003 & LSTM & LSTM & LSTM* \\
+    array12 & 6 & +0.200$\pm$0.003 & +0.215$\pm$0.004 & +0.201$\pm$0.006 & +0.188$\pm$0.007 & +0.173$\pm$0.002 & LSTM & LSTM & LSTM \\
+    array17 & 1 & +0.119$\pm$0.002 & +0.119$\pm$0.002 & +0.117$\pm$0.005 & +0.090$\pm$0.003 & +0.085$\pm$0.005 & XGB & CNN & LSTM* \\
+    array17 & 3 & +0.183$\pm$0.001 & +0.181$\pm$0.005 & +0.176$\pm$0.005 & +0.156$\pm$0.008 & +0.139$\pm$0.008 & LSTM & LSTM & LSTM \\
+    array17 & 6 & +0.130$\pm$0.003 & +0.154$\pm$0.006 & +0.149$\pm$0.009 & +0.125$\pm$0.012 & +0.103$\pm$0.017 & LSTM* & LSTM & LSTM \\
     \bottomrule
   \end{tabular}
 \end{table*}

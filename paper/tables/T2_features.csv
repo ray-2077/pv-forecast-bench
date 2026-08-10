@@ -1,25 +1,25 @@
 feature,category,regime,shift,description
-p_cs,deterministic at target time,lagged + oracle,"0 (at t; deterministic, computable in advance)","Clear-sky power model (temperature climatology + gain, TRAIN-only fit)"
-ghi_cs,deterministic at target time,lagged + oracle,"0 (at t; deterministic, computable in advance)","Clear-sky GHI (Ineichen model, 5-min resolution averaged to hourly - Finding 1)"
-solar_zenith,deterministic at target time,lagged + oracle,"0 (at t; deterministic, computable in advance)",Solar zenith angle at the hour midpoint
-solar_azimuth,deterministic at target time,lagged + oracle,"0 (at t; deterministic, computable in advance)",Solar azimuth angle at the hour midpoint
-solar_elevation,deterministic at target time,lagged + oracle,"0 (at t; deterministic, computable in advance)",Solar elevation angle at the hour midpoint (90 minus zenith)
-hour_sin,deterministic at target time,lagged + oracle,"0 (at t; deterministic, computable in advance)",Sine encoding of hour-of-day
-hour_cos,deterministic at target time,lagged + oracle,"0 (at t; deterministic, computable in advance)",Cosine encoding of hour-of-day
-doy_sin,deterministic at target time,lagged + oracle,"0 (at t; deterministic, computable in advance)",Sine encoding of day-of-year
-doy_cos,deterministic at target time,lagged + oracle,"0 (at t; deterministic, computable in advance)",Cosine encoding of day-of-year
+p_cs,deterministic at target time,lagged + oracle,0,"Clear-sky power model (temperature climatology + gain, TRAIN-only fit)"
+ghi_cs,deterministic at target time,lagged + oracle,0,"Clear-sky GHI (Ineichen model, 5-min resolution averaged to hourly - Finding 1)"
+solar_zenith,deterministic at target time,lagged + oracle,0,Solar zenith angle at the hour midpoint
+solar_azimuth,deterministic at target time,lagged + oracle,0,Solar azimuth angle at the hour midpoint
+solar_elevation,deterministic at target time,lagged + oracle,0,Solar elevation angle at the hour midpoint (90 minus zenith)
+hour_sin,deterministic at target time,lagged + oracle,0,Sine encoding of hour-of-day
+hour_cos,deterministic at target time,lagged + oracle,0,Cosine encoding of hour-of-day
+doy_sin,deterministic at target time,lagged + oracle,0,Sine encoding of day-of-year
+doy_cos,deterministic at target time,lagged + oracle,0,Cosine encoding of day-of-year
 Active_Power_issue,lagged observations,lagged + oracle,h,Active power at issue time t-h
 Active_Power_issue_m1,lagged observations,lagged + oracle,h+1,Active power at t-h-1
 Active_Power_issue_m2,lagged observations,lagged + oracle,h+2,Active power at t-h-2
-Active_Power_daily,lagged observations,lagged + oracle,24 (fixed),"Active power 24h before target time (same hour, previous day)"
-k_p_issue,lagged observations,lagged + oracle,h,Clear-sky power index k_p = Active_Power / p_cs (forward-filled up to 24h before shifting) at issue time t-h
-k_p_issue_m1,lagged observations,lagged + oracle,h+1,Clear-sky power index k_p = Active_Power / p_cs (forward-filled up to 24h before shifting) at t-h-1
-k_p_issue_m2,lagged observations,lagged + oracle,h+2,Clear-sky power index k_p = Active_Power / p_cs (forward-filled up to 24h before shifting) at t-h-2
-k_p_daily,lagged observations,lagged + oracle,24 (fixed),"Clear-sky power index k_p = Active_Power / p_cs (forward-filled up to 24h before shifting) 24h before target time (same hour, previous day)"
-k_ghi_issue,lagged observations,lagged + oracle,h,Clear-sky index of GHI (forward-filled up to 24h before shifting) at issue time t-h
-k_ghi_issue_m1,lagged observations,lagged + oracle,h+1,Clear-sky index of GHI (forward-filled up to 24h before shifting) at t-h-1
-k_ghi_issue_m2,lagged observations,lagged + oracle,h+2,Clear-sky index of GHI (forward-filled up to 24h before shifting) at t-h-2
-k_ghi_daily,lagged observations,lagged + oracle,24 (fixed),"Clear-sky index of GHI (forward-filled up to 24h before shifting) 24h before target time (same hour, previous day)"
+Active_Power_daily,lagged observations,lagged + oracle,24,"Active power 24h before target (same hour, previous day)"
+k_p_issue,lagged observations,lagged + oracle,h,k_p at issue time t-h
+k_p_issue_m1,lagged observations,lagged + oracle,h+1,k_p at t-h-1
+k_p_issue_m2,lagged observations,lagged + oracle,h+2,k_p at t-h-2
+k_p_daily,lagged observations,lagged + oracle,24,"k_p 24h before target (same hour, previous day)"
+k_ghi_issue,lagged observations,lagged + oracle,h,k_ghi at issue time t-h
+k_ghi_issue_m1,lagged observations,lagged + oracle,h+1,k_ghi at t-h-1
+k_ghi_issue_m2,lagged observations,lagged + oracle,h+2,k_ghi at t-h-2
+k_ghi_daily,lagged observations,lagged + oracle,24,"k_ghi 24h before target (same hour, previous day)"
 k_p_hours_stale,lagged observations,lagged + oracle,h,"Hours since the last genuinely observed k_p, as of issue time (0 if observed exactly at issue time)"
 k_p_is_stale,lagged observations,lagged + oracle,h,"1 if k_p_hours_stale > 0 (forward-filled, not directly observed), else 0"
 Weather_Temperature_Celsius_issue,lagged observations,lagged + oracle,h,Air temperature at issue time t-h
@@ -27,17 +27,17 @@ Weather_Relative_Humidity_issue,lagged observations,lagged + oracle,h,Relative h
 Wind_Speed_issue,lagged observations,lagged + oracle,h,Wind speed at issue time t-h
 Global_Horizontal_Radiation_issue,lagged observations,lagged + oracle,h,Global horizontal irradiance (GHI) at issue time t-h
 Diffuse_Horizontal_Radiation_issue,lagged observations,lagged + oracle,h,Diffuse horizontal irradiance (DHI) at issue time t-h
-Active_Power_roll3_mean,rolling statistics,lagged + oracle,h (window ends at issue time t-h),Mean of Active_Power over the trailing 3 wall-clock hours ending at issue time
-Active_Power_roll3_std,rolling statistics,lagged + oracle,h (window ends at issue time t-h),Std of Active_Power over the trailing 3 wall-clock hours ending at issue time
-Active_Power_roll24_mean,rolling statistics,lagged + oracle,h (window ends at issue time t-h),Mean of Active_Power over the trailing 24 wall-clock hours ending at issue time
-Active_Power_roll24_std,rolling statistics,lagged + oracle,h (window ends at issue time t-h),Std of Active_Power over the trailing 24 wall-clock hours ending at issue time
-k_p_last3obs_mean,rolling statistics,lagged + oracle,h (last N valid obs at or before issue time),"Mean of k_p over the last 3 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k_p is undefined at night (see build.py's OBS_ROLLING_SPECS comment)"
-k_p_last3obs_std,rolling statistics,lagged + oracle,h (last N valid obs at or before issue time),"Std of k_p over the last 3 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k_p is undefined at night (see build.py's OBS_ROLLING_SPECS comment)"
-k_p_last24obs_mean,rolling statistics,lagged + oracle,h (last N valid obs at or before issue time),"Mean of k_p over the last 24 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k_p is undefined at night (see build.py's OBS_ROLLING_SPECS comment)"
-k_p_last24obs_std,rolling statistics,lagged + oracle,h (last N valid obs at or before issue time),"Std of k_p over the last 24 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k_p is undefined at night (see build.py's OBS_ROLLING_SPECS comment)"
-k_ghi_last3obs_std,rolling statistics,lagged + oracle,h (last N valid obs at or before issue time),"Std of k_ghi over the last 3 VALID (non-NaN) observations at or before issue time - NOT a wall-clock window, since k_ghi is undefined at night (see build.py's OBS_ROLLING_SPECS comment)"
-oracle_Weather_Temperature_Celsius,oracle weather,oracle only,0 (AT TARGET TIME t - upper bound only),"Measured air temperature AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable"
-oracle_Weather_Relative_Humidity,oracle weather,oracle only,0 (AT TARGET TIME t - upper bound only),"Measured relative humidity AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable"
-oracle_Wind_Speed,oracle weather,oracle only,0 (AT TARGET TIME t - upper bound only),"Measured wind speed AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable"
-oracle_Global_Horizontal_Radiation,oracle weather,oracle only,0 (AT TARGET TIME t - upper bound only),"Measured global horizontal irradiance (GHI) AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable"
-oracle_Diffuse_Horizontal_Radiation,oracle weather,oracle only,0 (AT TARGET TIME t - upper bound only),"Measured diffuse horizontal irradiance (DHI) AT TARGET TIME t - perfect-forecast UPPER BOUND, never achievable"
+Active_Power_roll3_mean,rolling statistics,lagged + oracle,h(w),"Mean of Active_Power, trailing 3h"
+Active_Power_roll3_std,rolling statistics,lagged + oracle,h(w),"Std of Active_Power, trailing 3h"
+Active_Power_roll24_mean,rolling statistics,lagged + oracle,h(w),"Mean of Active_Power, trailing 24h"
+Active_Power_roll24_std,rolling statistics,lagged + oracle,h(w),"Std of Active_Power, trailing 24h"
+k_p_last3obs_mean,rolling statistics,lagged + oracle,h(o),"Mean of k_p, last 3 valid obs"
+k_p_last3obs_std,rolling statistics,lagged + oracle,h(o),"Std of k_p, last 3 valid obs"
+k_p_last24obs_mean,rolling statistics,lagged + oracle,h(o),"Mean of k_p, last 24 valid obs"
+k_p_last24obs_std,rolling statistics,lagged + oracle,h(o),"Std of k_p, last 24 valid obs"
+k_ghi_last3obs_std,rolling statistics,lagged + oracle,h(o),"Std of k_ghi, last 3 valid obs"
+oracle_Weather_Temperature_Celsius,oracle weather,oracle only,0,Measured air temperature at target time t
+oracle_Weather_Relative_Humidity,oracle weather,oracle only,0,Measured relative humidity at target time t
+oracle_Wind_Speed,oracle weather,oracle only,0,Measured wind speed at target time t
+oracle_Global_Horizontal_Radiation,oracle weather,oracle only,0,Measured global horizontal irradiance (GHI) at target time t
+oracle_Diffuse_Horizontal_Radiation,oracle weather,oracle only,0,Measured diffuse horizontal irradiance (DHI) at target time t

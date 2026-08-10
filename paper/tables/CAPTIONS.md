@@ -56,20 +56,38 @@ tilt 20 deg / azimuth 0 deg, same source already cited for
 array11/12/17 - filled in, with the source noted in the script's
 module docstring.
 
+COMPILE-FIX PASS (2026-08-11, paper/overleaf, reported 209pt too wide
+for IEEE two-column width): columns cut from 16 to 10. Dropped: Site
+(identical to the Array column - array11/site 11 etc.), Tilt/Azim and
+Installed (both constant or near-constant across arrays, moved into
+the caption below), and the three Daylight-geometric train/val/test
+columns (identical across all arrays by construction, since they
+depend only on shared solar geometry - moved into the caption as fixed
+numbers: 11,414/3,799/3,802). The Evaluable val/test columns are kept
+in full - they are the one count that genuinely varies by array
+(array17's documented outage). The array07 footnote paragraph (which
+duplicated facts already in the caption) was also dropped from the
+rendered table; the caption below is now the only place those facts
+appear.
+
 Caption:
 Table 1. Dataset summary: the three co-located DKASC arrays used in
 evaluation (array11 poly-Si, array12 mono-Si, array17 HIT - one shared
 weather station, not three independent sites) plus array07 (CdTe),
-excluded. Row counts and geometric daylight-hour counts (solar
-elevation $>10^\circ$, identical across arrays by construction) by
+excluded. All arrays are fixed-mount at 20 deg tilt / 0 deg azimuth;
+only array17's install date is documented (2010-03-11), which is why
+the training window in this paper starts at 2011. Row counts by
 chronological split (train 2011-2013, validation 2014, test 2015 -
 touched once, at the end), plus outage-adjusted evaluable hour counts
 for validation and test: array17's documented 2015-06-05 to 2015-06-09
 outage reduces its evaluable test count to 3757 daylight hours, versus
-3802 for array11 and array12, which are unaffected. array07 is
-retained as an excluded row, not deleted, with its row/daylight/
-evaluable columns reported as not applicable rather than measured (no
-run in this project fits or scores a model against array07's data): a
+3802 for array11 and array12, which are unaffected. Geometric
+daylight-hour counts (solar elevation $>10^\circ$) are identical
+across all arrays by construction - 11,414 (train), 3,799 (val), 3,802
+(test) - and are omitted from the table on that basis. array07 is
+retained as an excluded row, not deleted, with its row/evaluable
+columns reported as not applicable rather than measured (no run in
+this project fits or scores a model against array07's data): a
 completeness audit (results/data_audit.csv) passed its 2014 data at
 99.99% coverage and 0.00% NaN in Active_Power, while a dead-period
 audit (results/dead_period_audit.csv) found 48.41% of that same year's
@@ -101,16 +119,37 @@ feature_names('lagged'|'oracle', horizon) exactly before the table is
 written, so a future change to build.py that isn't reflected here fails
 the script loudly instead of shipping a stale table.
 
+COMPILE-FIX PASS (2026-08-11, paper/overleaf, reported 77pt too wide
+and 95pt too tall): columns cut from 5 to 3. Dropped Category (this
+column had always been emitted as an empty string - the category was
+already shown via the multicolumn group header, so the column carried
+no content, an oversight rather than a deliberate design) and Regime
+(lagged + oracle for every row except the oracle-weather group, which
+is oracle-only - stated once in the caption instead of 42 times).
+Shift text compacted to codes (0/h/h+1/h+2/24/h(w)/h(o)) with a legend
+in the caption, and the k_p/k_ghi ratio + forward-fill definitions and
+the wall-clock-vs-valid-observation rolling-window distinction, both
+previously repeated in most of the 42 row descriptions, are now stated
+once in the caption instead.
+
 Caption:
 Table 2. Feature list by regime: all 37 lagged-regime features, plus
 the 5 additional oracle-only features (42 total), grouped into four
 categories (deterministic at target time, lagged observations, rolling
-statistics, oracle weather), with the shift applied to each relative
-to target time $t$ and issue time $t-h$. Every lagged-regime feature's
-shift is at or after the issue time ($\geq h$); oracle features are
-prefixed oracle\_ and use measured weather AT TARGET TIME $t$ (shift
-0) - a perfect-forecast upper bound, never achievable, and never mixed
-with the lagged regime in one feature matrix (CLAUDE.md rule 5).
+statistics, oracle weather). All features in the first three groups
+belong to both regimes; the oracle weather group belongs to the oracle
+regime only, is measured AT TARGET TIME $t$, and is a perfect-forecast
+upper bound, never achievable and never mixed with the lagged regime
+in one feature matrix (CLAUDE.md rule 5). Shift, relative to issue
+time $t-h$ or target time $t$: 0 = deterministic at $t$ (first group)
+or measured at $t$ (oracle group); h/h+1/h+2 = issue time and the two
+preceding hours; 24 = fixed 24-hour lag (same hour, previous day);
+h(w) = wall-clock window ending at issue time; h(o) = window of the
+last $N$ valid (non-NaN) observations at or before issue time, used
+instead of a wall-clock window for $k_p$ and $k_{ghi}$-based
+statistics because both are undefined at night. $k_p$ = Active_Power /
+p_cs and $k_{ghi}$ = the clear-sky index of GHI, both forward-filled
+up to 24h before shifting.
 
 Must convey: completeness and explicit shifts. This is the table a
 reviewer checks the leakage claim against - every category-B/C feature
@@ -219,21 +258,34 @@ skill_vs_convex, 5 seeds), results/table6_dm_lagged.csv (pairwise
 Diebold-Mariano significance, seed=0) - joined and reformatted, no new
 computation
 
+COMPILE-FIX PASS (2026-08-11, paper/overleaf, reported 265pt too
+wide): the three Diebold-Mariano columns previously carried the full
+annotation string ("LSTM better, hln=+1.23, p_holm=0.0456 (sig)",
+~45 chars) per cell - this was the overflow source. Compacted to a
+short token (winning model + "*" if Holm-significant, e.g. "LSTM*"),
+since the full HLN/p_holm numbers for these same three comparisons
+(plus a fourth) are already in Table 6 - this table now names the
+winner and significance only, pointing to Table 6 for the numbers,
+rather than duplicating them.
+
 Caption:
 Table 5. Component attribution (RQ2): skill\_vs\_convex by model
 (XGBoost, LSTM, CNN-LSTM, LSTM+residual, CNN-LSTM+residual), array, and
-horizon - mean $\pm$ 1 seed standard deviation across 5 seeds - with
-Diebold-Mariano significance (HAC variance, HLN small-sample
-correction, Holm-Bonferroni within cell, single seed=0) for the three
-comparisons RQ2's Results turns on: LSTM vs. XGBoost, CNN-LSTM vs.
-LSTM, and LSTM+residual vs. LSTM. At $h=1$ and $h=3$, XGBoost and LSTM
-are statistically indistinguishable on every array ($p_{holm}=1.0$
-throughout); at $h=6$, LSTM's edge over XGBoost is significant on only
-one of three co-located arrays (array17). The residual stage is
-significant in the direction of the plain base model in 5 of 9
-lstm\_residual cells, with no clean horizon-based split - array12
-$h=1$ is significant, array12 $h=6$ is not, despite being the longer
-horizon.
+horizon - mean $\pm$ 1 seed standard deviation across 5 seeds - with a
+Diebold-Mariano significance marker for the three comparisons RQ2's
+Results turns on: LSTM vs. XGBoost, CNN-LSTM vs. LSTM, and
+LSTM+residual vs. LSTM. Each DM column names the winning model; an
+asterisk marks Holm-Bonferroni significance at $\alpha=0.05$ (HAC
+variance, HLN small-sample correction, single seed=0). Full HLN
+statistics and Holm-adjusted p-values for these three comparisons,
+plus a fourth (CNN-LSTM+residual vs. CNN-LSTM) this table omits, are
+in Table 6. At $h=1$ and $h=3$, XGBoost and LSTM are statistically
+indistinguishable on every array ($p_{holm}=1.0$ throughout); at
+$h=6$, LSTM's edge over XGBoost is significant on only one of three
+co-located arrays (array17). The residual stage is significant in the
+direction of the plain base model in 5 of 9 lstm\_residual cells, with
+no clean horizon-based split - array12 $h=1$ is significant, array12
+$h=6$ is not, despite being the longer horizon.
 
 Must convey: seed spread (the mean $\pm$ std columns) must never be
 read as a significance test on its own - the DM annotation is what

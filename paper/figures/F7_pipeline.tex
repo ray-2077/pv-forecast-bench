@@ -38,10 +38,21 @@
 % the extra yshift on a few main-chain nodes (added to leave room for
 % that node's branch children, which sit between it and the next
 % main-chain node) are estimated by hand, not measured from an actual
-% render. Branch nodes hold multi-line \scriptsize text and may grow
+% render. Branch nodes hold multi-line \tiny text and may grow
 % taller than their minimum height, which would need more clearance
 % than estimated here. Expect to loosen node distance / yshift values
 % after a first compile, not to rewrite the structure.
+%
+% COMPILE-FIX PASS (paper/overleaf, reported 92pt too tall for a full-
+% width float): node distance tightened 1.3/2.4cm -> 1.0/2.0cm, the
+% three main-chain extra yshifts (fork/models/json) each cut by roughly
+% a quarter, minimum node heights reduced, and fonts stepped down one
+% size throughout (\small -> \footnotesize for process/data/protocol,
+% \scriptsize -> \tiny for branch/hlbranch/side; the side note's minimum
+% width was also trimmed 6.8cm -> 6.2cm to match). Not compile-tested -
+% same caveat as above - so treat this as a first cut at the height
+% reduction, not a guaranteed fit; loosen again if branch text overflows
+% its box at \tiny.
 %
 % STYLE KEY (greyscale-safe throughout - no colour is load-bearing):
 %   double border      = a PROTOCOL decision point
@@ -53,21 +64,21 @@
 %   bold + double border (small box) = the HEADLINE metric choice
 
 \begin{tikzpicture}[
-    node distance=1.3cm and 2.4cm,
+    node distance=1.0cm and 2.0cm,
     process/.style={rectangle, draw, thick, minimum width=6.2cm,
-      minimum height=1.1cm, align=center, font=\small},
+      minimum height=0.9cm, align=center, font=\footnotesize},
     data/.style={rectangle, draw, thin, rounded corners, fill=black!7,
-      minimum width=6.2cm, minimum height=1cm, align=center, font=\small},
+      minimum width=6.2cm, minimum height=0.8cm, align=center, font=\footnotesize},
     protocol/.style={rectangle, draw, very thick, double,
-      minimum width=6.2cm, minimum height=1.2cm, align=center,
-      font=\small\bfseries},
-    branch/.style={rectangle, draw, thin, minimum width=4.8cm,
-      minimum height=1.4cm, align=center, font=\scriptsize},
+      minimum width=6.2cm, minimum height=1.0cm, align=center,
+      font=\footnotesize\bfseries},
+    branch/.style={rectangle, draw, thin, minimum width=4.4cm,
+      minimum height=1.15cm, align=center, font=\tiny},
     hlbranch/.style={rectangle, draw, very thick, double,
-      minimum width=4.8cm, minimum height=1.4cm, align=center,
-      font=\scriptsize\bfseries},
-    side/.style={rectangle, draw, dashed, thin, minimum width=6.8cm,
-      align=center, font=\scriptsize, inner sep=6pt},
+      minimum width=4.4cm, minimum height=1.15cm, align=center,
+      font=\tiny\bfseries},
+    side/.style={rectangle, draw, dashed, thin, minimum width=6.2cm,
+      align=center, font=\tiny, inner sep=4pt},
     arr/.style={-stealth, thick},
     thinarr/.style={-stealth, thin},
   ]
@@ -87,10 +98,10 @@
   \node[protocol, below=of proc] (split)
     {PROTOCOL\\Chronological split\\(never shuffled)};
 
-  \node[protocol, below=of split, yshift=-2.1cm] (fork)
+  \node[protocol, below=of split, yshift=-1.5cm] (fork)
     {PROTOCOL\\Feature regime fork\\(never mixed)};
 
-  \node[process, below=of fork, yshift=-1.6cm] (models)
+  \node[process, below=of fork, yshift=-1.1cm] (models)
     {Models\\[2pt]
      \textit{reference forecasts:}\\
      SmartPersistence, Climatology,\\
@@ -109,7 +120,7 @@
   \node[process, below=of metrics] (skill)
     {Skill score};
 
-  \node[data, below=of skill, yshift=-1.7cm] (json)
+  \node[data, below=of skill, yshift=-1.2cm] (json)
     {results/\textless run\_id\textgreater.json\\
      config, git hash, seed,\\
      metrics, timing -- the audit trail};
