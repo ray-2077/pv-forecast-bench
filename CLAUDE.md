@@ -50,10 +50,21 @@ check the installed version before writing code, not after it fails.
    is the headline metric, not raw RMSE and not skill vs persistence alone.
    Weight w fitted on VALIDATION only, per Yang et al. 2020 Solar Energy
    210:20-37. Skill vs plain persistence is reported alongside, because the
-   gap between them is a result: on array11 2014, XGBoost h=6 scores +0.659
-   vs persistence but +0.215 vs the convex reference. Persistence collapses
+   gap between them is a result: on array11 2014, XGBoost h=6 scores +0.652
+   vs persistence but +0.194 vs the convex reference. Persistence collapses
    at long horizons (MBE to -2.15 kW at midday, h=6) because the issue time
    falls near dawn and its k_p is stale.
+
+   CHANGE LOG (2026-08-10): this rule originally gave +0.659 vs
+   persistence and +0.215 vs the convex reference for the same
+   array11 2014 XGBoost h=6 cell. Those figures were STALE, not wrong
+   when written - they moved when TRAIN_YEARS narrowed from 2009-2013
+   to 2011-2013 (see "Data window" below), which refits the training
+   mean/gain/climatology and therefore every downstream skill number.
+   Current values (+0.652 / +0.194) are read directly from
+   results/reference_comparison.csv. The qualitative point the example
+   makes - persistence collapses at long horizons while the convex
+   reference does not - is unchanged; only the two decimals were stale.
 
 5. Lagged and oracle feature regimes must never be mixed. Any result using
 
