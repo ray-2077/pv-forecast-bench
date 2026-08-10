@@ -1,0 +1,61 @@
+% T6_dm_architecture.tex - DM significance, architecture comparisons, booktabs fragment.
+% NOT compile-tested (no LaTeX toolchain in this dev
+% environment) - same caveat as the other paper/tables/*.tex files.
+% Needs \usepackage{booktabs}.
+% SCOPE: 4 of the 21 pairwise comparisons in the full
+% table6_dm_lagged.csv - the ones RQ2's architecture results turn on.
+\begin{table*}[t]
+  \centering
+  \small
+  \caption{Diebold-Mariano significance (HAC variance, HLN small-sample correction, Holm-Bonferroni within cell), lagged regime, validation year 2014, seed 0, restricted to the four architecture comparisons RQ2's results turn on. LSTM vs. XGBoost is significant in 1 of 9 array x horizon cells (array17, $h=6$); CNN-LSTM vs. LSTM is significant in none; LSTM+residual vs. LSTM is significant in 5 of 9, with no clean horizon-based split; CNN-LSTM+residual vs. CNN-LSTM is significant in all 9, in the direction of the plain CNN-LSTM base. HLN $>0$ favours model\_1 in each comparison's fixed (model\_1, model\_2) ordering (XGBoost, LSTM, LSTM, CNN-LSTM respectively); the Better column names the favoured model directly so the sign need not be tracked separately.}
+  \label{tab:T6}
+  \begin{tabular}{ll rrl}
+    \toprule
+    Array & $h$ & HLN & $p_{holm}$ & Better \\
+    \midrule
+    \multicolumn{5}{l}{\textit{LSTM vs XGBoost}} \\
+    array11 & 1 & -0.66 & 1.0000 (ns) & xgboost \\
+    array11 & 3 & +0.67 & 1.0000 (ns) & lstm \\
+    array11 & 6 & +2.56 & 0.0728 (ns) & lstm \\
+    array12 & 1 & -0.09 & 1.0000 (ns) & xgboost \\
+    array12 & 3 & +0.54 & 1.0000 (ns) & lstm \\
+    array12 & 6 & +2.64 & 0.0585 (ns) & lstm \\
+    array17 & 1 & -0.45 & 1.0000 (ns) & xgboost \\
+    array17 & 3 & +0.05 & 1.0000 (ns) & lstm \\
+    array17 & 6 & +3.26 & 0.0114 (sig) & lstm \\
+    \addlinespace
+    \multicolumn{5}{l}{\textit{CNN-LSTM vs LSTM}} \\
+    array11 & 1 & +1.64 & 0.4078 (ns) & cnn_lstm \\
+    array11 & 3 & -1.69 & 0.3612 (ns) & lstm \\
+    array11 & 6 & -0.67 & 1.0000 (ns) & lstm \\
+    array12 & 1 & +0.91 & 1.0000 (ns) & cnn_lstm \\
+    array12 & 3 & -0.66 & 1.0000 (ns) & lstm \\
+    array12 & 6 & -2.30 & 0.1300 (ns) & lstm \\
+    array17 & 1 & +0.61 & 1.0000 (ns) & cnn_lstm \\
+    array17 & 3 & -1.54 & 0.7359 (ns) & lstm \\
+    array17 & 6 & -0.69 & 1.0000 (ns) & lstm \\
+    \addlinespace
+    \multicolumn{5}{l}{\textit{LSTM+res vs LSTM}} \\
+    array11 & 1 & -2.46 & 0.0689 (ns) & lstm \\
+    array11 & 3 & -3.45 & 0.0040 (sig) & lstm \\
+    array11 & 6 & -3.45 & 0.0056 (sig) & lstm \\
+    array12 & 1 & -2.89 & 0.0271 (sig) & lstm \\
+    array12 & 3 & -6.24 & 0.0000 (sig) & lstm \\
+    array12 & 6 & -2.09 & 0.1849 (ns) & lstm \\
+    array17 & 1 & -2.90 & 0.0228 (sig) & lstm \\
+    array17 & 3 & -1.54 & 0.7359 (ns) & lstm \\
+    array17 & 6 & -1.86 & 0.3159 (ns) & lstm \\
+    \addlinespace
+    \multicolumn{5}{l}{\textit{CNN-LSTM+res vs CNN-LSTM}} \\
+    array11 & 1 & -4.34 & 0.0001 (sig) & cnn_lstm \\
+    array11 & 3 & -4.50 & 0.0001 (sig) & cnn_lstm \\
+    array11 & 6 & -3.03 & 0.0199 (sig) & cnn_lstm \\
+    array12 & 1 & -3.02 & 0.0225 (sig) & cnn_lstm \\
+    array12 & 3 & -4.27 & 0.0001 (sig) & cnn_lstm \\
+    array12 & 6 & -3.45 & 0.0052 (sig) & cnn_lstm \\
+    array17 & 1 & -3.88 & 0.0011 (sig) & cnn_lstm \\
+    array17 & 3 & -3.76 & 0.0015 (sig) & cnn_lstm \\
+    array17 & 6 & -2.89 & 0.0350 (sig) & cnn_lstm \\
+    \bottomrule
+  \end{tabular}
+\end{table*}

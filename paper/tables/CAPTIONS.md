@@ -119,6 +119,96 @@ oracle regime's target-time upper bound, with no feature omitted.
 
 ---
 
+## T3 - seed-variance reproducibility
+
+Files: paper/tables/T3_seed_sweep.csv, paper/tables/T3_seed_sweep.tex
+Generating script: scripts/build_table3_seed_sweep.py
+Source: results/seed_sweep_summary_lagged.csv (45 rows: 5 models x 3
+arrays x 3 horizons, 5 seeds each) - a single-source-of-truth artifact
+already in the repo; this script only pivots and reformats it, no new
+computation.
+
+ADDED 2026-08-10: this table number was referenced throughout
+paper/WRITING_BRIEF.md's Section 7 plan and cited by name in the
+Results prose and in F1/F2's own captions ("(Table 3)"), but - despite
+this file's own intro paragraph listing it among tables that "already
+had generating scripts" - no script ever emitted paper/tables/
+T3_seed_sweep.tex until now. That intro line was true only of the
+CSV-computing script (scripts/aggregate_seed_sweep.py); no .tex
+fragment existed. Distinct from Table 5
+(scripts/build_table5_component_attribution.py), which joins this same
+skill data with Diebold-Mariano significance annotations for three
+comparisons - this table is the plain seed-spread statistic on its own.
+
+Caption:
+Table 3. Seed-variance reproducibility: mean skill_vs_convex +/- 1
+standard deviation across 5 seeds, lagged regime, validation year 2014,
+for all five models by array and horizon. This is a reproducibility
+statistic, not a significance test - seed spread measures whether a
+result recurs on retraining, not whether one model forecasts better
+than another on this evaluation sample (Table 6). The largest seed
+spread observed is 0.017 (CNN-LSTM+res, array17, h=6), of the same
+order as the largest architecture-to-architecture difference measured
+anywhere in this study (0.024, LSTM vs. XGBoost, array17, h=6, Table 6).
+
+Must convey: the mean +/- std columns here must never be read as a
+significance test on their own (CLAUDE.md wording caution;
+PROJECT_CHECKPOINT.md Finding 8's own retraction of exactly that
+substitution) - this table is reproducibility evidence, Table 6 is the
+significance evidence, and they answer different questions.
+
+---
+
+## T4 - protocol configurations (RQ1, headline)
+
+Files: paper/tables/T4_protocol.csv, paper/tables/T4_protocol.tex
+Generating script: scripts/build_table4_config_summary.py
+Source: results/table4_protocol_lagged.csv (54 rows: 3 arrays x 3
+horizons x 6 configs C1-C6) - computed by the pre-existing
+scripts/build_table4_protocol.py (a different script - see the naming
+note below); this script only reads that CSV and reformats a subset of
+it, no new computation.
+
+NAMING: not to be confused with scripts/build_table4_protocol.py, which
+computes results/table4_protocol_lagged.csv itself by re-running the
+protocol-sensitivity comparison directly against processed data. That
+script existed before this pass (see this file's own intro paragraph);
+it never emitted a .tex fragment. This script was deliberately named
+build_table4_config_summary.py, not build_table4_protocol.py, to avoid
+overwriting or being confused with the data-computing script.
+
+SCOPE, DELIBERATE: array11 only, not all three arrays - the full 54
+rows would not fit one float. array11 is the array used as the running
+example throughout the Results text for this exact table's four
+findings (night-hour inclusion, reference forecast, residual-stage
+fitting, weather regime); array12 and array17 show the same pattern and
+are reported in the Results prose, not in this table.
+
+Caption:
+Table 4. Protocol configurations, site 11 (array11), lagged regime,
+validation year 2014: sample count, normalised RMSE, skill score, and
+reference forecast for six evaluation-protocol configurations (C1-C6)
+at each of the three horizons. C1: daylight hours only, skill against
+the convex reference (the protocol used throughout this paper). C2:
+daylight hours only, skill against smart persistence. C3: hours where
+the convex reference has a prediction (not a full 24-hour cycle -
+included only to document this coverage restriction). C4: all 24
+hours, skill against smart persistence. C5 and C6: raw nRMSE at
+daylight-only and all-24-hours, no reference forecast. Comparing C5
+against C6 shows the closed-form night-hour deflation; comparing C1
+against C2 shows the reference-forecast effect - at h=6, skill falls
+from +0.652 against persistence to +0.194 against the convex
+reference, using the identical forecasts. Restricted to array11; sites
+12 and 17 show the same pattern (reported in the Results text).
+
+Must convey: this is the paper's headline table (RQ1) - a reader should
+be able to see, in one place, both the night-hour deflation (C5 vs C6)
+and the reference-choice effect (C1 vs C2) that the Introduction and
+Abstract both lead with. The array11-only restriction must read as a
+stated scope limit, not an omission.
+
+---
+
 ## T5 - component attribution (RQ2)
 
 Files: paper/tables/T5_component_attribution.csv,
@@ -151,6 +241,53 @@ actually establishes or fails to establish a claim
 (PROJECT_CHECKPOINT.md Finding 8's own retraction of exactly that
 substitution). A reader should be able to see, cell by cell, which
 apparent gaps are established and which are merely suggestive.
+
+---
+
+## T6 - Diebold-Mariano significance, architecture comparisons (RQ2)
+
+Files: paper/tables/T6_dm_architecture.csv, paper/tables/T6_dm_architecture.tex
+Generating script: scripts/build_table6_dm_summary.py
+Source: results/table6_dm_lagged.csv (189 rows: 9 cells x 21 pairs) -
+computed by the pre-existing scripts/build_table6_dm.py (a different
+script - see the naming note below); this script reads that CSV and
+restricts/reformats 4 of the 21 pairs, no new computation.
+
+NAMING: not to be confused with scripts/build_table6_dm.py, which
+computes results/table6_dm_lagged.csv itself by independently refitting
+all 7 comparators and running the full pairwise Diebold-Mariano test.
+That script existed before this pass (see this file's own intro
+paragraph); it never emitted a .tex fragment. This script was
+deliberately named build_table6_dm_summary.py, not build_table6_dm.py,
+to avoid overwriting or being confused with the data-computing script.
+
+SCOPE, DELIBERATE: 4 of the 21 pairwise comparisons per cell - lstm vs
+xgboost, cnn_lstm vs lstm, lstm_residual vs lstm, cnn_lstm_residual vs
+cnn_lstm - the ones RQ2's architecture-attribution results turn on.
+Three of these four are also embedded as compact annotation text inside
+Table 5's wider format; this table is the complementary full numeric
+version (clean HLN/p_holm columns, all 9 cells) plus the fourth
+comparison (cnn_lstm_residual vs cnn_lstm) that Table 5 does not carry.
+
+Caption:
+Table 6. Diebold-Mariano significance (HAC variance, HLN small-sample
+correction, Holm-Bonferroni within cell), lagged regime, validation
+year 2014, seed 0, restricted to the four architecture comparisons
+RQ2's results turn on. LSTM vs. XGBoost is significant in 1 of 9 array
+x horizon cells (array17, h=6); CNN-LSTM vs. LSTM is significant in
+none; LSTM+residual vs. LSTM is significant in 5 of 9, with no clean
+horizon-based split; CNN-LSTM+residual vs. CNN-LSTM is significant in
+all 9, in the direction of the plain CNN-LSTM base. HLN > 0 favours
+model_1 in each comparison's fixed (model_1, model_2) ordering
+(XGBoost, LSTM, LSTM, CNN-LSTM respectively); the Better column names
+the favoured model directly so the sign need not be tracked separately.
+
+Must convey: the same wording caution as Table 5 - this is the
+established/suggestive line the paper's own claims table draws (C1, C5,
+C9-C11 in paper/WRITING_BRIEF.md Section 2): the six-hour recurrence
+advantage and the residual-stage penalty are NOT uniformly significant
+across all nine cells, and a reader must be able to see exactly which
+cells are and are not, not just a pooled direction.
 
 ---
 
