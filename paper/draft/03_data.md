@@ -35,7 +35,7 @@ A conventional completeness audit passed site 7 for 2014 with 99.99
 percent coverage and 0.00 percent missing values in the power channel.
 The array had in fact produced no power from March to September 2014:
 48.41 percent of that year's daylight hours record exactly zero output,
-confirmed in the raw five-minute files, where between 48 and 97 percent
+confirmed in the raw five-minute files, where between 49 and 97 percent
 of clearly daylit records (GHI above 200 W m-2) are exactly zero. A
 further 48-day near-zero period occurs in November-December 2015, inside
 the test year.
@@ -53,7 +53,7 @@ included in the repository.
 Raw measurements are recorded at five-minute resolution with naive
 timestamps. Timestamps were localised to Australia/Darwin (UTC+9:30, no
 daylight saving); this was verified empirically rather than assumed: the
-mean hour of maximum measured global horizontal irradiance is 11.98,
+mean hour of maximum measured global horizontal irradiance is 11.97,
 against 12.00 for the modelled clear-sky series, agreeing to within one
 minute.
 

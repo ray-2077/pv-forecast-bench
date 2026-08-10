@@ -225,7 +225,9 @@ either residual-corrected variant at one fortieth to one forty-fifth of
 the cost. Fig. [VERIFY F6] plots skill against fitting time.
 
 The comparison is bounded by the scale of this study: fitting times are
-for a single laptop GPU on approximately 13,000 training samples, and
+for a single laptop GPU on approximately 11,200 daylight training rows
+per array after feature construction (11,209 to 11,218 depending on
+horizon), and
 inference cost, which dominates in operational deployment, is not
 measured.
 
@@ -242,7 +244,7 @@ horizon shape remains non-monotonic against the convex reference (0.210,
 persistence (0.266, 0.574, 0.701); residual correction reduces skill in
 all eighteen cells; the convolutional front end is worse than the plain
 recurrent model in all nine; and the oracle-to-lagged gap remains
-between 0.52 and 0.75.
+between 0.52 and 0.74.
 
 Two results change in magnitude and are reported as such.
 
@@ -295,7 +297,8 @@ other two arrays. Tracing further, climatology improved comparably for
 all three arrays, while persistence improved substantially for site 17
 at every horizon and worsened for sites 11 and 12 at the longer
 horizons. Site 17's convex reference weights persistence far more
-heavily (0.31 to 0.83, against 0.04 to 0.29), so it is structurally more
+heavily (0.31 to 0.83, against 0.04 to 0.77, with sites 11 and 12
+falling to 0.04 and 0.05 at six hours where site 17 remains at 0.31), so it is structurally more
 exposed to persistence's year-to-year variation.
 
 Reported skill therefore depends on how the reference behaves in the

@@ -4,7 +4,7 @@ A. Hardware and Software
 
 All experiments were run on a single laptop with an NVIDIA GeForce RTX 3070 Ti Laptop GPU (8 GB) under Windows 11. The software environment was Python 3.12.13 with numpy 2.5.1, pandas 3.0.5, scikit-learn 1.9.0, xgboost 3.3.0, PyTorch 2.11.0+cu128, pvlib 0.15.2, and statsmodels 0.14.6. Exact versions are recorded in every result file and pinned in requirements.txt.
 
-Gradient-boosted models were fitted on CPU. On a dataset of this size — roughly 13,000 usable training samples with 37 features — GPU execution offers no throughput benefit and introduces a source of nondeterminism, so the CPU histogram method was used throughout. Recurrent models were fitted on the GPU.
+Gradient-boosted models were fitted on CPU. On a dataset of this size — roughly 11,200 daylight training rows per array after feature construction (11,209 to 11,218 depending on horizon) with 37 features — GPU execution offers no throughput benefit and introduces a source of nondeterminism, so the CPU histogram method was used throughout. Recurrent models were fitted on the GPU.
 
 B. Hyperparameters
 
