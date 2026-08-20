@@ -1,0 +1,37 @@
+% T4_protocol.tex - protocol-inflation configurations (array11), booktabs fragment.
+% NOT compile-tested (no LaTeX toolchain in this dev
+% environment) - same caveat as the other paper/tables/*.tex files.
+% Needs \usepackage{booktabs}.
+% SCOPE: array11 only - see this script's module docstring for why.
+\begin{table*}[t]
+  \centering
+  \small
+  \caption{Protocol configurations, site 11 (array11), lagged regime, validation year 2014: sample count, normalised RMSE, skill score, and reference forecast for six evaluation-protocol configurations (C1-C6) at each of the three horizons. C1: daylight hours only, skill against the convex reference (the protocol used throughout this paper). C2: daylight hours only, skill against smart persistence. C3: hours where the convex reference has a prediction (not a full 24-hour cycle - included only to document this coverage restriction). C4: all 24 hours, skill against smart persistence. C5 and C6: raw nRMSE at daylight-only and all-24-hours, no reference forecast. Comparing C5 against C6 shows the closed-form night-hour deflation; comparing C1 against C2 shows the reference-forecast effect - at $h=6$, skill falls from $+0.652$ against persistence to $+0.194$ against the convex reference, using the identical forecasts. Restricted to array11; sites 12 and 17 show the same pattern (reported in the Results text).}
+  \label{tab:T4}
+  \begin{tabular}{cl rrrl}
+    \toprule
+    $h$ & Config & $n$ & nRMSE (\%) & skill & Reference \\
+    \midrule
+    1 & C1 & 3773 & 6.36 & +0.200 & convex \\
+     & C2 & 3773 & 6.36 & +0.252 & persistence \\
+     & C3 & 4255 & 6.00 & +0.207 & convex \\
+     & C4 & 8694 & 4.20 & +0.261 & persistence \\
+     & C5 & 3773 & 6.36 & -- & -- \\
+     & C6 & 8694 & 4.20 & -- & -- \\
+    \addlinespace
+    3 & C1 & 3762 & 8.97 & +0.276 & convex \\
+     & C2 & 3762 & 8.97 & +0.526 & persistence \\
+     & C3 & 4247 & 8.44 & +0.276 & convex \\
+     & C4 & 8694 & 5.90 & +0.528 & persistence \\
+     & C5 & 3762 & 8.97 & -- & -- \\
+     & C6 & 8694 & 5.90 & -- & -- \\
+    \addlinespace
+    6 & C1 & 3756 & 10.71 & +0.194 & convex \\
+     & C2 & 3756 & 10.71 & +0.652 & persistence \\
+     & C3 & 4245 & 10.07 & +0.194 & convex \\
+     & C4 & 8694 & 7.04 & +0.652 & persistence \\
+     & C5 & 3756 & 10.71 & -- & -- \\
+     & C6 & 8694 & 7.04 & -- & -- \\
+    \bottomrule
+  \end{tabular}
+\end{table*}

@@ -275,6 +275,33 @@ def print_pass_fail_summary(audit_df):
     print(f"\n{n_fail}/{n_total} array-years FAILED.")
 
 
+def _check_no_arrays_lost(existing_path, new_df):
+    """Refuse to overwrite dead_period_audit.csv with fewer distinct arrays
+    than it currently has.
+
+    ARRAYS above deliberately excludes array07 (it is audited separately in
+    PART 1, from the raw CSV, not from the processed-parquet pipeline), so a
+    plain unconditional overwrite of this file would silently delete
+    array07's rows on every rerun. CLAUDE.md's "Data window" section
+    requires those rows be kept as the evidence for array07's exclusion.
+    """
+    if not existing_path.exists():
+        return
+
+    existing_arrays = set(pd.read_csv(existing_path, usecols=["array"])["array"])
+    new_arrays = set(new_df["array"])
+    lost = existing_arrays - new_arrays
+    if lost:
+        raise RuntimeError(
+            f"Refusing to overwrite {existing_path}: it would drop rows for "
+            f"{sorted(lost)}, present in the existing file but not produced "
+            f"by this run. CLAUDE.md's 'Data window' section requires these "
+            f"rows be kept as the evidence for excluding those arrays. If "
+            f"removing them is intentional, edit the CSV deliberately and "
+            f"update CLAUDE.md - do not let this script drop them silently."
+        )
+
+
 def main():
     audit_raw_array07_2014()
 
@@ -284,6 +311,7 @@ def main():
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = RESULTS_DIR / "dead_period_audit.csv"
+    _check_no_arrays_lost(out_path, audit_df)
     audit_df.to_csv(out_path, index=False)
     print(f"\nSaved full table to {out_path}")
 

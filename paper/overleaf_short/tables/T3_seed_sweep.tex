@@ -1,0 +1,30 @@
+% T3_seed_sweep.tex - seed-variance reproducibility, booktabs fragment.
+% NOT compile-tested (no LaTeX toolchain in this dev
+% environment) - same caveat as the other paper/tables/*.tex files.
+% Needs \usepackage{booktabs}.
+% WORDING CAUTION: the mean +/- std columns here are a
+% reproducibility statistic, NOT a significance test - see this
+% script's module docstring and paper/WRITING_BRIEF.md Section 3
+% item 2. Significance is Table 6, not this table.
+\begin{table*}[t]
+  \centering
+  \small
+  \caption{Seed-variance reproducibility: mean skill\_vs\_convex $\pm$ 1 standard deviation across 5 seeds, lagged regime, validation year 2014, for all five models by array and horizon. This is a reproducibility statistic, not a significance test - seed spread measures whether a result recurs on retraining, not whether one model forecasts better than another on this evaluation sample (Table \ref{tab:T6}). The largest seed spread observed is 0.017 (CNN-LSTM+res, array17, $h=6$), of the same order as the largest architecture-to-architecture difference measured anywhere in this study (0.024, LSTM vs. XGBoost, array17, $h=6$, Table \ref{tab:T6}).}
+  \label{tab:T3}
+  \begin{tabular}{ll rrrrr}
+    \toprule
+    Array & $h$ & XGBoost & LSTM & CNN-LSTM & LSTM+res & CNN-LSTM+res \\
+    & & \multicolumn{5}{c}{skill\_vs\_convex, mean $\pm$ std (5 seeds)} \\
+    \midrule
+    array11 & 1 & +0.197$\pm$0.002 & +0.194$\pm$0.002 & +0.194$\pm$0.006 & +0.168$\pm$0.006 & +0.164$\pm$0.006 \\
+    array11 & 3 & +0.276$\pm$0.003 & +0.272$\pm$0.004 & +0.265$\pm$0.003 & +0.246$\pm$0.007 & +0.234$\pm$0.003 \\
+    array11 & 6 & +0.195$\pm$0.002 & +0.210$\pm$0.006 & +0.202$\pm$0.005 & +0.177$\pm$0.009 & +0.158$\pm$0.010 \\
+    array12 & 1 & +0.189$\pm$0.002 & +0.190$\pm$0.002 & +0.189$\pm$0.004 & +0.163$\pm$0.007 & +0.162$\pm$0.005 \\
+    array12 & 3 & +0.275$\pm$0.001 & +0.275$\pm$0.005 & +0.267$\pm$0.006 & +0.234$\pm$0.009 & +0.240$\pm$0.003 \\
+    array12 & 6 & +0.200$\pm$0.003 & +0.215$\pm$0.004 & +0.201$\pm$0.006 & +0.188$\pm$0.007 & +0.173$\pm$0.002 \\
+    array17 & 1 & +0.119$\pm$0.002 & +0.119$\pm$0.002 & +0.117$\pm$0.005 & +0.090$\pm$0.003 & +0.085$\pm$0.005 \\
+    array17 & 3 & +0.183$\pm$0.001 & +0.181$\pm$0.005 & +0.176$\pm$0.005 & +0.156$\pm$0.008 & +0.139$\pm$0.008 \\
+    array17 & 6 & +0.130$\pm$0.003 & +0.154$\pm$0.006 & +0.149$\pm$0.009 & +0.125$\pm$0.012 & +0.103$\pm$0.017 \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
