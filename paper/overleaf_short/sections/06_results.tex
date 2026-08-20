@@ -4,8 +4,8 @@
 Results are organised by research question, beginning with protocol
 sensitivity. All figures are reported for the validation year (2014)
 unless stated otherwise; Section VI-E reports the held-out test year
-(2015), which was evaluated once after every modelling and evaluation
-choice was frozen.
+(2015), evaluated once after every modelling and evaluation choice was
+frozen.
 
 \subsection{RQ1: Protocol Sensitivity}
 \label{sec:rq1}
@@ -46,9 +46,9 @@ because the reference forecast is deflated by the same factor.
 The choice of reference changes both the magnitude and the shape of
 reported skill. For gradient boosting on site 11 over daylight hours,
 skill against smart persistence is 0.252, 0.527 and 0.652 at one, three
-and six hours. Against the convex combination of climatology and
-persistence, over the same rows and the same forecasts, it is 0.200,
-0.276 and 0.194.
+and six hours; against the convex combination of climatology and
+persistence, over the same rows and forecasts, it is 0.200, 0.276 and
+0.194.
 
 At six hours, 70 percent of the apparent skill is attributable to the
 reference. The pattern holds on all three arrays: 0.244 to 0.190, 0.510
@@ -66,14 +66,12 @@ not of the model. Fig. \ref{fig:F1} shows this for all three arrays.
 \begin{figure*}[!t]
   \centering
   \includegraphics[width=\textwidth]{figures/F1_skill_vs_horizon.pdf}
-  \caption{Forecast skill against two reference forecasts, XGBoost, lagged
-  regime, validation year 2014. Skill against smart persistence (solid)
-  rises monotonically with horizon; skill against the optimal convex
-  combination of climatology and persistence (dashed) is non-monotonic
-  and peaks at 3 h. The apparent horizon trend is a property of the
-  reference, not the model. Error bars show one standard deviation across
-  five seeds and are smaller than the markers. Only XGBoost is shown; the
-  other four models follow the same pattern (Table \ref{tab:T3}).}
+  \caption{Forecast skill against two reference forecasts (smart
+  persistence, solid; convex climatology-persistence combination,
+  dashed), XGBoost, lagged regime, validation year 2014, all three
+  arrays. Error bars: one standard deviation across five seeds. Only
+  XGBoost shown; other models follow the same pattern (Table
+  \ref{tab:T5}).}
   \label{fig:F1}
 \end{figure*}
 
@@ -92,13 +90,13 @@ stronger in relative terms. This matters in Section VI-E.
 
 The residual correction stage can be fitted on out-of-fold training
 residuals, as specified in Section IV-F, or on validation residuals and
-then evaluated on validation. The second is in-sample evaluation of the
-correction stage. Its effect is the largest single protocol effect we
-measure.
+then evaluated on validation - the second is in-sample evaluation of
+the correction stage, and its effect is the largest single protocol
+effect we measure.
 
 On site 11 at a six-hour horizon with a recurrent base, the corrected
-scheme gives a skill score of 0.177 against the convex reference. The
-plain recurrent model without any correction gives 0.211. The in-sample
+scheme gives a skill score of 0.177 against the convex reference; the
+plain recurrent model without any correction gives 0.211; the in-sample
 scheme gives 0.545.
 
 A single choice in how residuals are constructed therefore turns a
@@ -113,8 +111,8 @@ about how much.
 
 Substituting measured weather at the target time for observations
 available at issue time raises skill against the convex reference from
-0.276 to 0.783 on site 11 at three hours. Across all arrays and
-horizons the gap ranges from 0.51 to 0.72.
+0.276 to 0.783 on site 11 at three hours; across all arrays and horizons
+the gap ranges from 0.51 to 0.72.
 
 This is not an achievable result and is not reported as one; it bounds
 what perfect weather knowledge would be worth. The bound is
@@ -124,36 +122,20 @@ between any two architectures under identical conditions.
 \begin{figure*}[!t]
   \centering
   \includegraphics[width=\textwidth]{figures/F2_skill_by_model_regime.pdf}
-  \caption{Skill against the convex reference, by model and by feature
-  regime (lagged: information available at issue time; oracle: measured
-  weather AT TARGET TIME, a perfect-forecast UPPER BOUND, never an
-  achievable result), array11, three horizons. Within either regime,
-  skill varies by at most 0.03-0.05 across the five models at a given
-  horizon (Table \ref{tab:T3}). Switching from lagged to oracle features moves
-  skill by 0.51-0.63 for every model and horizon shown here, and by
-  0.51-0.72 across all three arrays and 45 model x array x horizon cells
-  (Section \ref{sec:rq1}). Perfect weather knowledge is worth roughly an order of
-  magnitude more than any architecture choice tested here. array11 only;
-  the same lagged-vs-oracle gap holds on array12 and array17 (Table \ref{tab:T3}).}
+  \caption{Skill against the convex reference, by model and feature
+  regime (lagged vs. oracle, a perfect-forecast upper bound), array11,
+  three horizons. Within either regime, skill varies by at most
+  0.03-0.05 across models; switching regimes moves skill by 0.51-0.63
+  for every model/horizon shown (Table \ref{tab:T5}), matching array12
+  and array17.}
   \label{fig:F2}
 \end{figure*}
 
-\begin{figure*}[!t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/F5_feature_importance.pdf}
-  \caption{XGBoost feature importance (gain), top 10, array11, h=3, seed
-  0, validation year 2014, lagged vs oracle regime. Under oracle features
-  (measured weather AT TARGET TIME, a perfect-forecast UPPER BOUND,
-  prefixed oracle\_ so it cannot be mistaken for a legitimate feature),
-  oracle\_Global\_Horizontal\_Radiation dominates at 145.6 gain, more than
-  3x the next feature (p\_cs, 45.5). Under the lagged regime - the only
-  features available at real issue time - no single feature dominates:
-  the top four (solar\_elevation 502.1, hour\_cos 422.6, p\_cs 370.9,
-  solar\_zenith 110.3) are all deterministic solar-geometry features, not
-  measured weather, and the top two differ by less than 20\%. array11,
-  h=3, seed 0 only.}
-  \label{fig:F5}
-\end{figure*}
+Under the oracle regime, XGBoost's top feature by gain is measured
+global horizontal irradiance at the target time, more than 3x the next
+feature; under the lagged regime no single feature dominates and the
+top four are all deterministic solar-geometry features, not measured
+weather (full feature-importance figures in the repository).
 
 \subsection{RQ2: Component Attribution}
 \label{sec:rq2}
@@ -161,11 +143,7 @@ between any two architectures under identical conditions.
 We decompose the hybrid architecture by measuring each component against
 the same protocol, with five seeds per configuration.
 
-\input{tables/T3_seed_sweep.tex}
-
 \input{tables/T5_component_attribution.tex}
-
-\input{tables/T6_dm_architecture.tex}
 
 \subsubsection{Recurrence}
 
@@ -202,7 +180,9 @@ array-horizon cells.
 Under the corrected out-of-fold scheme, residual correction reduces
 skill in all eighteen array-horizon-base cells, by 0.024 to 0.046. With
 a convolutional base the penalty is Holm-significant in all nine cells;
-with a recurrent base it is significant in five of nine.
+with a recurrent base it is significant in five of nine, with no clean
+horizon-based split - array12 at one hour is significant, array12 at
+six hours is not, despite the longer horizon.
 
 The magnitude, however, depends on a construction detail. With three
 training years the expanding window yields only two folds, whose base
@@ -215,35 +195,21 @@ and smallest at six.
 A diagnostic on the correction stage itself explains the residual
 penalty at long horizons. The correlation between the predicted and
 actual residual is 0.76 out of fold but 0.10 on validation at three
-hours, and 0.79 against 0.04 at six. The corrector is not learning
-nothing; it is miscalibrated. Adding a correction $p$ to a base with
+hours, and 0.79 against 0.04 at six - the corrector is not learning
+nothing, it is miscalibrated. Adding a correction $p$ to a base with
 residual $r$ changes mean squared error by $-2\rho\sigma_r\sigma_p +
 \sigma_p^2$, so it helps only when $\sigma_p < 2\rho\sigma_r$. The observed
 ratio $\sigma_p / \sigma_r$ is 0.33 to 0.38 across configurations against a
 break-even of 0.07 to 0.26 - the correction is applied at between 1.2
-and 4.7 times the magnitude its out-of-sample correlation justifies. The
-overconfidence is worst at six hours, which is where the penalty
-survives fold correction.
+and 4.7 times the magnitude its out-of-sample correlation justifies, and
+the overconfidence is worst at six hours, where the penalty survives
+fold correction.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/F4_residual_distribution.pdf}
-  \caption{Forecast residual (y\_true - y\_pred) distribution before and
-  after the residual-correction stage, LSTM base, array11, h=6, seed 0,
-  lagged regime, validation year 2014 (n=3679 daylight, non-outage
-  hours). The residual stage does not tighten the error distribution:
-  mean residual moves from -0.008 kW (plain LSTM) to +0.014 kW
-  (corrected), and its standard deviation widens from 0.516 kW to 0.538
-  kW. This matches the overconfidence mechanism identified in Finding 11:
-  at h=6, the residual corrector's predicted-to-actual correlation on
-  validation is only $\rho_{val}=+0.036$ (versus +0.79 out-of-fold, the split
-  it was fit on), and its correction is sized $\sigma_p/\sigma_r = 0.34$,
-  roughly 4.7x the break-even ratio of 0.072 a correction needs to help.
-  It is not a well-calibrated correction lightly attenuated - it is a
-  correction sized for a relationship that does not transfer to
-  validation.}
-  \label{fig:F4}
-\end{figure}
+The residual stage's error distribution before and after correction
+(LSTM base, array11, h=6) is reported in full in the repository: mean
+residual moves from -0.008 kW to +0.014 kW and its standard deviation
+widens from 0.516 to 0.538 kW, consistent with the overconfidence
+mechanism above.
 
 \subsubsection{The full architecture}
 
@@ -269,31 +235,14 @@ the highest normalised error of any class, 16.2 percent against 11.7 for
 partly cloudy and 5.4 for clear - but the highest skill after clear
 conditions, 0.388 against 0.056. At six hours the pattern is stronger:
 overcast error reaches 24.3 percent with skill 0.267, while partly
-cloudy error is 11.7 percent with skill 0.035.
-
-\begin{figure*}[!t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/F3_error_by_sky_condition.pdf}
-  \caption{Forecast error and skill by sky condition (XGBoost, LSTM, LSTM
-  + residual; array11, h=3, validation year 2014). Left: nRMSE (percent
-  of nameplate capacity). Right: skill against the optimal convex
-  combination of climatology and persistence. nRMSE and skill rank the
-  sky classes differently: overcast has the worst nRMSE of the three
-  classes but retains high skill, while partly-cloudy skies have middling
-  nRMSE but near-zero skill. Overcast skies are temporally stable hour to
-  hour, so the convex reference already tracks them well; partly-cloudy
-  skies produce irradiance ramps that lagged features cannot anticipate.
-  array11, h=3 only; the same ranking holds in all 9 array x horizon
-  cells with zero exceptions (Table \ref{tab:T7}).}
-  \label{fig:F3}
-\end{figure*}
-
-\input{tables/T7_sky_condition.tex}
+cloudy error is 11.7 percent with skill 0.035. The same ranking holds in
+all nine array-horizon cells with zero exceptions (full breakdown in the
+repository).
 
 Overcast conditions are the hardest to forecast in absolute terms, and
 the reference forecast fails there too, so a model retains skill. Partly
 cloudy conditions produce middling absolute error but almost no skill,
-because the model and the reference perform comparably. Reported by
+because the model and the reference perform comparably: reported by
 error alone, overcast would be identified as the problem regime;
 reported by skill, partly cloudy is the regime in which modelling adds
 nothing.
@@ -305,9 +254,9 @@ desert site is largely a clear-sky skill score.
 
 Residual correction is worse than the plain recurrent model in eight of
 nine sky-class cells, independent confirmation of Section VI-B on a
-different partition of the same data. We note that the overcast class
-comprises 714 of 11,055 daylight hours and no significance test was
-performed within sky-condition subsets.
+different partition of the same data. The overcast class comprises 714
+of 11,055 daylight hours, and no significance test was performed within
+sky-condition subsets.
 
 \subsection{RQ4: Accuracy per Unit Compute}
 \label{sec:rq4}
@@ -322,34 +271,11 @@ Gradient boosting therefore achieves skill statistically
 indistinguishable from the recurrent model at one and three hours, at
 approximately one eighteenth of the training cost, and skill higher than
 either residual-corrected variant at one fortieth to one forty-fifth of
-the cost. Fig. \ref{fig:F6} plots skill against fitting time.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/F6_skill_vs_compute.pdf}
-  \caption{Skill against the convex reference vs. mean training compute,
-  array11, h=6, lagged regime, validation year 2014. x-axis: mean
-  fit\_seconds across all 45 lagged runs per model (5 models x 3 arrays x
-  3 horizons x 5 seeds), log scale. y-axis: mean skill\_vs\_convex at this
-  array/horizon cell, 5 seeds. XGBoost reaches skill 0.195 in 0.55 s;
-  LSTM reaches a higher 0.210 in 10.11 s, roughly 18x the compute for a
-  gain of +0.015 that is not Diebold-Mariano significant on this array
-  (Table \ref{tab:T6}: array11 h=6, p\_holm=0.073). The two residual variants cost
-  more compute still (22.7 s, 25.0 s) for lower skill than their own base
-  models. array11, h=6, lagged only. Mean fit\_seconds is a global
-  average, so the compute gap is the same at every array and horizon;
-  the skill gap it buys is largest here (h=6) and smaller still at h=1
-  and h=3, where XGBoost and LSTM are statistically indistinguishable
-  everywhere (Table \ref{tab:T6}).}
-  \label{fig:F6}
-\end{figure}
-
-The comparison is bounded by the scale of this study: fitting times are
-for a single laptop GPU on approximately 11,200 daylight training rows
-per array after feature construction (11,209 to 11,218 depending on
-horizon), and
-inference cost, which dominates in operational deployment, is not
-measured.
+the cost (skill-vs-compute plot in the repository). The comparison is
+bounded by the scale of this study: fitting times are for a single
+laptop GPU on approximately 11,200 daylight training rows per array
+(11,209 to 11,218 depending on horizon), and inference cost, which
+dominates in operational deployment, is not measured.
 
 \subsection{Test-Split Confirmation}
 \label{sec:results-test-split}

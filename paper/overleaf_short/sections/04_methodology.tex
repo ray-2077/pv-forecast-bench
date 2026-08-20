@@ -3,27 +3,11 @@
 
 This section describes the evaluation protocol before the models. That
 ordering is deliberate: the protocol is the contribution, and the models
-are instruments for measuring what the protocol choices are worth.
-
-\begin{figure*}[t]
-  \centering
-  \resizebox{\textwidth}{!}{\input{figures/F7_pipeline.tex}}
-  \caption{The evaluation pipeline, from raw 5-minute DKASC data to skill
-  scores, with every protocol decision point marked (double-bordered
-  boxes): the chronological split (train/validation/test boundaries,
-  what is fit where, test touched once at the end); the lagged/oracle
-  feature-regime fork (never mixed in one feature matrix); the daylight
-  filter (applied at evaluation, not baked into the splits); and the
-  choice of reference forecast (smart persistence vs. the optimal convex
-  combination of climatology and persistence, the headline metric per
-  Yang et al. 2020). The clear-sky chain (solar position, clear-sky
-  irradiance, daylight mask, clear-sky power) is shown as a side input
-  feeding the feature build, split into its deterministic
-  geometry/irradiance half and its train-only-fit power half. Every
-  protocol choice on this diagram is a knob this paper's Table \ref{tab:T4}
-  (protocol-inflation results) turns.}
-  \label{fig:F7}
-\end{figure*}
+are instruments for measuring what the protocol choices are worth. The
+evaluation pipeline - the chronological split, the lagged/oracle
+feature-regime fork, the daylight filter, and the choice of reference
+forecast - is diagrammed in full in the repository (available at an
+anonymised repository, link withheld for review).
 
 \subsection{Forecast Task and Alignment}
 \label{sec:methodology-task-alignment}
@@ -54,22 +38,26 @@ failure the convention exists to prevent.
 \label{sec:eval-protocol}
 
 We state the protocol as a set of explicit rules, in the spirit of the
-model information sheets proposed by Kapoor and Narayanan \cite{kapoor2023leakage}, and
-map each to the leakage type it addresses in their taxonomy.
+model information sheets proposed by Kapoor and Narayanan
+\cite{kapoor2023leakage}.
 
 1. Splits are chronological and never shuffled. Training is 2011-2013,
-   validation 2014, test 2015, each a whole calendar year. This
-   addresses temporal leakage [L3.1].
+   validation 2014, test 2015, each a whole calendar year.
 
 2. Evaluation is restricted to daylight hours, defined as solar
-   elevation above 10 degrees. Night hours contain near-zero power that
-   every model predicts correctly, and their inclusion is treated as a
-   protocol variable rather than a default (Section \ref{sec:rq1}).
+   elevation above 10 degrees (80 degree zenith) - stricter than the 85
+   degree zenith Yang et al. describe as typical practice
+   \cite{yang2020verification}, because at low elevation the clear-sky
+   index becomes unstable as measurement uncertainty and clear-sky
+   model error grow against a small denominator. Night hours contain
+   near-zero power that every model predicts correctly, and their
+   inclusion is treated as a protocol variable rather than a default
+   (Section \ref{sec:rq1}).
 
 3. All scalers and feature statistics are fitted on training data only.
    The scaler implementation permits a single fit per instance and
    raises on a second call, so refitting on validation or test is not
-   reachable by accident. This addresses preprocessing leakage [L1.2].
+   reachable by accident.
 
 4. The headline metric is the root-mean-square-error skill score against
    the optimal convex combination of climatology and persistence,
@@ -86,80 +74,45 @@ map each to the leakage type it addresses in their taxonomy.
 
 6. The residual correction stage is fitted on out-of-fold residuals
    generated within the training period, described in Section IV-F.
-   This addresses evaluating a stage on the data it was fitted to
-   [L1.1].
 
 7. Every experiment writes a machine-readable record containing its
    configuration, all metrics, timings, sample counts, random seed, the
    git commit hash, and a flag indicating whether the working tree was
    clean at execution time.
 
-No hyperparameter tuning was performed, on any split, for any model.
-This removes a class of leakage analogous to [L1.3], which Kapoor and
-Narayanan \cite{kapoor2023leakage} define for feature selection informed by test-set performance;
-the mechanism - using held-out performance to make a modelling choice -
-is the same. The cost of this decision is noted in Section \ref{sec:threats-to-validity}.
-
-Two properties of this dataset are worth naming against the same
-taxonomy. The three arrays are co-located and share a weather station,
-so their errors are not independent across arrays. This is not [L3.2]
-in Kapoor and Narayanan's sense, which concerns nonindependence between
-training and test samples; it is a separate dependence, across the
-units over which results are aggregated, and it constrains how many
-independent observations an array-by-horizon table contains. And three
-recorded channels
-- cumulative delivered energy, performance ratio, and average phase
-current - are deterministic functions of the target and are excluded as
-illegitimate features [L2]. We note that two of the 27 papers we surveyed use
-features of this kind as model inputs, one of them on this same dataset.
+No hyperparameter tuning was performed, on any split, for any model;
+the cost of this decision is noted in Section
+\ref{sec:threats-to-validity}. Each rule above addresses a specific
+leakage type in the taxonomy of Kapoor and Narayanan
+\cite{kapoor2023leakage}, mapped in full in the repository.
 
 \subsection{Feature Regimes}
 \label{sec:methodology-feature-regimes}
 
-Two feature regimes are constructed, and the distinction between them is
-the second protocol axis we measure.
+Two feature regimes are constructed, and the distinction between them
+is the second protocol axis we measure. The lagged regime contains 37
+features in three groups: nine deterministic at target time (clear-sky
+power and irradiance, solar geometry at the hour midpoint, cyclic
+hour-of-day and day-of-year encodings), nineteen observations at or
+before the issue time (measured power, clear-sky indices at the issue
+time, two preceding hours, and a fixed 24-hour lag, five weather
+channels, and staleness indicators), and nine rolling statistics whose
+windows terminate at the issue time. The oracle regime adds five
+measured weather channels at the target time, giving 42 features; it
+is not a forecasting method but bounds what perfect weather knowledge
+would be worth, the quantity against which architectural gains should
+be judged (full feature list in the repository).
 
-The lagged regime contains 37 features in three groups. Nine are
-deterministic at target time: clear-sky power and irradiance, solar
-zenith, azimuth and elevation evaluated at the hour midpoint, and cyclic
-encodings of hour-of-day and day-of-year. Nineteen are observations
-taken at or before the issue time: measured power, the clear-sky indices
-of power and of irradiance at the issue time and the two preceding
-hours, the same three quantities at a fixed 24-hour lag, five weather
-channels at the issue time, and two indicators recording how stale the
-clear-sky index is. Nine are rolling statistics whose windows terminate
-at the issue time.
-
-The oracle regime adds five measured weather channels at the target
-time, giving 42 features. It is not a forecasting method. It bounds what
-perfect weather knowledge would be worth, which is the quantity against
-which architectural gains should be judged.
-
-\input{tables/T2_features.tex}
-
-Two construction details are stated because they are consequential and
-rarely reported. First, the daily lag is a fixed 24 hours at every
-horizon rather than a horizon-relative offset, so that it remains
-aligned to hour-of-day; a horizon-relative lag would point at 06:00 when
-forecasting 12:00 at a six-hour horizon, losing the diurnal alignment
-that makes the feature useful.
-
-Second, the clear-sky index is undefined at night, and at a six-hour
-horizon a midday target is issued near dawn. Constructing lag features
-naively therefore discards most midday targets at long horizons: daylight
-target retention was 75.6, 56.5 and 28.0 percent at horizons of 1, 3 and
-6 hours, with targets in hours 8 to 13 dropped on essentially every day
-of the training period. Models and reference forecasts would then have
-been evaluated on different populations, with nothing in the metrics to
-indicate it. We forward-fill the clear-sky indices with a 24-hour limit
-before shifting - propagating past values forward in time only, which
-cannot leak - and add explicit staleness features so a model can
-discount an old observation. Rolling statistics of the clear-sky indices
-are computed over the last N valid observations rather than N wall-clock
-hours, since a wall-clock window ending before dawn contains no valid
-samples. Forward-filling the input to a rolling standard deviation would
-instead report zero variability where the truth is no recent
-observation. With these changes retention is 99.0 percent at all three
+Two construction details matter. The daily lag is a fixed 24 hours at
+every horizon, not a horizon-relative offset, so it stays aligned to
+hour-of-day. And the clear-sky index is undefined at night, so at a
+six-hour horizon - where a midday target is issued near dawn -
+constructing lag features naively discards most midday targets:
+daylight target retention was 75.6, 56.5 and 28.0 percent at horizons
+of 1, 3 and 6 hours. We forward-fill the clear-sky indices with a
+24-hour limit before shifting, add explicit staleness features, and
+compute rolling statistics over the last N valid observations rather
+than N wall-clock hours; retention is then 99.0 percent at all three
 horizons.
 
 \subsection{Reference Forecasts}
@@ -202,81 +155,57 @@ features - while the reference cannot.
 
 We report mean bias error, mean absolute error, root-mean-square error,
 root-mean-square error normalised by nameplate capacity, and the skill
-score
-
-  s = 1 - RMSE\_forecast / RMSE\_reference
-
-Normalisation is by nameplate capacity rather than by mean observed
-power, so that values are comparable across arrays of different sizes.
-We note that normalised error is not comparable across studies with
-different data regardless of the normaliser \cite{yang2020verification}, and make
-no cross-study accuracy comparisons on that basis.
-
-All metrics for a given cell are computed on the intersection of
-timestamps for which every compared forecast produced a prediction, and
-that sample count is recorded with every result. Documented outage hours
-are excluded before this intersection is formed.
+score $s = 1 - \mathrm{RMSE}_{forecast} / \mathrm{RMSE}_{reference}$.
+Normalisation is by nameplate capacity rather than mean observed power,
+so values are comparable across arrays of different sizes; normalised
+error is not comparable across studies with different data regardless
+of the normaliser \cite{yang2020verification}, and we make no
+cross-study accuracy comparisons on that basis. All metrics for a
+given cell are computed on the intersection of timestamps for which
+every compared forecast produced a prediction, with documented outage
+hours excluded first; that sample count is recorded with every result.
 
 \subsection{Models}
 \label{sec:methodology-models}
 
 Five models are evaluated, chosen to decompose a hybrid architecture
-rather than to survey the field.
-
-Gradient boosting over the tabular feature matrix serves as the
-non-recurrent reference point. No scaling is applied, since trees are
-invariant to monotone transforms of individual features; there is
-consequently nothing to fit on training data and nothing to leak.
-
-The recurrent model applies a single LSTM layer over a 24-step sequence
-of nine per-hour channels ending at the issue time, concatenates the
-final hidden state with the deterministic target-time features, and maps
-the result through a two-layer head. The deterministic features are
-necessary: without them the network has no representation of what time
-of day it is forecasting for.
-
-The con\-vo\-lu\-tion\-al-recurrent model prepends a one-dimensional
-convolution over the time axis of the same sequence. Same-length padding
-is used, which does not leak, because the entire sequence window lies at
-or before the issue time by construction.
+rather than to survey the field. Gradient boosting over the tabular
+feature matrix is the non-recurrent reference point; trees are
+invariant to monotone feature transforms, so nothing is fit on training
+data and nothing can leak. The recurrent model applies a single LSTM
+layer over a 24-step sequence of nine per-hour channels ending at the
+issue time, concatenates the final hidden state with the deterministic
+target-time features, and maps the result through a two-layer head -
+the deterministic features are necessary, since without them the
+network has no representation of what time of day it is forecasting
+for. The con\-vo\-lu\-tion\-al-recurrent model prepends a
+one-dimensional convolution over the same sequence with same-length
+padding, which does not leak because the window lies at or before the
+issue time by construction.
 
 The two residual-corrected models wrap either recurrent base with a
-gradient-boosted stage fitted to the base model's residuals. The
-construction of those residuals is the third protocol axis we measure.
-Residuals are generated out of fold within the training period by an
-expanding window: a base model is fitted on the first training year and
-predicts the second, then fitted on the first two and predicts the
-third, and the out-of-sample residuals are pooled. The base model is
-then refitted once on the full training period, with validation used
-only for early stopping. Each fold's base model sees less data than the
-deployed one, so the pooled residuals are slightly pessimistic, which is
-the correct direction to err.
-
-The alternative - fitting the residual stage on validation residuals -
-is reachable behind an explicit flag that emits a warning and records
-its use in the run configuration. It is included because measuring what
-it produces is one of this paper's results, not because it is a method
-we endorse.
+gradient-boosted stage fitted to the base model's residuals, generated
+out of fold within the training period by an expanding window (fit on
+year one, predict year two; fit on years one-two, predict year three;
+residuals pooled), then the base model is refitted once on the full
+training period, with validation used only for early stopping - each
+fold's base model sees less data than the deployed one, so the pooled
+residuals run slightly pessimistic, the correct direction to err.
+Fitting the residual stage on validation residuals instead is reachable
+behind an explicit flag that warns and records its use; it exists so we
+can measure what it produces, not because we endorse it.
 
 \subsection{Significance Testing}
 \label{sec:methodology-significance-testing}
 
 Model comparisons use the Diebold-Mariano test on paired squared-error
-series \cite{diebold1995comparing}. Because h-step-ahead forecast errors are
-autocorrelated by construction, the long-run variance is estimated with
-a Bartlett kernel truncated at lag h-1. The small-sample correction of
-Harvey, Leybourne and Newbold \cite{harvey1997testing} is applied and the statistic
-compared against Student's t with n-1 degrees of freedom. Within each
-array-horizon cell, twenty-one pairwise comparisons are made across the
-five models and two of the reference forecasts, and p-values are
-adjusted by the Holm-Bonferroni procedure.
+series \cite{diebold1995comparing}; because h-step-ahead errors are
+autocorrelated by construction, the long-run variance uses a Bartlett
+kernel truncated at lag h-1, with the small-sample correction of
+Harvey, Leybourne and Newbold \cite{harvey1997testing} and
+Holm-Bonferroni-adjusted p-values across the twenty-one pairwise
+comparisons per array-horizon cell.
 
-Seed variance across five seeds is reported separately and is not used
-as a significance test. The two quantities answer different questions:
-seed spread measures whether a result would recur on retraining, while
-the Diebold-Mariano test measures whether one forecast is better than
-another on this evaluation sample. An earlier version of this analysis
-used a two-standard-deviation seed heuristic in place of a paired test,
-and doing so changed the reported significance of one architecture
-comparison; we report the heuristic here as a methodological note rather
-than using it as a test.
+Seed variance across five seeds is reported separately and is not a
+significance test: it measures whether a result recurs on retraining,
+not whether one forecast beats another on this evaluation sample.

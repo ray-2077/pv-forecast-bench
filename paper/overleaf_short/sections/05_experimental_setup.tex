@@ -4,29 +4,51 @@
 \subsection{Hardware and Software}
 \label{sec:experimental-hardware-software}
 
-All experiments were run on a single laptop with an NVIDIA GeForce RTX 3070 Ti Laptop GPU (8 GB) under Windows 11. The software environment was Python 3.12.13 with numpy 2.5.1, pandas 3.0.5, scikit-learn 1.9.0, xgboost 3.3.0, PyTorch 2.11.0+cu128, pvlib 0.15.2, and statsmodels 0.14.6. Exact versions are recorded in every result file and pinned in requirements.txt.
-
-Gradient-boosted models were fitted on CPU. On a dataset of this size — roughly 11,200 daylight training rows per array after feature construction (11,209 to 11,218 depending on horizon) with 37 features — GPU execution offers no throughput benefit and introduces a source of nondeterminism, so the CPU histogram method was used throughout. Recurrent models were fitted on the GPU.
+All experiments ran on a single laptop with an NVIDIA GeForce RTX 3070
+Ti Laptop GPU (8 GB) under Windows 11, with Python 3.12.13, numpy
+2.5.1, pandas 3.0.5, scikit-learn 1.9.0, xgboost 3.3.0, PyTorch
+2.11.0+cu128, pvlib 0.15.2, and statsmodels 0.14.6; exact versions are
+recorded in every result file and pinned in requirements.txt.
+Gradient-boosted models were fitted on CPU - at this dataset size
+(roughly 11,200 daylight training rows per array, 37 features), GPU
+execution offers no throughput benefit and introduces nondeterminism -
+and recurrent models on the GPU.
 
 \subsection{Hyperparameters}
 \label{sec:experimental-hyperparameters}
 
-Hyperparameters were fixed a priori and not tuned. A search of
-the repository confirms no grid search, no tuning loop, and no
-hyperparameter default changed after its introduction. XGBoost used 500 estimators, maximum depth 6, learning rate 0.05, subsample 0.8, column subsample 0.8, and early stopping after 50 rounds without improvement on the validation split. Both recurrent models used a single layer of 64 hidden units, sequence length 24, batch size 256, learning rate $10^{-3}$ with Adam, a maximum of 100 epochs, and early stopping with patience 10 on validation RMSE. The CNN-LSTM added a 1-D convolutional front end with 32 filters and kernel size 3. The residual stage used 300 estimators, maximum depth 4, learning rate 0.05 — deliberately smaller than the standalone gradient-boosted model, since it fits residuals rather than the target.
-
-Deliberately small networks were chosen because the training set is small by deep-learning standards; larger capacity would invite overfitting rather than improve the comparison.
+Hyperparameters were fixed a priori and not tuned; a repository search
+confirms no grid search, no tuning loop, and no default changed after
+its introduction. XGBoost used 500 estimators, maximum depth 6,
+learning rate 0.05, subsample 0.8, column subsample 0.8, and early
+stopping after 50 rounds without improvement on validation. Both
+recurrent models used a single layer of 64 hidden units, sequence
+length 24, batch size 256, learning rate $10^{-3}$ with Adam, up to
+100 epochs, and early stopping with patience 10 on validation RMSE; the
+CNN-LSTM added a 1-D convolutional front end with 32 filters and kernel
+size 3. The residual stage used 300 estimators, maximum depth 4,
+learning rate 0.05 - deliberately smaller than the standalone
+gradient-boosted model, since it fits residuals rather than the
+target. Networks were kept small deliberately: the training set is
+small by deep-learning standards, and larger capacity would invite
+overfitting rather than improve the comparison.
 
 \subsection{Seeds and Reproducibility}
 \label{sec:experimental-seeds}
 
-Every configuration was run with five random seeds (0–4). Python, NumPy and PyTorch seeds were set explicitly and recorded. Full determinism was not achieved: torch.nn.LSTM provides no deterministic CUDA backward pass, and result files record full\_determinism\_achieved = false for all recurrent runs. This is the reason seed variance is reported alongside every recurrent result.
-
-Each run writes a JSON record containing its configuration, all metrics, wall-clock timings, sample counts, the git commit hash, and a flag indicating whether the working tree was clean at execution time. That flag reads true for most runs, because run records are themselves version controlled: the tree is clean when a sweep begins and becomes dirty as soon as the sweep writes its first record. The final test-split sweep was gated on a clean tree at its initial launch, commit 1aec37b, and the script refuses to execute otherwise; it was later resumed after a pause and gated clean again at commit 5acc0ca. The recorded per-run flags reflect the sweep's own accumulating output rather than uncommitted source changes.
-
-All figures and tables are generated from these records by scripts in the repository; no number in this paper was entered by hand. This was verified on [DATE]: all 21 generated outputs were deleted and regenerated from a clean state by 11 scripts; all table files and PNG previews were byte-identical to the committed versions, and the six PDF figures differed only in matplotlib's embedded creation timestamp.
+Every configuration was run with five random seeds (0-4); Python,
+NumPy and PyTorch seeds were set explicitly and recorded. Full
+determinism was not achieved - torch.nn.LSTM provides no deterministic
+CUDA backward pass, and result files record
+full\_determinism\_achieved = false for all recurrent runs - which is
+why seed variance is reported alongside every recurrent result. All
+figures and tables are generated from these records by repository
+scripts and were verified byte-identical on regeneration from a clean
+state (Section I).
 
 \subsection{Data and Code Availability}
 \label{sec:experimental-availability}
 
-The DKASC data are openly available from [URL]. All code, configuration, and the complete set of [N] run records are available at [REPO URL].
+The DKASC data are openly available \cite{dkasolarcentre}. All code,
+configuration, and the complete set of 900 run records are available
+at an anonymised repository, link withheld for review.

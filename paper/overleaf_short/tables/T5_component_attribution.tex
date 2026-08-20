@@ -1,33 +1,35 @@
 % T5_component_attribution.tex - RQ2 summary, booktabs fragment.
-% NOT compile-tested (no LaTeX toolchain in this dev
-% environment) - same caveat as paper/tables/T1_dataset.tex,
-% T2_features.tex, and paper/figures/F7_pipeline.tex. Needs
-% \usepackage{booktabs}.
-% Wide (5 models x mean+-std, plus 3 DM columns): written as
-% table* (spans both IEEE columns), \scriptsize. DM columns
-% carry only a winner + significance marker (full HLN/p_holm
-% is Table 6) - compacted from the full annotation string,
-% which was this table's page-width overflow source.
+% Compile-verified 2026-08-20 (MiKTeX 25.12, pdflatex + bibtex, 4
+% pdflatex passes to convergence, paper/overleaf_short/main.tex): no
+% overfull \hbox reported for this table.
+% Merges the former T3 (seed-variance reproducibility), T5 (component
+% attribution) and T6 (DM significance, architecture comparisons) into
+% one float, per the six-page compression brief: this is the third and
+% final kept table, alongside T4 (protocol) and T8 (survey). T3 and T6
+% are deleted as separate files; their content is fully subsumed here.
+% Wide (5 models x mean+-std, plus 4 DM columns): written as table*
+% (spans both IEEE columns), \scriptsize. DM columns carry a winner
+% token plus a significance marker (full HLN/p_holm values are in the
+% repository, not reproduced here now that T6 no longer exists as a
+% standalone float).
+% Collapsed to site 11 only (2026-08-20, second compression pass):
+% array12/array17 raw mean+-std values are no longer shown in this
+% table - the qualitative significance pattern is stated in the
+% caption and the exact per-array numbers are in the repository.
 \begin{table*}[t]
   \centering
   \scriptsize
-  \caption{Component attribution (RQ2): skill\_vs\_convex by model (XGBoost, LSTM, CNN-LSTM, LSTM+residual, CNN-LSTM+residual), array, and horizon - mean $\pm$ 1 seed standard deviation across 5 seeds - with a Diebold-Mariano significance marker for the three comparisons RQ2's Results turns on: LSTM vs. XGBoost, CNN-LSTM vs. LSTM, and LSTM+residual vs. LSTM. Each DM column names the winning model; an asterisk marks Holm-Bonferroni significance at $\alpha=0.05$ (HAC variance, HLN small-sample correction, single seed=0). Full HLN statistics and Holm-adjusted p-values for these three comparisons, plus a fourth (CNN-LSTM+residual vs. CNN-LSTM) this table omits, are in Table \ref{tab:T6}. At $h=1$ and $h=3$, XGBoost and LSTM are statistically indistinguishable on every array ($p_{holm}=1.0$ throughout); at $h=6$, LSTM's edge over XGBoost is significant on only one of three co-located arrays (array17). The residual stage is significant in the direction of the plain base model in 5 of 9 lstm\_residual cells, with no clean horizon-based split - array12 $h=1$ is significant, array12 $h=6$ is not, despite being the longer horizon.}
+  \caption{Component attribution (RQ2), site 11: skill\_vs\_convex by model and horizon, mean $\pm$ 1 seed standard deviation (5 seeds), with Diebold-Mariano significance markers (Holm-Bonferroni, $\alpha=0.05$, seed 0) for four comparisons: vs. XGBoost, vs. LSTM (CNN-LSTM base), +residual vs. LSTM, +residual vs. CNN-LSTM. Asterisk marks significance. Site 11 only; sites 12 and 17 match in significance pattern (full per-array numbers in the repository).}
   \label{tab:T5}
-  \begin{tabular}{ll rrrrr lll}
+  \begin{tabular}{l rrrrr llll}
     \toprule
-    & & \multicolumn{5}{c}{skill\_vs\_convex, mean $\pm$ std (5 seeds)} & \multicolumn{3}{c}{Better (DM sig., Table \ref{tab:T6})} \\
-    \cmidrule(lr){3-7} \cmidrule(lr){8-10}
-    Array & $h$ & XGBoost & LSTM & CNN-LSTM & LSTM+res & CNN-LSTM+res & vs XGB & vs LSTM & +res vs LSTM \\
+    & \multicolumn{5}{c}{skill\_vs\_convex, mean $\pm$ std (5 seeds)} & \multicolumn{4}{c}{Better (DM, * = Holm-sig)} \\
+    \cmidrule(lr){2-6} \cmidrule(lr){7-10}
+    $h$ & XGBoost & LSTM & CNN-LSTM & LSTM+res & CNN-LSTM+res & vs XGB & vs LSTM & +res vs LSTM & +res vs CNN \\
     \midrule
-    array11 & 1 & +0.197$\pm$0.002 & +0.194$\pm$0.002 & +0.194$\pm$0.006 & +0.168$\pm$0.006 & +0.164$\pm$0.006 & XGB & CNN & LSTM \\
-    array11 & 3 & +0.276$\pm$0.003 & +0.272$\pm$0.004 & +0.265$\pm$0.003 & +0.246$\pm$0.007 & +0.234$\pm$0.003 & LSTM & LSTM & LSTM* \\
-    array11 & 6 & +0.195$\pm$0.002 & +0.210$\pm$0.006 & +0.202$\pm$0.005 & +0.177$\pm$0.009 & +0.158$\pm$0.010 & LSTM & LSTM & LSTM* \\
-    array12 & 1 & +0.189$\pm$0.002 & +0.190$\pm$0.002 & +0.189$\pm$0.004 & +0.163$\pm$0.007 & +0.162$\pm$0.005 & XGB & CNN & LSTM* \\
-    array12 & 3 & +0.275$\pm$0.001 & +0.275$\pm$0.005 & +0.267$\pm$0.006 & +0.234$\pm$0.009 & +0.240$\pm$0.003 & LSTM & LSTM & LSTM* \\
-    array12 & 6 & +0.200$\pm$0.003 & +0.215$\pm$0.004 & +0.201$\pm$0.006 & +0.188$\pm$0.007 & +0.173$\pm$0.002 & LSTM & LSTM & LSTM \\
-    array17 & 1 & +0.119$\pm$0.002 & +0.119$\pm$0.002 & +0.117$\pm$0.005 & +0.090$\pm$0.003 & +0.085$\pm$0.005 & XGB & CNN & LSTM* \\
-    array17 & 3 & +0.183$\pm$0.001 & +0.181$\pm$0.005 & +0.176$\pm$0.005 & +0.156$\pm$0.008 & +0.139$\pm$0.008 & LSTM & LSTM & LSTM \\
-    array17 & 6 & +0.130$\pm$0.003 & +0.154$\pm$0.006 & +0.149$\pm$0.009 & +0.125$\pm$0.012 & +0.103$\pm$0.017 & LSTM* & LSTM & LSTM \\
+    1 & +0.197$\pm$0.002 & +0.194$\pm$0.002 & +0.194$\pm$0.006 & +0.168$\pm$0.006 & +0.164$\pm$0.006 & XGB & CNN & LSTM & CNN-LSTM* \\
+    3 & +0.276$\pm$0.003 & +0.272$\pm$0.004 & +0.265$\pm$0.003 & +0.246$\pm$0.007 & +0.234$\pm$0.003 & LSTM & LSTM & LSTM* & CNN-LSTM* \\
+    6 & +0.195$\pm$0.002 & +0.210$\pm$0.006 & +0.202$\pm$0.005 & +0.177$\pm$0.009 & +0.158$\pm$0.010 & LSTM & LSTM & LSTM* & CNN-LSTM* \\
     \bottomrule
   \end{tabular}
 \end{table*}

@@ -1,141 +1,85 @@
 \section{Related Work}
 \label{sec:related}
 
-\subsection{Hybrid Deep Learning for PV Power Forecasting}
-\label{sec:related-hybrid-dl}
-
-Hybrid architectures combining convolutional and recurrent layers, often
-with a further gradient-boosted or decomposition stage, dominate recent
-work on short-term photovoltaic power forecasting. Aggregate analyses of
-the field support their prominence: a statistical meta-analysis of 180
-studies published since 2007 reports that hybrid models consistently
-outperform alternatives and concludes they are likely to be the future of
-PV output forecasting \cite{nguyenmusgens2021drives}.
-
-That conclusion aggregates reported errors. What follows examines what
-those reported errors are measured against.
-
 \subsection{A Survey of Evaluation Practice}
 \label{sec:related-survey}
 
-To characterise evaluation practice rather than architecture, we coded 27
-papers on PV power forecasting, drawn from searches for hybrid
-convolutional-recurrent methods published between 2022 and 2026. Each
-paper was coded on eight dimensions of evaluation protocol. Coding was
+Aggregate analyses report that hybrid deep learning models
+consistently outperform alternatives in this literature
+\cite{nguyenmusgens2021drives}; that conclusion aggregates reported
+errors, and what follows examines what those errors are measured
+against. We coded 27 papers on PV power forecasting, drawn from
+searches for hybrid convolutional-recurrent methods published between
+2022 and 2026, on eight dimensions of evaluation protocol. Coding was
 conservative: a field was recorded as not stated unless the paper
-explicitly stated it, and a plotting range, a figure axis, or a
-contextual implication was not accepted in place of a statement. Every
-coded judgement is supported by a verbatim quotation from the source,
-recorded in the accompanying repository; 25 of the 27 papers were coded
-this way, and the two coded from summary notes without a source document
-are marked as such and excluded from no count. Table \ref{tab:T8} reports the
-full coding.
+explicitly stated it, and every coded judgement is supported by a
+verbatim quotation, recorded in the accompanying repository; 25 of 27
+papers were coded this way, and the two coded from summary notes
+without a source document are marked as such and excluded from no
+count. Table \ref{tab:T8} reports the full coding.
 
 \input{tables/T8_survey.tex}
 
-Four results characterise the sample.
+Twenty-six of 27 papers report no skill score against any reference
+forecast; seventeen compare only against their own architecture's
+components, and three report no comparison model at all. Reported
+improvements are therefore improvements over strictly weaker versions
+of the same approach. All 27 report point estimates without any
+measure of variance across seeds; the seed spread we measure in Section
+\ref{sec:rq2} reaches 0.017, of the same order as the largest
+architecture difference we find (0.024), so a single-run comparison
+cannot separate an architectural effect from retraining noise.
+Twenty-two of 27 do not state whether their split preserves temporal
+order - three state a chronological split, one uses rolling-origin
+evaluation, and one uses k-fold cross-validation, which on a time
+series is temporal leakage in the hyperparameter-selection stage
+\cite{kapoor2023leakage, hewamalage2023pitfalls}. Seventeen of 27 do
+not state whether night hours are excluded, a choice that materially
+affects any error metric normalised over all hours (Section
+\ref{sec:rq1}).
 
-\textit{No reference forecast.} Twenty-six of 27 papers report no skill score
-against any reference forecast. Seventeen compare only against their own
-architecture's components - a hybrid against the convolutional and
-recurrent models it is built from - and a further six compare only
-against other machine-learning models. Three report no comparison model
-at all. Reported improvements in this literature are therefore
-improvements over strictly weaker versions of the same approach, and
-carry no information about whether the proposed model exceeds a naive
-forecast.
+Three further observations: only one paper makes code available; three
+papers describe procedures that constitute leakage under the taxonomy
+of Kapoor and Narayanan \cite{kapoor2023leakage} - one decomposes the
+full series before splitting [L1.2], and two use target-derived
+features as inputs [L2], one of them on this same dataset. We identify
+these from the papers' own descriptions only; the 22 papers silent on
+split protocol may or may not be affected.
 
-\textit{No run-to-run variance.} All 27 papers report point estimates without
-any measure of variance across random seeds or repeated runs. Recurrent
-models are stochastic in training, and the seed spread we measure in
-Section \ref{sec:rq2} reaches 0.017 in skill score, of the same order as the
-largest difference we find between any two architectures (0.024). A
-single-run comparison in this regime cannot separate an architectural
-effect from retraining noise. Every reported figure in the
-surveyed sample therefore carries an unstated error bar of unknown size.
-
-\textit{No stated split protocol.} Twenty-two of 27 papers do not state whether
-their train-test split preserves temporal order. Three state a
-chronological split, one uses rolling-origin evaluation, and one uses
-k-fold cross-validation - which, applied to a time series, is temporal
-leakage in the hyperparameter selection stage \cite{kapoor2023leakage, hewamalage2023pitfalls}. A stated ratio such as 80/20 is not a statement of
-ordering, and we did not treat it as one.
-
-\textit{No night-hour statement.} Seventeen of 27 papers do not state whether
-night hours are excluded from evaluation. Eight state a daylight
-restriction, one applies a partial restriction, and one explicitly
-retains all hours. Since night power is near zero and trivially
-predicted, this choice materially affects any error metric normalised
-over all hours, as we quantify in Section \ref{sec:rq1}.
-
-Three further observations. Only one paper in the sample makes code
-available. Three papers describe procedures in their own text that
-constitute leakage under the taxonomy of Kapoor and Narayanan \cite{kapoor2023leakage}:
-one applies signal decomposition to the full series before splitting
-[L1.2], and two use features that are deterministic functions of the
-target as model inputs [L2]. We identify these from the
-papers' own descriptions and do not infer leakage where a paper is
-silent; the twenty-two papers that do not state their split protocol may
-or may not be affected.
-
-\subsection{Rigorous Practice Exists}
+\subsection{Rigorous Practice Exists and Is Not the Norm}
 \label{sec:related-rigorous-practice}
 
-This is not a claim that solar forecasting lacks evaluation standards.
-The verification of deterministic solar forecasts has been treated
-extensively, and the recommendations are explicit: Yang et al. \cite{yang2020verification},
+The verification of deterministic solar forecasts is treated
+extensively elsewhere: Yang et al. \cite{yang2020verification},
 writing with more than thirty co-authors, recommend universally
-reporting the root-mean-square-error skill score against the optimal
-convex combination of climatology and persistence, and treat
-distribution-oriented verification as the standard against which
-measure-based evaluation is a supplement. The same work documents the
-instability of the clear-sky index at low solar elevation and the zenith
-filtering convention that exists because of it - practices that are
-routine in the irradiance forecasting literature.
+reporting the skill score against the optimal convex combination of
+climatology and persistence. One paper in our sample of 27 meets that
+standard: Mayer \cite{mayer2022physmlhybrid} evaluates day-ahead
+forecasts for fourteen plants against that convex reference, states its
+daylight filter as a protocol, and holds out a full year used in no
+part of model selection. Its headline hybrid improvement is 5.2 percent
+in mean absolute error and 1.0 percent in root-mean-square error over
+an optimised physical model chain - an order of magnitude smaller than
+improvements typically reported in the sample above, against a
+considerably stronger baseline. The standards are published in the same
+journals the surveyed papers appear in.
 
-One paper in our sample of 27 meets that standard. Mayer \cite{mayer2022physmlhybrid} evaluates
-day-ahead forecasts for fourteen plants using the skill score against the
-convex combination of persistence and climatology, states its daylight
-filter as a protocol, holds out a full year that is used in no part of
-model selection, reports six metrics including bias and variance ratio,
-and checks the operational feasibility of its forecast timing against the
-grid's submission deadline. It also reports which of its own methods
-perform worst. Its headline hybrid improvement is 5.2 percent in mean
-absolute error and 1.0 percent in root-mean-square error over an
-optimised physical model chain - an order of magnitude smaller than
-improvements commonly reported in the sample surveyed above, and measured
-against a considerably stronger baseline.
-
-The gap this paper addresses is therefore not the absence of standards
-but their non-adoption in a specific and productive subfield. The
-standards are published in the same journals.
-
-\subsection{Leakage and Evaluation Beyond Solar Forecasting}
+\subsection{Leakage Beyond Solar Forecasting}
 \label{sec:related-leakage}
 
-The pattern is not unique to this domain. Kapoor and Narayanan \cite{kapoor2023leakage}
-document leakage in at least 294 papers across 17 scientific fields and
-provide a taxonomy of eight types, which we adopt in Section \ref{sec:eval-protocol}.
-Their civil war prediction case study is directly analogous to the
-finding we report: complex machine-learning models believed to
-substantially outperform logistic regression were found, once leakage was
-corrected, not to outperform a decades-old method at all.
+The pattern is not unique to this domain. Kapoor and Narayanan
+\cite{kapoor2023leakage} document leakage in at least 294 papers across
+17 fields; their civil war prediction case study is directly analogous
+to the finding we report - complex models believed to outperform
+logistic regression did not, once leakage was corrected. Hewamalage et
+al. \cite{hewamalage2023pitfalls} note that random cross-validation
+does not preserve temporal order and that rolling-origin evaluation is
+itself leakage-susceptible. Nguyen and Musgens
+\cite{nguyenmusgens2021drives} find test-set length negatively
+correlated with reported accuracy and recommend test sets of at least
+one year, a recommendation our design follows.
 
-From the forecasting side, He\-wa\-ma\-la\-ge et al. \cite{hewamalage2023pitfalls} observe that random
-cross-validation does not preserve temporal order and that rolling-origin
-evaluation is itself susceptible to leakage, and note encountering
-inadequate benchmark comparisons in top-tier venues. Nguyen and Musgens
-\cite{nguyenmusgens2021drives}, in the meta-analysis cited above, find test-set length negatively
-correlated with reported accuracy and attribute this in part to selective
-reporting on favourable subsets, recommending test sets of at least one
-year - a recommendation our design follows.
-
-\subsection{Positioning}
-\label{sec:related-positioning}
-
-Against this background, this paper does not propose an architecture.
-It fixes a leakage-controlled protocol, holds it constant, and measures
-how much reported accuracy moves when individual evaluation choices are
-varied - the choices that the survey above shows to be commonly
-unreported. The models serve as instruments for that measurement rather
-than as contributions in themselves.
+This paper does not propose an architecture. It fixes a
+leakage-controlled protocol and measures how much reported accuracy
+moves when the evaluation choices above - shown here to be commonly
+unreported - are varied, one at a time, with the model held constant.

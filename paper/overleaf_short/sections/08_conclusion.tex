@@ -1,91 +1,66 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-We fixed a leakage-controlled evaluation protocol for short-term
-photovoltaic power forecasting, held it constant, and varied individual
-evaluation choices while keeping the model, data and training procedure
-identical. Four such choices were measured across five architectures,
-three module technologies, three horizons, two feature regimes and five
-seeds, over 900 recorded runs.
+We fixed a leakage-controlled evaluation protocol, held it constant,
+and varied individual evaluation choices while keeping the model, data
+and training procedure identical: five architectures, three
+technologies, three horizons, two regimes and five seeds, 900 runs
+across a validation and a held-out test year.
 
 The protocol effects are one to two orders of magnitude larger than the
-architectural ones. The choice of reference forecast accounts for 70
-percent of reported skill at a six-hour horizon and inverts the
-relationship between skill and horizon from monotonic to non-monotonic.
-Including night hours deflates normalised error by approximately 34
-percent, by a factor that is closed-form in the daylight fraction and
-independent of the model. Fitting a residual correction stage on the
-split it is evaluated on turns a component that costs 0.034 in skill
-into one that appears to contribute 0.334. The largest difference we
-measure between any two architectures, under identical conditions, is
-0.024.
+architectural ones. Reference forecast: 70 percent of reported skill at
+six hours. Night-hour inclusion: approximately 34 percent deflation in
+normalised error. Residual-stage construction: 0.034 becomes an
+apparent 0.334. Architecture: the largest difference we measure between
+any two architectures is 0.024.
 
-The architectural findings are correspondingly modest. Gradient boosting
-and a recurrent network are statistically indistinguishable at one- and
-three-hour horizons. A convolutional front end shows no detectable
-benefit in any of the nine array-horizon cells tested and a consistent
-tendency toward harm. A gradient-boosted residual correction stage reduces skill
-in all eighteen configurations, and we identify the mechanism: the
-correction is applied at between 1.2 and 4.7 times the magnitude its
-out-of-sample correlation with the true residual justifies. Its measured
-cost is also sensitive to how the out-of-fold residuals are constructed,
-a detail rarely reported.
+The architectural findings are correspondingly modest. Gradient
+boosting and a recurrent network are statistically indistinguishable at
+one- and three-hour horizons. A convolutional front end shows no
+detectable benefit. A gradient-boosted residual correction stage
+reduces skill in all eighteen configurations tested.
 
-Every direction of finding holds on a held-out year evaluated once,
-after all choices were frozen. The magnitudes shift, and one shifts
-instructively: two co-located arrays sharing a weather station and a
-model moved in opposite directions between years, because their optimal
-reference weights differ and their references consequently improved by
-different amounts. Reported skill depends on how the reference behaves
-in the evaluation year, not only on the forecast.
+Every finding holds in direction on the held-out test year, evaluated
+once, after all choices were frozen. Magnitudes shift, most notably a
+denominator effect that moves two co-located arrays' skill in opposite
+directions between years, because their optimal reference weights
+differ.
 
 \subsection{Implications for Practice}
 \label{sec:conclusion-implications}
 
-Three recommendations follow, none of them novel, all of them absent
-from most of the literature we surveyed.
+Three recommendations follow, none novel, most absent from the
+literature we surveyed. Report a skill score against a defensible
+reference and state which reference: the two references in this paper
+support opposite conclusions from identical forecasts. Report the
+evaluation sample: night-hour inclusion, the daylight threshold, and
+excluded hours each move reported error by more than the improvement
+typically claimed. Report run-to-run variance: none of the 27 papers we
+surveyed does, and the seed spread we measure (0.017) is of the same
+order as the largest architecture difference.
 
-Report a skill score against a defensible reference, and state which
-reference. Against smart persistence alone, our models appear to improve
-steadily with horizon; against the convex combination of climatology and
-persistence recommended by Yang et al. \cite{yang2020verification}, they do not.
-The two references support opposite conclusions from identical
-forecasts.
-
-Report the evaluation sample. Whether night hours are included, what
-daylight threshold is applied, how many samples each cell contains, and
-whether any hours are excluded are each sufficient to move a reported
-error by more than the improvement typically claimed.
-
-Report run-to-run variance. None of the 27 papers we surveyed does. The
-seed spread we measure reaches 0.017 in skill score, of the same order
-as the largest difference between any two architectures we test. A
-single run cannot separate an architectural effect from retraining
-noise.
-
-We would add one recommendation specific to multi-stage architectures.
-When a correction stage is fitted to another model's residuals, state
-where those residuals come from. Fitting on the evaluation split is
-in-sample evaluation of that stage, and in our measurements it reverses
-the sign of the component's contribution and reorders its feature
-importances entirely.
+We add one recommendation specific to multi-stage architectures: state
+where residual-stage training data come from. Fitting on the evaluation
+split is in-sample evaluation of that stage, and in our measurements it
+reverses the sign of the component's contribution.
 
 \subsection{Scope}
 \label{sec:conclusion-scope}
 
-These results come from three co-located arrays at a single desert site,
-sharing one weather station, over one held-out year, at horizons of one
-to six hours, with deterministic forecasts and no hyperparameter tuning.
-We do not claim that any architecture is generally inferior, nor that
-these effect sizes transfer to other sites or climates. We claim that
-the choices producing them are made in every study of this kind, are
-unreported in most, and are large enough that reported accuracies cannot
-be compared across papers without them.
+These results come from three co-located arrays at a single desert
+site, sharing one weather station, over one held-out year, at horizons
+of one to six hours, with deterministic forecasts and no hyperparameter
+tuning. We do not claim that any architecture is generally inferior,
+nor that these effect sizes transfer to other sites or climates. We
+claim that the choices producing them are made in every study of this
+kind, are unreported in most, and are large enough that reported
+accuracies cannot be compared across papers without them.
 
 Rigorous verification practice for solar forecasting exists and is
 documented \cite{yang2020verification, yang2019ropes}. One of the 27
-papers we surveyed follows it \cite{mayer2022physmlhybrid}. The harness, the run
-records, the coded survey with its supporting evidence, and the scripts
-regenerating every table and figure in this paper are available at
-[REPO URL], so that the protocol described here can be adopted, or
+papers we surveyed follows it \cite{mayer2022physmlhybrid}. The
+harness, the run records, the coded survey with its supporting
+evidence, and the scripts regenerating every table and figure in this
+paper are available at an anonymised repository, link withheld for
+review, so that the protocol described here can be adopted, or
 disputed, on the same data.

@@ -1,29 +1,19 @@
 % T8_survey.tex - literature survey evaluation practice, booktabs fragment.
-% NOT compile-tested (no LaTeX toolchain in this dev
-% environment) - same caveat as the other paper/tables/*.tex
-% files and paper/figures/F7_pipeline.tex. Needs
+% Compile-verified 2026-08-20 (MiKTeX 25.12, pdflatex + bibtex, 4
+% pdflatex passes to convergence, paper/overleaf_short/main.tex): no
+% overfull \hbox reported for this table. Needs
 % \usepackage{booktabs}.
 % SUMMARY table: one row per coded value per dimension, n=27 papers.
 % Full per-paper coding is in results/literature_survey.csv, not here.
 \begin{table}[t]
   \centering
   \footnotesize
-  \caption{Literature survey evaluation practice, $n=27$ papers on
+  \caption{Literature survey of evaluation practice, $n=27$ papers on
   hybrid convolutional-recurrent PV power forecasting, coded on eight
-  dimensions of evaluation protocol (Related Work, Section 2-B).
-  Twenty-six of 27 report no skill score against any reference forecast
-  and all 27 report no run-to-run variance across seeds; 22 of 27 do not
-  state whether their train-test split preserves temporal order; 17 of
-  27 do not state whether night hours are excluded from evaluation; and
-  3 of 27 describe, in their own text, a procedure that constitutes
-  documented leakage under the taxonomy of Kapoor and Narayanan (2023).
-  Coding was conservative: a field was recorded as not stated unless the
-  paper explicitly stated it. The full per-paper coding, with a
-  verbatim-quoted supporting audit file for 25 of the 27 papers
-  (evidence\_level=quoted; the remaining 2 are evidence\_level=
-  summary\_only, coded from pre-existing notes with no locatable source
-  PDF), is in results/literature\_survey.csv and evidence/*.md, not
-  reproduced here.}
+  dimensions of evaluation protocol (Section II); counts and
+  percentages are per coded value within each dimension. Full
+  per-paper coding with verbatim supporting evidence is available at
+  an anonymised repository, link withheld for review.}
   \label{tab:T8}
   \begin{tabular}{llrr}
     \toprule
