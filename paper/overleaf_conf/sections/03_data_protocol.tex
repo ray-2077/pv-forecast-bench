@@ -1,0 +1,80 @@
+\section{Data and Protocol}
+\label{sec:data-protocol}
+
+\subsection{Data}
+\label{sec:data}
+
+Experiments use the Desert Knowledge Australia Solar Centre (DKASC)
+dataset at Alice Springs (23.767$^\circ$S, 133.867$^\circ$E, 558 m), an
+open dataset of ground-mounted PV installations with per-array power
+measurement and a co-located weather station \cite{dkasolarcentre}:
+every number in this paper is independently checkable against it.
+Three fixed-mount arrays are used, chosen for differing module
+technology at comparable scale: array 11 (BP Solar, polycrystalline
+silicon, 5.0 kW), array 12 (BP Solar, monocrystalline silicon, 5.1
+kW), and array 17 (Sanyo, heterojunction, 6.3 kW), all mounted at
+20$^\circ$ tilt. The three arrays share one weather station and are
+not independent replications of one another.
+
+Splits are chronological whole calendar years: training 2011-2013,
+validation 2014, test 2015, the last touched once, at the end.
+Training begins in 2011 because array 17 was commissioned in March
+2010, and all three arrays share this training window so that
+cross-array comparisons are not confounded by differing training
+length.
+
+Evaluation is restricted to hours with solar elevation above
+10$^\circ$, stricter than the 85$^\circ$ zenith filter Yang et
+al.~\cite{yang2020verification} describe as typical practice, applied
+for the reason they give: at low solar elevation the clear-sky index
+becomes unstable relative to a small denominator. One further
+exclusion is applied: array 17 was switched off for a documented
+maintenance outage from 5 to 9 June 2015, excluded from evaluation for
+that array only.
+
+\subsection{The Excluded Array}
+\label{sec:data-excluded}
+
+A fourth array, array 07 (First Solar, cadmium telluride, 7.0 kW), was
+initially included and subsequently excluded, and is reported rather
+than omitted, because the mechanism by which it was nearly retained is
+itself evidence for this harness. A conventional completeness audit
+passed array 07 for 2014 with 99.99 percent coverage and 0.00 percent
+missing values in the power channel; the array had in fact produced no
+power from March to September that year, with 48.41 percent of its
+daylight hours recording exactly zero output. The audit did not detect
+this because the logger continued to record faithfully, and what it
+recorded was zero: zero is not missing, and a completeness-only check
+is structurally blind to a healthy sensor reporting a dead array. A
+second audit, testing for near-zero rather than exactly-missing output,
+is what caught it, and both audits are included in the anonymised
+repository accompanying this paper.
+
+\subsection{Protocol}
+\label{sec:protocol}
+
+We state here only the rules bearing on this paper's claim; the full
+evaluation protocol, including feature construction and significance
+testing, is available in the anonymised repository accompanying this
+paper.
+
+Splits are never shuffled, and all scalers and feature statistics used
+by the models are fitted on training data only.
+
+Three reference forecasts are used. Smart persistence forecasts
+$\hat{P}(t) = k_p(t-h) \times P_{cs}(t)$, persisting the clear-sky
+index from the issue time. Climatology forecasts $\hat{P}(t) =
+\bar{k}_p(\text{month}, \text{hour}) \times P_{cs}(t)$, with the mean
+clear-sky index per calendar month and hour of day estimated on
+training data only. The convex reference is $w \times$ persistence $+
+(1-w) \times$ climatology, with $w$ selected by grid search to
+minimise root-mean-square error on the validation split, fitted
+independently for each array, horizon, seed and regime. Following Yang
+et al.~\cite{yang2020verification}, the convex reference is the
+headline metric; skill against plain persistence is reported
+alongside because the gap between the two is a result, not a
+robustness check.
+
+The skill score is $s = 1 - \text{RMSE}_{\text{forecast}} /
+\text{RMSE}_{\text{reference}}$, computed against both references over
+the same forecasts and the same evaluation sample.

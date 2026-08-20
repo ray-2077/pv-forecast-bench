@@ -1,0 +1,138 @@
+\section{Results}
+\label{sec:results}
+
+Figures are for the validation year (2014) unless stated otherwise;
+held-out test-year (2015) confirmation, evaluated once after every
+modelling and evaluation choice was frozen, is reported alongside each
+finding. Table~\ref{tab:T2} gives the array-11 configurations
+underlying both effects in this section; arrays 12 and 17 are reported
+in the text below.
+
+\input{tables/T2_protocol.tex}
+
+\subsection{The Reference Forecast Changes Both Magnitude and Shape}
+\label{sec:rq1-reference}
+
+Holding the model, the data and the training procedure fixed, we
+compute skill for the same forecasts against two references: smart
+persistence and the convex reference. For gradient boosting on array
+11 over daylight hours, skill against persistence is 0.252, 0.527 and
+0.652 at one, three and six hours; against the convex reference, over
+the same rows and the same forecasts, it is 0.200, 0.276 and 0.194
+(Table~\ref{tab:T2}). At six hours, 70 percent of the apparent skill
+is attributable to the reference. The pattern holds on all three
+arrays: 0.244 to 0.190, 0.510 to 0.275 and 0.639 to 0.201 on array 12;
+0.166 to 0.122, 0.341 to 0.183 and 0.386 to 0.132 on array 17.
+
+The shape, not only the magnitude, changes. Measured against
+persistence, skill rises monotonically with horizon - the pattern
+commonly reported as evidence that a method's advantage grows at
+longer lead times. Measured against the convex reference, skill is
+non-monotonic and peaks at three hours, falling by six hours to
+approximately its one-hour value. Fig.~\ref{fig:F1} shows this for all
+three arrays: the solid curve (persistence) rises monotonically in
+every panel; the dashed curve (convex reference) peaks at three hours
+in every panel and falls back at six.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/F1_skill_vs_horizon.pdf}
+  \caption{Forecast skill against two reference forecasts, XGBoost,
+  lagged regime, validation year 2014, one panel per array. Skill
+  against smart persistence (solid) rises monotonically with horizon
+  in every panel; skill against the optimal convex combination of
+  climatology and persistence (dashed) peaks at three hours and falls
+  back at six. The apparent horizon trend is a property of the
+  reference, not the model. Error bars show one standard deviation
+  across five seeds and are smaller than the markers. Only XGBoost is
+  shown; the other four architectures follow the same pattern.}
+  \label{fig:F1}
+\end{figure}
+
+The mechanism is structural. Smart persistence forecasts $\hat{P}(t) =
+k_p(t-h) \times P_{cs}(t)$, and at a six-hour horizon a midday target
+is issued near dawn, when no valid clear-sky index yet exists: the
+proportion of daylight forecasts relying on a forward-filled rather
+than directly observed index rises from 3.3 percent at one hour to
+22.6 percent at three and 51 percent at six, and the resulting bias
+reaches $-2.15$ kW at midday on a 5 kW array. The fitted convex weight
+$w$ reflects this directly, falling from 0.77 at one hour to 0.25 at
+three and 0.04 at six on array 11 - at long horizons the optimal
+reference is almost entirely climatology, which has no comparable
+staleness problem. Array 17 is a partial exception: its fitted weight
+remains higher at every horizon (0.83, 0.50, 0.31), because its
+persistence forecast is stronger in relative terms, and its
+non-monotonic peak in Fig.~\ref{fig:F1} is correspondingly shallower.
+
+Under a paired Diebold-Mariano test with HAC (Bartlett-kernel)
+variance, the Harvey-Leybourne-Newbold small-sample correction, and
+Holm-adjusted p-values \cite{diebold1995comparing, harvey1997testing},
+the convex reference beats smart persistence in all nine array-horizon
+cells on both the validation and the test split ($p_{\text{holm}} <
+0.05$ in all 18 comparisons): the reference this paper treats as
+proper is not merely a construction, it is a significantly harder
+target.
+
+The shape inversion itself, not only the significance of the
+reference gap, replicates on the held-out test year (2015), evaluated
+once after every modelling and evaluation choice was frozen, on all
+three arrays. Skill against persistence is 0.266, 0.574 and 0.701 on
+array 11, 0.263, 0.556 and 0.684 on array 12, and 0.077, 0.281 and
+0.381 on array 17, at one, three and six hours - monotonic throughout.
+Against the convex reference it is 0.210, 0.316 and 0.232 on array 11,
+0.202, 0.305 and 0.225 on array 12, and 0.043, 0.156 and 0.144 on
+array 17: non-monotonic on every array, peaking at three hours and
+falling back by six, on data no evaluation choice was tuned against.
+Array 17's absolute skill shifts between years by more than the other
+two arrays' does, and the shift traces to its reference rather than
+its models: array 17's convex weight leans more heavily on
+persistence at every horizon (0.31 to 0.83, against 0.04 to 0.77 for
+arrays 11 and 12), so its reference is structurally more exposed to
+persistence's year-to-year variation. This affects magnitude, not the
+shape the paper claims; the full decomposition is in the anonymised
+repository accompanying this paper.
+
+\subsection{Night Hours Deflate Error, Not Skill}
+\label{sec:rq1-night}
+
+Restricting evaluation to daylight hours or retaining all 24 hours
+changes reported error substantially and reported skill almost not at
+all. If night-time errors are approximately zero, then
+\begin{equation}
+  \text{RMSE}_{\text{all}} = \text{RMSE}_{\text{daylight}} \times
+  \sqrt{N_{\text{daylight}} / N_{\text{all}}}.
+  \label{eq:closed-form}
+\end{equation}
+At six hours on array 11, $N_{\text{daylight}} = 3756$ and
+$N_{\text{all}} = 8694$, giving a predicted ratio of 0.657 against an
+observed 0.658; agreement is within 0.3 percent at every array and
+horizon. Reported normalised error at this site is therefore deflated
+by approximately 34 percent by a protocol choice unreported in 17 of
+the 27 papers we surveyed (Table~\ref{tab:T1}), and the deflation
+factor is a property of latitude and season, not of the forecasting
+method. Skill, by contrast, is nearly invariant to the same choice -
+for gradient boosting on array 11 it moves from 0.252 to 0.261, 0.527
+to 0.528 and 0.652 to 0.652 at one, three and six hours - because the
+reference forecast is deflated by the same factor as the model.
+
+\subsection{Architecture Contributes Comparatively Little}
+\label{sec:rq2-architecture}
+
+Across five architectures - gradient boosting, a recurrent network, a
+convolutional-recurrent network, and both recurrent variants with a
+gradient-boosted residual correction stage - evaluated under the
+identical protocol above, the largest difference we measure between
+any two architectures at any array and horizon is 0.024 in skill
+score, an order of magnitude smaller than either protocol effect
+reported above.
+
+\subsection{Held-Out Test Year}
+\label{sec:test-split}
+
+The reference-forecast shape inversion, shown above to hold on the
+test split, is not the only direction that does. Night hours remain
+deflationary and skill remains nearly unchanged by the same
+closed-form argument, which does not depend on which year it is
+applied to, and the largest architecture difference remains an order
+of magnitude smaller than either protocol effect on the test split as
+well as on validation.

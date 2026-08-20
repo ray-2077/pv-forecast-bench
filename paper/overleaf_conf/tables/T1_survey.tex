@@ -1,0 +1,54 @@
+% T1_survey.tex - literature survey evaluation practice, booktabs fragment.
+% Source: paper/overleaf_short/tables/T8_survey.tex, renamed T1 since it
+% is the only table in this paper. Content unchanged. Needs
+% \usepackage{booktabs}.
+% SUMMARY table: one row per coded value per dimension, n=27 papers.
+% Full per-paper coding is in results/literature_survey.csv, not here.
+\begin{table}[t]
+  \centering
+  \footnotesize
+  \caption{Literature survey of evaluation practice, $n=27$ papers on
+  hybrid convolutional-recurrent PV power forecasting, coded on eight
+  dimensions of evaluation protocol (Section~\ref{sec:related}); counts and
+  percentages are per coded value within each dimension. Full
+  per-paper coding with verbatim supporting evidence is available at
+  an anonymised repository, link withheld for review.}
+  \label{tab:T1}
+  \begin{tabular}{llrr}
+    \toprule
+    Dimension & Value & $n$ & \% \\
+    \midrule
+    Night hours excluded & not stated & 17 & 63.0 \\
+     & yes & 8 & 29.6 \\
+     & no & 1 & 3.7 \\
+     & partial & 1 & 3.7 \\
+    \addlinespace
+    Baseline used & own components only & 17 & 63.0 \\
+     & other ML models & 6 & 22.2 \\
+     & none & 3 & 11.1 \\
+     & convex combination & 1 & 3.7 \\
+    \addlinespace
+    Skill score reported & no & 26 & 96.3 \\
+     & yes & 1 & 3.7 \\
+    \addlinespace
+    Weather source & measured & 20 & 74.1 \\
+     & not stated & 4 & 14.8 \\
+     & NWP forecast & 1 & 3.7 \\
+     & none & 1 & 3.7 \\
+     & reanalysis & 1 & 3.7 \\
+    \addlinespace
+    Split type & not stated & 22 & 81.5 \\
+     & chronological & 3 & 11.1 \\
+     & k-fold & 1 & 3.7 \\
+     & rolling-origin & 1 & 3.7 \\
+    \addlinespace
+    Run-to-run variance reported & no & 27 & 100.0 \\
+    \addlinespace
+    Code available & not stated & 26 & 96.3 \\
+     & yes & 1 & 3.7 \\
+    \addlinespace
+    Documented leakage & none & 24 & 88.9 \\
+     & documented & 3 & 11.1 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

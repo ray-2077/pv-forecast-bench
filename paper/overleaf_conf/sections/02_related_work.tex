@@ -1,0 +1,44 @@
+\section{Related Work}
+\label{sec:related}
+
+Hybrid architectures combining convolutional and recurrent layers,
+often with a further decomposition or gradient-boosted stage, dominate
+recent work on short-term PV power forecasting, and reported accuracy
+gains are large: a meta-analysis of 180 studies published since 2007
+concludes that hybrid models consistently outperform alternatives
+\cite{nguyenmusgens2021drives}. That conclusion aggregates reported
+errors; this paper asks what those errors are measured against.
+
+To characterise current practice, we coded 27 papers on hybrid PV
+power forecasting published between 2022 and 2026, on eight dimensions
+of evaluation protocol, each judgement supported by a verbatim
+quotation from the source (Table~\ref{tab:T1}). Beyond the two counts
+given in Section~\ref{sec:intro}, seventeen of 27 papers compare only
+against their own architecture's components, and seventeen do not
+state whether night hours are excluded from evaluation - the two
+protocol axes this paper measures.
+
+\input{tables/T1_survey.tex}
+
+Rigorous verification practice exists in solar forecasting. Yang et
+al.~\cite{yang2020verification}, writing with more than thirty
+co-authors, recommend universally reporting the skill score against
+the optimal convex combination of climatology and persistence. One
+paper in our sample of 27 meets that standard: Mayer
+\cite{mayer2022physmlhybrid} evaluates day-ahead forecasts for
+fourteen plants against that convex reference, states its daylight
+filter as a protocol, and holds out a full year used in no part of
+model selection; its headline hybrid improvement is 5.2 percent in
+mean absolute error and 1.0 percent in root-mean-square error over an
+optimised physical model chain, an order of magnitude smaller than
+improvements typically reported elsewhere in the sample, and measured
+against a considerably stronger baseline. The standard is achievable
+and is published in the same journals the surveyed papers appear in;
+we adopt its reference forecast here and hold the model fixed while
+varying it.
+
+The difficulty of comparing results across studies with differing
+evaluation protocols is not specific to solar forecasting; it has been
+documented across at least 294 papers in 17 scientific fields,
+together with a taxonomy of the mechanisms involved
+\cite{kapoor2023leakage}.

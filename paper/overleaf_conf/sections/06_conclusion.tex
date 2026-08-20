@@ -1,0 +1,36 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+Holding the model, the data and the training procedure fixed, we
+varied only the reference forecast and the treatment of night hours.
+The reference forecast changes both the magnitude and the shape of
+reported skill: it accounts for 70 percent of apparent skill at a
+six-hour horizon and inverts the trend from monotonically increasing
+to a peak at three hours, a shape inversion that holds on a held-out
+test year and is backed by significant Diebold-Mariano tests in every
+array-horizon cell on both splits. Including night hours deflates
+normalised error by approximately 34 percent, closed-form in the
+daylight fraction, while leaving skill nearly unchanged. Both effects
+exceed the largest difference we measure across five architectures
+under an identical protocol, 0.024 in skill score.
+
+\subsection{Recommendations}
+\label{sec:conclusion-recommendations}
+
+Three practices, none of them novel, would make results in this
+literature comparable. Report a skill score against a stated reference
+forecast: against smart persistence alone our results appear to
+improve steadily with horizon, against the convex combination of
+climatology and persistence recommended by Yang et
+al.~\cite{yang2020verification} they do not, and the two references
+support opposite conclusions from identical forecasts. Report the
+evaluation sample: whether night hours are included, what daylight
+threshold is applied, and how many samples each cell contains are each
+sufficient to move a reported error by more than the improvement
+typically claimed. Report run-to-run variance: none of the 27 papers
+we surveyed does, and a single run cannot separate a genuine effect
+from retraining noise.
+
+The harness, the 900 run records, and the coded survey with its
+supporting evidence are available at an anonymised repository, link
+withheld for review.

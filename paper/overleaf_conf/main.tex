@@ -1,0 +1,57 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage{cite}
+
+\begin{document}
+
+\title{How Much of Reported Skill Is the Reference Forecast? A
+Controlled Evaluation for Short-Term Photovoltaic Power Forecasting}
+
+\author{
+  \IEEEauthorblockN{Author names withheld for double-blind review}
+  \IEEEauthorblockA{Affiliation withheld for double-blind review \\
+  Email withheld for double-blind review}
+}
+
+\maketitle
+
+\begin{abstract}
+Photovoltaic power forecasting studies report large accuracy gains
+under widely varying protocol: of 27 recent papers we coded, 26 report
+no skill score against a reference forecast and all report point
+estimates without run-to-run variance. Using a leakage-controlled protocol on three
+co-located arrays (900 recorded runs, five architectures, five seeds),
+we show the reference forecast determines both the magnitude and the
+shape of reported skill. Against smart persistence, skill rises
+monotonically with horizon, read as a model's advantage growing at
+longer lead times; against the optimal convex combination of
+climatology and persistence, the same forecasts give non-monotonic
+skill peaking at three hours. Night hours deflate normalised error by
+approximately 34 percent, closed-form in the daylight fraction, while
+skill is almost unchanged. Reported accuracy here is shaped more by
+the reference forecast and error metric than by the model: the
+largest difference across five architectures is 0.024 in skill score.
+All directions hold on a held-out test year.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Photovoltaic power forecasting, forecast verification, skill score,
+reproducibility, benchmark evaluation.
+\end{IEEEkeywords}
+
+\input{sections/01_introduction.tex}
+\input{sections/02_related_work.tex}
+\input{sections/03_data_protocol.tex}
+\input{sections/04_results.tex}
+\input{sections/05_limitations.tex}
+\input{sections/06_conclusion.tex}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
