@@ -72,9 +72,11 @@ index from the issue time. Climatology forecasts $\hat{P}(t) =
 clear-sky index per calendar month and hour of day estimated on
 training data only. The convex reference is $w \times$ persistence $+
 (1-w) \times$ climatology, with $w$ selected by grid search to
-minimise root-mean-square error on the validation split, fitted
-independently for each array, horizon, seed and regime. Because $w$ is
-chosen to minimise error on that split, validation skill against the
+minimise root-mean-square error on the validation split, selected
+independently for each array, horizon and regime; because the
+reference forecasts are deterministic, the weight is shared across
+model seeds. Because $w$ is chosen to minimise error on that split,
+validation skill against the
 convex reference is in-sample for the reference; $w$ is never refit on
 test, so the held-out test year is the clean, out-of-sample
 measurement, and Section~\ref{sec:rq1-reference} reports it first.

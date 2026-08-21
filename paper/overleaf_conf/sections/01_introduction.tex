@@ -23,21 +23,23 @@ forecast, without knowing what they were measured against.
 This paper measures what that comparison is worth. Holding the model,
 data and training procedure fixed, we vary only the reference forecast
 and the treatment of night hours. On one array at a six-hour horizon,
-the same forecasts score 0.652 against smart persistence and 0.194
-against the optimal convex combination of climatology and persistence
-recommended by Yang et al.~\cite{yang2020verification} - 70 percent of
-the apparent skill relative to persistence disappears when the same
-forecasts are evaluated against the convex reference. More
-consequentially, skill against persistence rises monotonically with
-horizon, the pattern usually read as a model's advantage growing at
-longer lead times, while skill against the proper reference is
+on the held-out test year, the same forecasts score 0.701 against
+smart persistence and 0.232 against the optimal convex combination of
+climatology and persistence recommended by Yang et
+al.~\cite{yang2020verification} - 67 percent of the apparent skill
+relative to persistence disappears when the same forecasts are
+evaluated against the convex reference (70 percent on the validation
+split, an upper bound, since the reference's weight is fitted there).
+More consequentially, skill against persistence rises monotonically
+with horizon, the pattern usually read as a model's advantage growing
+at longer lead times, while skill against the recommended reference is
 non-monotonic and peaks at three hours: the trend is a property of the
 reference, not the model. Including night hours deflates normalised
 RMSE by approximately 34 percent, a factor that is closed-form in the
 daylight fraction, while the skill score is nearly unchanged. Among
 the three base architectures evaluated under an identical protocol,
-the largest difference we measure is 0.024 in skill score - smaller
-than either protocol effect.
+the largest difference we measure on the held-out test year is 0.028
+in skill score - smaller than either protocol effect.
 
 \subsection{Contributions}
 \label{sec:intro-contributions}

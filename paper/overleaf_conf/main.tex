@@ -6,6 +6,7 @@
 \usepackage{amssymb}
 \usepackage{url}
 \usepackage{cite}
+\usepackage{placeins}
 
 \begin{document}
 
@@ -34,10 +35,11 @@ climatology and persistence, the same forecasts give non-monotonic
 skill peaking at three hours. Night hours deflate normalised error by
 approximately 34 percent, closed-form in the daylight fraction, while
 skill is almost unchanged. Reported accuracy here is shaped more by
-the reference forecast and error metric than by the model: the
-largest difference among the three base architectures is 0.024 in
-skill score.
-All directions hold on a held-out test year.
+the evaluation protocol than by the model: on the test year, the
+reference effect (0.469) is 5.46 times the largest architectural
+effect we measure across all five architectures (0.086), and 16.6
+times the base-architecture spread alone (0.028), both test-split
+figures.
 \end{abstract}
 
 \begin{IEEEkeywords}

@@ -5,20 +5,27 @@ Three effects, two different units (skill score vs percent nRMSE), so
 this is two stacked panels on separate axes rather than one bar chart
 with a misleading shared length scale:
 
-  Top panel (skill score, x in [0, ~0.5]), three bars:
+  Top panel (skill score, x in [0, ~0.5]), three bars, ALL on the
+  TEST split (w is fit on validation, so validation-split spreads and
+  the reference effect are not on comparable footing - see
+  paper/overleaf_conf/sections/04_results.tex RQ1/RQ3 for the
+  in-sample-vs-out-of-sample discussion this figure follows):
     - largest difference among the three base architectures (xgboost,
-      lstm, cnn_lstm), any array/horizon: 0.024
-      (results/seed_sweep_summary_lagged.csv, array17 h=6,
-      lstm-xgboost = 0.0239)
+      lstm, cnn_lstm), any array/horizon, test split: 0.028
+      (results/seed_sweep_summary_lagged_test.csv, array17 h=6,
+      cnn_lstm-xgboost = 0.0282)
     - largest architectural effect of any kind, including the
-      residual-corrected variants: 0.053
-      (results/seed_sweep_summary_lagged.csv, array11 h=6,
-      cnn_lstm_residual-lstm = 0.0528)
-    - reference-forecast effect at h=6, array11: 0.652 - 0.194 = 0.458
-      (results/reference_comparison.csv, xgb_skill_vs_persistence -
-      xgb_skill_vs_convex, array11, horizon 6)
+      residual-corrected variants, test split: 0.086
+      (results/seed_sweep_summary_lagged_test.csv, array17 h=6,
+      cnn_lstm_residual-xgboost = 0.0858)
+    - reference-forecast effect at h=6, array11, test split: 0.701 -
+      0.232 = 0.469
+      (results/seed_sweep_summary_lagged_test.csv,
+      mean_skill_vs_persistence - mean_skill_vs_convex, xgboost,
+      array11, horizon 6)
 
-  Bottom panel (percent nRMSE, x in [0, ~40]):
+  Bottom panel (percent nRMSE, x in [0, ~40]), VALIDATION split (not
+  recomputed on test - out of scope for this figure's revision):
     - night-hour inclusion deflates normalised RMSE by ~34 percent
       (results/table4_protocol_lagged.csv, array11, C5 vs C6, mean
       across the three horizons)
@@ -54,10 +61,11 @@ plt.rcParams.update(
     }
 )
 
-# Verified against source, see module docstring.
-ARCH_DIFF_BASE = 0.024
-ARCH_DIFF_ALL = 0.053
-REF_EFFECT = 0.458
+# Verified against source, see module docstring. Top-panel figures are
+# all test-split; bottom-panel figure is validation-split.
+ARCH_DIFF_BASE = 0.028
+ARCH_DIFF_ALL = 0.086
+REF_EFFECT = 0.469
 NIGHT_HOUR_PCT = 34
 
 
@@ -68,16 +76,16 @@ def build():
     )
 
     skill_labels = [
-        "Architecture\n(base only)",
-        "Architecture\n(incl. residual)",
-        "Reference forecast\n($h=6$, array 11)",
+        "Architecture\n(base only, test)",
+        "Architecture\n(incl. residual, test)",
+        "Reference forecast\n($h=6$, array 11, test)",
     ]
     skill_vals = [ARCH_DIFF_BASE, ARCH_DIFF_ALL, REF_EFFECT]
     y_skill = [0, 1, 2]
     bars = ax_skill.barh(y_skill, skill_vals, height=0.55, color="black")
     ax_skill.set_yticks(y_skill)
     ax_skill.set_yticklabels(skill_labels)
-    ax_skill.set_xlim(0, 0.55)
+    ax_skill.set_xlim(0, 0.52)
     ax_skill.set_xlabel(r"protocol / architecture effect ($\Delta$ skill)")
     ax_skill.spines["top"].set_visible(False)
     ax_skill.spines["right"].set_visible(False)
@@ -90,7 +98,7 @@ def build():
     y_pct = [0]
     bar_pct = ax_pct.barh(y_pct, [NIGHT_HOUR_PCT], height=0.55, color="black")
     ax_pct.set_yticks(y_pct)
-    ax_pct.set_yticklabels(["Night-hour\ninclusion"])
+    ax_pct.set_yticklabels(["Night-hour\ninclusion (val.)"])
     ax_pct.set_xlim(0, 45)
     ax_pct.set_xlabel("nRMSE deflation (%), separate axis")
     ax_pct.spines["top"].set_visible(False)

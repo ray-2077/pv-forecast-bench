@@ -96,13 +96,15 @@ persistence forecast is stronger in relative terms, and its
 non-monotonic peak in Fig.~\ref{fig:F1} is correspondingly shallower.
 
 Under a paired Diebold-Mariano test with HAC (Bartlett-kernel)
-variance, the Harvey-Leybourne-Newbold small-sample correction, and
-Holm-adjusted p-values \cite{diebold1995comparing, harvey1997testing},
-the convex reference beats smart persistence in all nine array-horizon
-cells on both the validation and the test split ($p_{\text{holm}} <
-0.05$ in all 18 comparisons): the reference this paper treats as
-proper is not merely a construction, it is a significantly harder
-target.
+variance and the Harvey-Leybourne-Newbold small-sample correction
+\cite{diebold1995comparing, harvey1997testing}, the convex reference is
+supported by Holm-adjusted Diebold-Mariano tests on the held-out test
+split, beating smart persistence in all nine array-horizon cells
+($p_{\text{holm}} < 0.05$); the corresponding validation-split
+comparisons, reported descriptively because $w$ is fitted to minimise
+error on that exact split, are significant in all nine cells there as
+well. The reference recommended by Yang et al. is not merely a
+construction, it is a significantly harder target.
 
 Array 17's absolute skill shifts between years by more than the other
 two arrays' does, and the shift traces to its reference rather than
@@ -112,6 +114,8 @@ arrays 11 and 12), so its reference is structurally more exposed to
 persistence's year-to-year variation. This affects magnitude, not the
 shape the paper claims; the full decomposition is in the anonymised
 repository accompanying this paper.
+
+\FloatBarrier
 
 \subsection{RQ2: Night Hours Deflate Error, Not Skill}
 \label{sec:rq1-night}
@@ -142,35 +146,39 @@ reference forecast is deflated by the same factor as the model.
 Across all five architectures we evaluate - gradient boosting, a
 recurrent network, a convolutional-recurrent network, and both
 recurrent variants with a gradient-boosted residual correction stage -
-the largest effect of any architectural choice we measure, including
-the residual correction stage itself, is 0.053 in skill score. At six
-hours on array 11, the reference-forecast effect alone (0.652 - 0.194
-= 0.458 in skill) is approximately 8.6 times this largest
-architectural effect, measured under an identical protocol - still
-roughly an order of magnitude larger even when every architectural
-choice tested, not only differences among base architectures, is
-counted against it. Restricted to the three base architectures only -
-excluding the residual correction stage - the largest pairwise
-difference is smaller still, 0.024, making the reference effect
-approximately 19 times larger; this narrower comparison is a
-sub-result within the broader one above.
+the largest effect of any architectural choice we measure on the
+held-out test year, including the residual correction stage itself, is
+0.086 in skill score. The reference-forecast effect alone at six hours
+on array 11, also on the test split (0.701 - 0.232 = 0.469 in skill),
+is approximately 5.46 times this largest test-split architectural
+effect, measured under an identical protocol. Restricted to the three
+base architectures only - excluding the residual correction stage -
+the largest test-split pairwise difference is smaller still, 0.028,
+making the reference effect approximately 16.6 times larger; this
+narrower comparison is a sub-result within the broader one above,
+shown in Fig.~\ref{fig:F2}. The largest architectural differences on
+test occur at array 17 and six hours - the same array-horizon cell
+whose reference behaviour differs most between years, as documented in
+Section~\ref{sec:rq1-reference}.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{figures/F2_effect_summary.pdf}
   \caption{Effect sizes under an identical protocol. Top axis, three
-  bars, same units and directly comparable: the largest difference
-  among the three base architectures (0.024 in skill); the largest
-  architectural effect of any kind, including the residual correction
-  stage (0.053); and the reference-forecast effect (0.458 in skill,
-  array 11, $h=6$) - approximately 8.6 times the largest architectural
-  effect of any kind, and 19 times the base-architecture spread alone.
-  Bottom axis: the night-hour inclusion effect (34 percent nRMSE
-  deflation), a different unit, shown on its own axis rather than a
-  shared bar length. Under an identical benchmark, protocol effects
-  dominate architecture effects.}
+  bars, all on the held-out test split, same units and directly
+  comparable: the largest difference among the three base architectures
+  (0.028 in skill); the largest architectural effect of any kind,
+  including the residual correction stage (0.086); and the
+  reference-forecast effect (0.469 in skill, array 11, $h=6$) -
+  approximately 5.46 times the largest architectural effect of any
+  kind. Bottom axis, validation split: the night-hour inclusion effect
+  (34 percent nRMSE deflation), a different unit, shown on its own axis
+  rather than a shared bar length. Under an identical benchmark,
+  protocol effects dominate architecture effects.}
   \label{fig:F2}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{Held-Out Test Year}
 \label{sec:test-split}
