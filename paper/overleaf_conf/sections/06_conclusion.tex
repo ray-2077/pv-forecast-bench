@@ -3,16 +3,24 @@
 
 Holding the model, the data and the training procedure fixed, we
 varied only the reference forecast and the treatment of night hours.
-The reference forecast changes both the magnitude and the shape of
-reported skill: it accounts for 70 percent of apparent skill at a
-six-hour horizon and inverts the trend from monotonically increasing
-to a peak at three hours, a shape inversion that holds on a held-out
-test year and is backed by significant Diebold-Mariano tests in every
-array-horizon cell on both splits. Including night hours deflates
-normalised error by approximately 34 percent, closed-form in the
-daylight fraction, while leaving skill nearly unchanged. Both effects
-exceed the largest difference we measure across five architectures
-under an identical protocol, 0.024 in skill score.
+Baseline selection does not merely rescale reported skill; it can
+reverse the qualitative conclusion about how forecast advantage varies
+with horizon. The reference forecast changes both the magnitude and
+the shape of reported skill: 70 percent of the apparent skill relative
+to persistence disappears when the same forecasts are evaluated
+against the convex reference at a six-hour horizon, and the trend
+inverts from monotonically increasing to a peak at three hours - a
+shape inversion established cleanly on the held-out test year, where
+the convex reference's weight is never fit, and backed by significant
+Diebold-Mariano tests in every array-horizon cell on both splits.
+Including night hours deflates normalised error by approximately 34
+percent, closed-form in the daylight fraction, while leaving skill
+nearly unchanged. Both effects exceed the largest architectural effect
+we measure, 0.053 in skill score, including the residual correction
+stage; restricted to the three base architectures alone the spread is
+smaller still, 0.024, making the reference-forecast effect
+approximately 19 times larger in that narrower comparison and 8.6
+times larger overall.
 
 \subsection{Recommendations}
 \label{sec:conclusion-recommendations}

@@ -26,17 +26,18 @@ and the treatment of night hours. On one array at a six-hour horizon,
 the same forecasts score 0.652 against smart persistence and 0.194
 against the optimal convex combination of climatology and persistence
 recommended by Yang et al.~\cite{yang2020verification} - 70 percent of
-the apparent skill is attributable to the reference. More
+the apparent skill relative to persistence disappears when the same
+forecasts are evaluated against the convex reference. More
 consequentially, skill against persistence rises monotonically with
 horizon, the pattern usually read as a model's advantage growing at
 longer lead times, while skill against the proper reference is
 non-monotonic and peaks at three hours: the trend is a property of the
 reference, not the model. Including night hours deflates normalised
 RMSE by approximately 34 percent, a factor that is closed-form in the
-daylight fraction, while the skill score is nearly unchanged. Across
-five architectures under an identical protocol, the largest difference
-we measure is 0.024 in skill score - smaller than either protocol
-effect.
+daylight fraction, while the skill score is nearly unchanged. Among
+the three base architectures evaluated under an identical protocol,
+the largest difference we measure is 0.024 in skill score - smaller
+than either protocol effect.
 
 \subsection{Contributions}
 \label{sec:intro-contributions}
@@ -52,3 +53,11 @@ measure.
 
 3. A coded survey of 27 papers characterising current reporting
 practice on reference forecasts and run-to-run variance.
+
+This paper is organised around three questions. RQ1: how much does the
+choice of reference forecast change the magnitude and shape of
+reported skill (Section~\ref{sec:rq1-reference})? RQ2: how much does
+including night hours change reported error and skill
+(Section~\ref{sec:rq1-night})? RQ3: how large are these protocol
+effects relative to the largest difference we measure between
+architectures (Section~\ref{sec:rq2-architecture})?

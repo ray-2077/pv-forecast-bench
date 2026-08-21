@@ -9,18 +9,28 @@ concludes that hybrid models consistently outperform alternatives
 \cite{nguyenmusgens2021drives}. That conclusion aggregates reported
 errors; this paper asks what those errors are measured against.
 
-To characterise current practice, we coded 27 papers on hybrid PV
-power forecasting published between 2022 and 2026, on eight dimensions
-of evaluation protocol, each judgement supported by a verbatim
-quotation from the source (Table~\ref{tab:T1}). Beyond the two counts
+Papers were located by keyword search for hybrid convolutional-recurrent
+architectures applied to photovoltaic power forecasting - search terms
+combining an architecture family (convolutional, recurrent, LSTM,
+hybrid) with photovoltaic or solar power forecasting - restricted to
+work published between 2022 and 2026. The inclusion criterion was a
+hybrid convolutional-recurrent, or closely related hybrid
+deep-learning, architecture evaluated for PV power output forecasting.
+
+To characterise current practice, we coded the 27 papers meeting that
+criterion, on eight dimensions of evaluation protocol, each judgement
+supported by a verbatim quotation from the source (Table~\ref{tab:T1}).
+Beyond the two counts
 given in Section~\ref{sec:intro}, seventeen of 27 papers compare only
-against their own architecture's components, and seventeen do not
-state whether night hours are excluded from evaluation - the two
+against their own architecture's components (e.g.,
+\cite{li2022eemdssalstm, abumohsen2024cnnlstmrf}), and seventeen do
+not state whether night hours are excluded from evaluation - the two
 protocol axes this paper measures.
 
 \input{tables/T1_survey.tex}
 
-Rigorous verification practice exists in solar forecasting. Yang et
+Rigorous verification practice exists in solar forecasting
+\cite{yang2020verification, yang2019ropes}. Yang et
 al.~\cite{yang2020verification}, writing with more than thirty
 co-authors, recommend universally reporting the skill score against
 the optimal convex combination of climatology and persistence. One
@@ -36,9 +46,3 @@ against a considerably stronger baseline. The standard is achievable
 and is published in the same journals the surveyed papers appear in;
 we adopt its reference forecast here and hold the model fixed while
 varying it.
-
-The difficulty of comparing results across studies with differing
-evaluation protocols is not specific to solar forecasting; it has been
-documented across at least 294 papers in 17 scientific fields,
-together with a taxonomy of the mechanisms involved
-\cite{kapoor2023leakage}.

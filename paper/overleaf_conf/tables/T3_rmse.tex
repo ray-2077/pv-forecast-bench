@@ -1,0 +1,31 @@
+% T3_rmse.tex - absolute RMSE, model and all three references, array11.
+% Sources (verified against both directly, values agree to rounding):
+%   Model RMSE: results/table4_protocol_lagged.csv, config_id=C1,
+%   array11 (daylight hours, lagged regime, XGBoost, skill vs convex
+%   reference - the protocol used throughout this paper; skill column
+%   there matches xgb_skill_vs_convex in reference_comparison.csv
+%   exactly at all three horizons).
+%   Reference RMSEs: results/reference_comparison.csv, array11,
+%   rmse_persistence / rmse_climatology / rmse_convex.
+% Needs \usepackage{booktabs}.
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Absolute RMSE (kW), array 11, lagged regime, validation year
+  2014, daylight hours only. Skill is a ratio; this table lets it be
+  reconstructed and shows whether each reference is weak or strong in
+  absolute terms. Climatology is constant across horizons because it
+  uses no recent observation. Persistence is competitive with the
+  model at $h=1$ but degrades sharply by $h=6$; climatology and the
+  convex reference do not.}
+  \label{tab:T3}
+  \begin{tabular}{c rrrr}
+    \toprule
+    $h$ & Model & Persistence & Climatology & Convex \\
+    \midrule
+    1 & 0.318 & 0.428 & 0.669 & 0.400 \\
+    3 & 0.448 & 0.955 & 0.669 & 0.621 \\
+    6 & 0.535 & 1.548 & 0.669 & 0.666 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

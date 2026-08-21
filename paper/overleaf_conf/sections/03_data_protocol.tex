@@ -7,8 +7,12 @@
 Experiments use the Desert Knowledge Australia Solar Centre (DKASC)
 dataset at Alice Springs (23.767$^\circ$S, 133.867$^\circ$E, 558 m), an
 open dataset of ground-mounted PV installations with per-array power
-measurement and a co-located weather station \cite{dkasolarcentre}:
-every number in this paper is independently checkable against it.
+measurement and a co-located weather station \cite{dkasolarcentre},
+also used by six of the papers in our survey
+\cite{zhou2024cnnlstmattnbayes, hou2024vmdwoalstm,
+ye2026distributedcnnlstm, hussain2022hybridgrucnn,
+alharkan2023dsclanet, guo2024qrkddn}: every number in this paper is
+independently checkable against it.
 Three fixed-mount arrays are used, chosen for differing module
 technology at comparable scale: array 11 (BP Solar, polycrystalline
 silicon, 5.0 kW), array 12 (BP Solar, monocrystalline silicon, 5.1
@@ -69,10 +73,14 @@ clear-sky index per calendar month and hour of day estimated on
 training data only. The convex reference is $w \times$ persistence $+
 (1-w) \times$ climatology, with $w$ selected by grid search to
 minimise root-mean-square error on the validation split, fitted
-independently for each array, horizon, seed and regime. Following Yang
-et al.~\cite{yang2020verification}, the convex reference is the
-headline metric; skill against plain persistence is reported
-alongside because the gap between the two is a result, not a
+independently for each array, horizon, seed and regime. Because $w$ is
+chosen to minimise error on that split, validation skill against the
+convex reference is in-sample for the reference; $w$ is never refit on
+test, so the held-out test year is the clean, out-of-sample
+measurement, and Section~\ref{sec:rq1-reference} reports it first.
+Following Yang et al.~\cite{yang2020verification}, the convex
+reference is the headline metric; skill against plain persistence is
+reported alongside because the gap between the two is a result, not a
 robustness check.
 
 The skill score is $s = 1 - \text{RMSE}_{\text{forecast}} /

@@ -262,3 +262,129 @@
   year    = {2019},
   doi     = {10.1063/1.5087462}
 }
+
+% ---------------------------------------------------------------------
+% Individual entries from the 27-paper survey (results/literature_survey.csv),
+% added 2026-08-21 so Sections II and III can cite specific example papers
+% rather than only the aggregate counts. Bibliographic data (author, title,
+% journal, volume, pages, year, DOI) verified against each paper's own
+% evidence/*_audit.md file, which itself quotes the source PDF directly.
+
+% leakage_flag=documented [L1.2]: "A subset of PV data from the DKASC
+% dataset... was selected" (evidence/zhou2024cnnlstmattnbayes_audit.md,
+% p.8) - same open dataset this project uses. Signal decomposition
+% applied before any train/test split is described in this paper's own
+% text. Also cited in Section III as a DKASC-family survey paper.
+@article{zhou2024cnnlstmattnbayes,
+  author  = {Zhou, N. and Shang, B. and Xu, M. and Peng, L. and Feng, G.},
+  title   = {Enhancing photovoltaic power prediction using a {CNN-LSTM}-attention hybrid model with {B}ayesian hyperparameter optimization},
+  journal = {Global Energy Interconnection},
+  volume  = {7},
+  number  = {5},
+  pages   = {667--681},
+  year    = {2024},
+  doi     = {10.1016/j.gloei.2024.10.005}
+}
+
+% leakage_flag=documented [L1.2]; baseline_used=own_components (six-row
+% ablation table, each row adding one more of the paper's own
+% preprocessing/optimization modules - evidence/li2022eemdssalstm_audit.md,
+% p.10). Also cited in Section II as an own-components example.
+@article{li2022eemdssalstm,
+  author  = {Li, Z. and Xu, R. and Luo, X. and Cao, X. and Du, S. and Sun, H.},
+  title   = {Short-term photovoltaic power prediction based on modal reconstruction and hybrid deep learning model},
+  journal = {Energy Reports},
+  volume  = {8},
+  pages   = {9919--9932},
+  year    = {2022},
+  doi     = {10.1016/j.egyr.2022.07.176}
+}
+
+% leakage_flag=documented [L2]: target-derived Performance Ratio used as
+% one of three input features (evidence/bhutta2024hcrnhcln_audit.md).
+@article{bhutta2024hcrnhcln,
+  author  = {Bhutta, M. S. and Li, Y. and Abubakar, M. and Almasoudi, F. M. and Alatawi, K. S. S. and Altimania, M. R. and Al-Barashi, M.},
+  title   = {Optimizing solar power efficiency in smart grids using hybrid machine learning models for accurate energy generation prediction},
+  journal = {Scientific Reports},
+  volume  = {14},
+  pages   = {17101},
+  year    = {2024},
+  doi     = {10.1038/s41598-024-68030-5}
+}
+
+% baseline_used=own_components (evidence/abumohsen2024cnnlstmrf_audit.md).
+% Cited in Section II as an own-components example.
+@article{abumohsen2024cnnlstmrf,
+  author  = {Abumohsen, M. and Owda, A. Y. and Owda, M. and Abumihsan, A.},
+  title   = {Hybrid machine learning model combining of {CNN-LSTM-RF} for time series forecasting of Solar Power Generation},
+  journal = {e-Prime -- Advances in Electrical Engineering, Electronics and Energy},
+  volume  = {9},
+  pages   = {100636},
+  year    = {2024},
+  doi     = {10.1016/j.prime.2024.100636}
+}
+
+% dataset=Yulara Solar System, a DKA Solar Centre site - same network
+% this project's own DKASC data comes from (evidence/hou2024vmdwoalstm_audit.md).
+% Cited in Section III as a DKASC-family survey paper.
+@article{hou2024vmdwoalstm,
+  author  = {Hou, Z. and Zhang, Y. and Liu, Q. and Ye, X.},
+  title   = {A hybrid machine learning forecasting model for photovoltaic power},
+  journal = {Energy Reports},
+  volume  = {11},
+  pages   = {5125--5138},
+  year    = {2024},
+  doi     = {10.1016/j.egyr.2024.04.065}
+}
+
+% dataset=DKASC Alice Springs - the exact site this project's own data
+% comes from (evidence/ye2026distributedcnnlstm_audit.md). Cited in
+% Section III as a DKASC-family survey paper.
+@article{ye2026distributedcnnlstm,
+  author  = {Ye, H. and Xu, T.},
+  title   = {Research on the distributed photovoltaic power prediction method based on {CNN-LSTM}},
+  journal = {International Journal of Low-Carbon Technologies},
+  volume  = {21},
+  pages   = {1--8},
+  year    = {2026},
+  doi     = {10.1093/ijlct/ctaf131}
+}
+
+% dataset=four DKASC arrays across two sites, Alice Springs and Yulara
+% (evidence/hussain2022hybridgrucnn_audit.md). Cited in Section III as a
+% DKASC-family survey paper.
+@article{hussain2022hybridgrucnn,
+  author  = {Hussain, A. and Khan, Z. A. and Hussain, T. and Ullah, F. U. M. and Rho, S. and Baik, S. W.},
+  title   = {A Hybrid Deep Learning-Based Network for Photovoltaic Power Forecasting},
+  journal = {Complexity},
+  volume  = {2022},
+  pages   = {7040601},
+  year    = {2022},
+  doi     = {10.1155/2022/7040601}
+}
+
+% dataset=three DKASC Alice Springs arrays, Trina 1A/1B and Eco 2
+% (evidence/alharkan2023dsclanet_audit.md). Cited in Section III as a
+% DKASC-family survey paper.
+@article{alharkan2023dsclanet,
+  author  = {Alharkan, H. and Habib, S. and Islam, M.},
+  title   = {Solar Power Prediction Using Dual Stream {CNN-LSTM} Architecture},
+  journal = {Sensors},
+  volume  = {23},
+  pages   = {945},
+  year    = {2023},
+  doi     = {10.3390/s23020945}
+}
+
+% dataset=DKASC Hanwha Solar array, Alice Springs
+% (evidence/guo2024qrkddn_audit.md). Cited in Section III as a
+% DKASC-family survey paper.
+@article{guo2024qrkddn,
+  author  = {Guo, W. and Xu, L. and Wang, T. and Zhao, D. and Tang, X.},
+  title   = {Photovoltaic Power Prediction Based on Hybrid Deep Learning Networks and Meteorological Data},
+  journal = {Sensors},
+  volume  = {24},
+  pages   = {1593},
+  year    = {2024},
+  doi     = {10.3390/s24051593}
+}
