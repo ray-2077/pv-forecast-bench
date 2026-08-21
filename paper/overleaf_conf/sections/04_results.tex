@@ -10,6 +10,16 @@ therefore reports the held-out test year (2015) first, evaluated once
 after every modelling and evaluation choice was frozen, as the clean,
 out-of-sample measurement.
 
+Six configurations (C1-C6) isolate the two effects in
+Table~\ref{tab:T2} below. C1 and C2 restrict to daylight hours and
+report skill against the convex reference and against persistence
+respectively; C3 restricts further to hours where the convex reference
+has a prediction, documenting a coverage restriction; C4 uses all 24
+hours with skill against persistence; C5 and C6 report raw nRMSE with
+no reference, at daylight-only and all-24-hours respectively. C1
+versus C2 isolates the reference-forecast effect; C5 versus C6
+isolates the night-hour deflation.
+
 \input{tables/T2_protocol.tex}
 
 \subsection{RQ1: The Reference Forecast Changes Both Magnitude and Shape}
@@ -78,8 +88,6 @@ one hour to 1.548 kW at six, while climatology remains flat at 0.669
 kW throughout. The denominator changes because the baseline genuinely
 changes in quality, not because of how the ratio is formed.
 
-\input{tables/T3_rmse.tex}
-
 The mechanism is structural. Smart persistence forecasts $\hat{P}(t) =
 k_p(t-h) \times P_{cs}(t)$, and at a six-hour horizon a midday target
 is issued near dawn, when no valid clear-sky index yet exists: the
@@ -94,6 +102,8 @@ staleness problem. Array 17 is a partial exception: its fitted weight
 remains higher at every horizon (0.83, 0.50, 0.31), because its
 persistence forecast is stronger in relative terms, and its
 non-monotonic peak in Fig.~\ref{fig:F1} is correspondingly shallower.
+
+\input{tables/T3_rmse.tex}
 
 Under a paired Diebold-Mariano test with HAC (Bartlett-kernel)
 variance and the Harvey-Leybourne-Newbold small-sample correction
@@ -114,8 +124,6 @@ arrays 11 and 12), so its reference is structurally more exposed to
 persistence's year-to-year variation. This affects magnitude, not the
 shape the paper claims; the full decomposition is in the anonymised
 repository accompanying this paper.
-
-\FloatBarrier
 
 \subsection{RQ2: Night Hours Deflate Error, Not Skill}
 \label{sec:rq1-night}
@@ -150,7 +158,7 @@ the largest effect of any architectural choice we measure on the
 held-out test year, including the residual correction stage itself, is
 0.086 in skill score. The reference-forecast effect alone at six hours
 on array 11, also on the test split (0.701 - 0.232 = 0.469 in skill),
-is approximately 5.46 times this largest test-split architectural
+is approximately 5.5 times this largest test-split architectural
 effect, measured under an identical protocol. Restricted to the three
 base architectures only - excluding the residual correction stage -
 the largest test-split pairwise difference is smaller still, 0.028,
@@ -170,7 +178,7 @@ Section~\ref{sec:rq1-reference}.
   (0.028 in skill); the largest architectural effect of any kind,
   including the residual correction stage (0.086); and the
   reference-forecast effect (0.469 in skill, array 11, $h=6$) -
-  approximately 5.46 times the largest architectural effect of any
+  approximately 5.5 times the largest architectural effect of any
   kind. Bottom axis, validation split: the night-hour inclusion effect
   (34 percent nRMSE deflation), a different unit, shown on its own axis
   rather than a shared bar length. Under an identical benchmark,

@@ -76,9 +76,9 @@ def build():
     )
 
     skill_labels = [
-        "Architecture\n(base only, test)",
-        "Architecture\n(incl. residual, test)",
-        "Reference forecast\n($h=6$, array 11, test)",
+        "Base architecture",
+        "All architectures",
+        "Reference forecast",
     ]
     skill_vals = [ARCH_DIFF_BASE, ARCH_DIFF_ALL, REF_EFFECT]
     y_skill = [0, 1, 2]
